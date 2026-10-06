@@ -7,7 +7,6 @@
 <title>طرح درمان ایمپلنت</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* Layout: app shell with archive list + treatment-plan form; tooth charts in Palmer layout; sticky action bar */
 :root{
@@ -407,6 +406,24 @@ function textBlock(title,lines,o={}){const c=mctx(),ws=[];lines.forEach(l=>wrap(
   return {h,draw(cx,top){let y=top;if(title){T(cx,title,C.R,top+20,{s:21,w:800});y+=40}ws.forEach((l,i)=>T(cx,l,C.R-(o.indent||0),y+15+i*30,{s:19,c:o.c||INK}))}}}
 function signBlock(){return {h:150,draw(cx,top){const w=(C.R-C.L-30)/2;[['امضای بیمار',C.R],['امضا و مهر پزشک',C.R-w-30]].forEach(([t,xr])=>{box(cx,xr-w,top+20,w,110,null,'#999',1.2);T(cx,t,xr-14,top+42,{s:18,c:'#555'})})}}}
 
+/* ---------- built-in PDF writer (A4 pages, one JPEG image per page; no external library) ---------- */
+function dataUrlBytes(u){const b=atob(u.split(',')[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+function bytesB64(a){let s='';for(let i=0;i<a.length;i+=0x8000)s+=String.fromCharCode.apply(null,a.subarray(i,i+0x8000));return btoa(s)}
+function jpegPDF(pages){const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const push=x=>{const b=typeof x==='string'?enc.encode(x):x;parts.push(b);len+=b.length};
+  const obj=(id,body)=>{offs[id]=len;push(id+' 0 obj\n'+body+'\nendobj\n')};
+  const W=595.28,H=841.89,n=pages.length,total=2+3*n;
+  push('%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n');
+  obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2,`<< /Type /Pages /Kids [${pages.map((_,i)=>(3+3*i)+' 0 R').join(' ')}] /Count ${n} >>`);
+  pages.forEach((pg,i)=>{const p=3+3*i,c=p+1,im=p+2,cs=`q ${W} 0 0 ${H} 0 0 cm /Im0 Do Q`;
+    obj(p,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im0 ${im} 0 R >> >> /Contents ${c} 0 R >>`);
+    obj(c,`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`);
+    offs[im]=len;push(`${im} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${pg.w} /Height ${pg.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${pg.jpg.length} >>\nstream\n`);push(pg.jpg);push('\nendstream\nendobj\n')});
+  const x=len;let xr=`xref\n0 ${total+1}\n0000000000 65535 f \n`;for(let i=1;i<=total;i++)xr+=String(offs[i]).padStart(10,'0')+' 00000 n \n';
+  push(xr+`trailer\n<< /Size ${total+1} /Root 1 0 R >>\nstartxref\n${x}\n%%EOF\n`);
+  const out=new Uint8Array(len);let o=0;parts.forEach(b=>{out.set(b,o);o+=b.length});return out}
+
 async function buildPDF(r,meta){
   try{await Promise.all([document.fonts.load(`400 20px Vazirmatn`),document.fonts.load(`700 20px Vazirmatn`),document.fonts.load(`800 20px Vazirmatn`)])}catch(e){}
   const pt=payText(r),bn=BRANDS.find(b=>b.k===r.brand).n;
@@ -422,9 +439,8 @@ async function buildPDF(r,meta){
   start(true);let th=tableHead();th.draw(pg.cx,y);y+=th.h;let inTable=true;
   blocks.forEach(b=>{if(b.table===undefined&&inTable)inTable=false;if(y+b.h>bottom){start(false);if(b.table){th=tableHead();th.draw(pg.cx,y);y+=th.h}}b.draw(pg.cx,y);y+=b.h});
   pages.forEach((p,i)=>T(p.cx,`صفحه ${fa(i+1)} از ${fa(pages.length)}`,PW/2,PH-M+6,{s:16,c:GREY,a:'center'}));
-  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'pt',format:'a4',compress:true});
-  pages.forEach((p,i)=>{if(i)doc.addPage();doc.addImage(p.cv.toDataURL('image/jpeg',0.92),'JPEG',0,0,595.28,841.89)});
-  const blob=doc.output('blob');const b64=doc.output('datauristring').split(',')[1];
+  const bytes=jpegPDF(pages.map(p=>({jpg:dataUrlBytes(p.cv.toDataURL('image/jpeg',0.92)),w:PW,h:PH})));
+  const blob=new Blob([bytes],{type:'application/pdf'});const b64=bytesB64(bytes);
   return {blob,b64,previews:pages.map(p=>p.cv.toDataURL('image/jpeg',0.6))}}
 
 /* ---------- server (Google Apps Script) ---------- */
