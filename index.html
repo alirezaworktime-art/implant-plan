@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>طرح درمان ایمپلنت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* Layout: app shell with archive list + treatment-plan form; tooth charts in Palmer layout; sticky action bar */
+:root{
+  --bg:#eef2f0; --surface:#ffffff; --ink:#15211e; --muted:#5f6f6a; --line:#d7e0dc;
+  --accent:#17624f; --accent-soft:#dcece6; --accent-ink:#ffffff; --warn:#a4552a; --ok:#1f7a4a; --bad:#b3362c;
+  --font:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1715; --surface:#17221f; --ink:#e6eeeb; --muted:#93a59f; --line:#2a3a35;
+  --accent:#4fb596; --accent-soft:#1d3a31; --accent-ink:#06120e; --warn:#e0956a; --ok:#5ec98f; --bad:#ef7d72; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1715; --surface:#17221f; --ink:#e6eeeb; --muted:#93a59f; --line:#2a3a35;
+  --accent:#4fb596; --accent-soft:#1d3a31; --accent-ink:#06120e; --warn:#e0956a; --ok:#5ec98f; --bad:#ef7d72; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.6;direction:rtl;padding-inline:16px;padding-block:12px 120px}
+.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+header.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h1{font-size:1.25rem;font-weight:800;margin:0}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:inherit;font-size:.85rem;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:6px 12px;cursor:pointer}
+.tab[aria-current="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.banner{border:1px solid var(--warn);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:.85rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card h2{font-size:1rem;font-weight:700;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tag{font-size:.7rem;font-weight:500;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:0 8px;white-space:nowrap}
+.tag.p{color:var(--warn);border-color:currentColor}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fields .full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:2px;font-size:.78rem;color:var(--muted);min-width:0}
+input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.price,.ltr{direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+.chart{direction:ltr;display:flex;flex-direction:column;gap:4px;overflow-x:auto}
+.jaw{display:flex;align-items:center;gap:6px}
+.jlabel{direction:rtl;font-size:.72rem;color:var(--muted);width:34px;flex:none;text-align:center}
+.half{display:flex;gap:3px}
+.mid{width:2px;align-self:stretch;background:var(--ink);opacity:.5;border-radius:2px;margin-inline:2px}
+.t{width:32px;height:36px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer;padding:0;font-variant-numeric:tabular-nums;flex:none}
+.t[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.sides{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);direction:ltr;padding-left:40px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;padding:5px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.grp{display:flex;flex-direction:column;gap:4px}
+.grp>span{font-size:.78rem;color:var(--muted)}
+.calc{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.calc b{color:var(--ink)}
+.brands,.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+@media (max-width:520px){.brands,.totals{grid-template-columns:repeat(2,1fr)}}
+.tot{border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:2px;cursor:pointer;background:var(--bg);font:inherit;color:var(--ink);text-align:right}
+.tot[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.tot small{color:var(--muted);font-size:.72rem}
+.tot b{font-variant-numeric:tabular-nums;font-size:.95rem}
+.rowline{display:flex;justify-content:space-between;gap:8px;font-size:.88rem;font-variant-numeric:tabular-nums}
+.rowline.big{font-weight:800;font-size:1rem;border-top:1px solid var(--line);padding-top:6px}
+.note{font-size:.78rem;color:var(--muted);margin:0}
+/* archive */
+.search{display:flex;gap:8px}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.item .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.item .nm{font-weight:700}
+.item .meta{font-size:.78rem;color:var(--muted)}
+.pill{font-size:.72rem;font-weight:700;border-radius:99px;padding:1px 10px;white-space:nowrap;border:1px solid currentColor}
+.pill.draft{color:var(--muted)} .pill.sent{color:var(--ok)} .pill.fail{color:var(--bad)} .pill.mod{color:var(--warn)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;font-size:.85rem;border-radius:9px;padding:8px 14px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:4px 10px;font-size:.78rem}
+.btn:disabled{opacity:.5;cursor:default}
+.empty{text-align:center;color:var(--muted);padding:28px 8px;font-size:.9rem}
+.bar{position:fixed;inset-inline:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:5}
+.bar .sum{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.bar .sum small{color:var(--muted);font-size:.72rem}
+.bar .sum b{font-size:1.02rem;font-variant-numeric:tabular-nums}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet .in{background:var(--surface);width:100%;max-width:680px;max-height:90%;overflow:auto;border-radius:14px 14px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+.sheet h3{margin:0;font-size:1rem}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.85rem}
+.kv span:nth-child(odd){color:var(--muted)}
+.kv span:nth-child(even){min-width:0;overflow-wrap:anywhere}
+.preview{display:flex;flex-direction:column;gap:8px}
+.preview img{width:100%;border:1px solid var(--line);border-radius:6px;background:#fff}
+.steps{display:flex;flex-direction:column;gap:4px;font-size:.85rem}
+.steps .s{display:flex;gap:8px;align-items:center}
+.steps .s i{width:10px;height:10px;border-radius:50%;background:var(--line);flex:none;font-style:normal}
+.steps .s.run i{background:var(--warn)} .steps .s.ok i{background:var(--ok)} .steps .s.err i{background:var(--bad)}
+.msg{font-size:.85rem;min-height:1.2em}
+.msg.err{color:var(--bad)} .msg.ok{color:var(--ok)}
+@media (prefers-reduced-motion:no-preference){.t,.chip,.tot{transition:background .12s,color .12s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>طرح درمان ایمپلنت</h1>
+    <nav class="tabs" id="nav" hidden>
+      <button class="tab" id="tabList" type="button">بایگانی</button>
+      <button class="tab" id="tabNew" type="button">فرم جدید</button>
+      <button class="tab" id="tabSet" type="button">تنظیمات</button>
+    </nav>
+  </header>
+  <section class="card" id="viewLogin" hidden>
+    <h2>ورود</h2>
+    <p class="note">رمز عبور کلینیک را وارد کنید. روی هر لپ‌تاپ فقط یک بار لازم است.</p>
+    <label class="f" id="lgUrlWrap" hidden>آدرس سرور (Apps Script)<input id="lg_url" class="ltr" placeholder="https://script.google.com/macros/s/.../exec"></label>
+    <label class="f">رمز عبور<input id="lg_pw" type="password" autocomplete="current-password"></label>
+    <div class="msg" id="lgMsg"></div>
+    <div class="btns"><button class="btn" id="lgGo" type="button">ورود</button></div>
+  </section>
+
+  <!-- archive -->
+  <section id="viewList" class="wrap" style="padding:0" hidden>
+    <div class="search"><input id="q" placeholder="جستجو با نام یا کد ملی"></div>
+    <div class="list" id="list"><div class="empty">در حال بارگذاری بایگانی…</div></div>
+  </section>
+
+  <!-- form -->
+  <section id="viewForm" class="wrap" style="padding:0" hidden>
+    <div class="banner" id="editNote" hidden></div>
+    <section class="card">
+      <h2>مشخصات بیمار</h2>
+      <div class="fields">
+        <label class="f full">نام و نام خانوادگی<input id="h_name" data-h="name"></label>
+        <label class="f">کد ملی<input id="h_nid" data-h="nid" inputmode="numeric"></label>
+        <label class="f">تاریخ مراجعه<input id="h_date" data-h="date"></label>
+        <label class="f">نام پزشک<input id="h_doc" data-h="doc"></label>
+        <label class="f">نام دستیار<input id="h_asst" data-h="asst"></label>
+      </div>
+    </section>
+    <div id="sections" class="wrap" style="padding:0"></div>
+    <section class="card">
+      <h2>جمع کل درمان</h2>
+      <p class="note">برند انتخابی بیمار را بزنید. شرایط پرداخت و PDF بر اساس همین برند حساب می‌شود.</p>
+      <div class="totals" id="brandTotals"></div>
+      <div class="rowline"><span>پارت جراحی</span><span id="t_surg"></span></div>
+      <div class="rowline"><span>پارت پروتز (روکش)</span><span id="t_pros"></span></div>
+      <div class="rowline big"><span>جمع کل</span><span id="t_all"></span></div>
+    </section>
+    <section class="card">
+      <h2>شرایط پرداخت</h2>
+      <div class="grp"><span>پارت جراحی</span>
+        <div class="chips" id="payOpt">
+          <button type="button" class="chip" data-opt="1">۳۰٪ نقد، باقی چک ماهانه</button>
+          <button type="button" class="chip" data-opt="2">۵۰٪ نقد، باقی یک چک</button>
+        </div>
+      </div>
+      <div class="fields">
+        <label class="f" id="lblN1">تعداد چک<input id="p_n1" class="price" inputmode="numeric"></label>
+        <label class="f" id="lblM2">موعد چک (ماه بعد از جراحی)<input id="p_m2" class="price" inputmode="numeric"></label>
+      </div>
+      <div class="calc" id="paySurg"></div>
+      <div class="grp"><span>پارت پروتز · ۳۰٪ نقد، باقی چک ماهانه</span></div>
+      <div class="fields"><label class="f">تعداد چک<input id="p_n3" class="price" inputmode="numeric"></label></div>
+      <div class="calc" id="payPros"></div>
+      <p class="note">قیمت‌ها تقریبی است. برای بیمارانی که زمان جراحی‌شان از دی‌ماه به بعد است، پارت پروتز به قیمت روز حساب می‌شود.</p>
+    </section>
+  </section>
+</div>
+
+<div class="bar" id="formBar" hidden>
+  <div class="sum"><small id="barLbl">جمع کل</small><b id="barTotal">۰</b></div>
+  <div class="btns">
+    <button class="btn ghost" id="saveBtn" type="button">ذخیره پیش‌نویس</button>
+    <button class="btn" id="confirmBtn" type="button">ثبت نهایی</button>
+  </div>
+</div>
+
+<!-- confirm sheet -->
+<div class="sheet" id="cSheet" hidden>
+  <div class="in">
+    <h3 id="cTitle">ثبت نهایی و ارسال</h3>
+    <div class="kv">
+      <span>نام فایل</span><span id="cFile"></span>
+      <span>ارسال به</span><span id="cTo" class="ltr"></span>
+      <span>فرستنده</span><span class="ltr" id="cFrom">alireza.worktime@gmail.com</span>
+    </div>
+    <div class="msg" id="cMsg"></div>
+    <div class="steps" id="cSteps" hidden>
+      <div class="s" id="st1"><i></i>ساخت PDF</div>
+      <div class="s" id="st2"><i></i>ذخیره در بایگانی</div>
+      <div class="s" id="st3"><i></i>ارسال ایمیل</div>
+    </div>
+    <div class="btns" id="cBtns">
+      <button class="btn" id="cGo" type="button">تأیید و ارسال</button>
+      <button class="btn ghost" id="cDl" type="button">دانلود PDF</button>
+      <button class="btn ghost" id="cPrint" type="button">باز کردن برای چاپ</button>
+      <button class="btn ghost" id="cClose" type="button">بستن</button>
+    </div>
+    <div class="preview" id="cPrev"></div>
+  </div>
+</div>
+
+<!-- settings sheet -->
+<div class="sheet" id="sSheet" hidden>
+  <div class="in">
+    <h3>تنظیمات</h3>
+    <label class="f">ایمیل گیرنده PDFها<input id="set_to" class="ltr" type="email" placeholder="name@example.com"></label>
+    <label class="f">نام کلینیک (سربرگ)<input id="set_clinic"></label>
+    <label class="f">نام پزشک و تخصص (سربرگ)<input id="set_doctor"></label>
+    <label class="f">تماس جهت هماهنگی<input id="set_phone"></label>
+    <h3 style="margin-top:6px">تعرفه‌ها (تومان)</h3>
+    <p class="note">این قیمت‌ها در هر فرم جدید خودکار پر می‌شوند. در خود فرم هم برای موارد خاص می‌شود عوضشان کرد. تغییر تعرفه روی فرم‌های قبلی اثری ندارد.</p>
+    <div id="set_prices" class="list"></div>
+    <p class="note">ایمیل‌ها از Gmailی فرستاده می‌شوند که سرور Apps Script با آن ساخته شده است.</p>
+    <div class="msg" id="sMsg"></div>
+    <div class="btns"><button class="btn" id="sSave" type="button">ذخیره تنظیمات</button><button class="btn ghost" id="sClose" type="button">بستن</button><button class="btn ghost" id="sOut" type="button">خروج از این لپ‌تاپ</button></div>
+  </div>
+</div>
+
+<script>
+/* ---------- model ---------- */
+const BRANDS=[{k:'ir',n:'ایرانی'},{k:'ko',n:'کره‌ای'},{k:'it',n:'ایتالیایی'},{k:'sw',n:'سوئیسی'}];
+const bz=f=>Object.fromEntries(BRANDS.map(b=>[b.k,f?f(b.k):0]));
+const SECTIONS=[
+ {id:'ext',t:'کشیدن دندان',kind:'teeth',n:8,price:'unit',full:true},
+ {id:'surg',t:'جراحی دندان نهفته',kind:'chips',groups:[{l:'عقل نهفته',o:['بالا راست','بالا چپ','پایین راست','پایین چپ']}],text:'دندان نهفته',price:'flat'},
+ {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',text:'توضیحات'},
+ {id:'aox',t:'All on X',kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],text:'توضیحات',price:'flat'},
+ {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',pros:true},
+ {id:'gbr',t:'جراحی GBR',kind:'chips',groups:[{o:['انجام شود']}],price:'flat'},
+ {id:'vip',t:'جراحی VIP / GBR',kind:'chips',groups:[{o:['انجام شود']}],price:'flat'},
+ {id:'crw',t:'فقط روکش',kind:'teeth',n:7,price:'unit',pros:true},
+ {id:'sin_o',t:'سینوس لیفت باز',kind:'chips',groups:[{o:['راست','چپ']}],price:'unit'},
+ {id:'sin_c',t:'سینوس لیفت بسته',kind:'chips',groups:[{o:['راست','چپ']}],price:'unit'},
+ {id:'alv',t:'آلوئولوپلاستی',kind:'chips',groups:[{o:['½ فک راست بالا','½ فک چپ بالا','½ فک راست پایین','½ فک چپ پایین']}],price:'unit'},
+ {id:'ram',t:'پیوند استخوان بلاک راموس',kind:'teeth',n:7,price:'unit'},
+ {id:'ovd',t:'اوردنچر',kind:'chips',groups:[{l:'فک بالا، تعداد پایه',o:['2','3','4','5'],single:true},{l:'فک پایین، تعداد پایه',o:['2','3','4','5'],single:true}],price:'brand'},
+ {id:'fgg',t:'FGG و وستیبولوپلاستی',kind:'chips',groups:[{l:'فک بالا',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']},{l:'فک پایین',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']}],text:'زمان',price:'unit'},
+ {id:'tmp',t:'روکش موقت',kind:'chips',groups:[{o:['دنچر','Essix','PMMA']}],price:'flat',pros:true},
+ {id:'cbct',t:'عکس CBCT',kind:'chips',groups:[{o:['لازم است']}],price:'flat'},
+ {id:'cons',t:'رضایت‌نامه',kind:'chips',groups:[{o:['نزدیک به عصب','دندان سالم']}]},
+ {id:'anes',t:'زمان بیهوشی',kind:'none',text:'مدت',price:'flat'}
+];
+const DEFAULT_SET={recipient:'',clinic:'کلینیک دندانپزشکی شهید رهنمون',doctor:'دکتر سید مجتبی علویکیا · جراح فک و صورت',phone:'۰۹۳۹۱۵۸۶۸۰۰ (منتظری)',prices:{}};
+let SET={...DEFAULT_SET};
+const fa=n=>Math.round(n).toLocaleString('fa-IR');
+const toEn=s=>String(s||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const num=s=>Number(toEn(s).replace(/[^\d]/g,''))||0;
+const fmtInput=v=>{const n=num(v);return n?n.toLocaleString('en-US'):''};
+const faD=s=>String(s??'').replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function jalali(d){const p={};new Intl.DateTimeFormat('fa-IR-u-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d).forEach(x=>p[x.type]=x.value);return {dash:`${p.year}-${p.month}-${p.day}`,slash:`${p.year}/${p.month}/${p.day}`}}
+function blankForm(){const s={},P=(SET&&SET.prices)||{};SECTIONS.forEach(x=>{const t=P[x.id]||{},bp=t.bp||{};s[x.id]={sel:{},text:'',price:fmtInput(t.price),bp:bz(k=>fmtInput(bp[k]))}});
+  return {id:null,h:{date:jalali(new Date()).slash},s,brand:'ko',pay:{opt:'1',n1:'',m2:'',n3:''},status:'new'}}
+let F=blankForm();
+let ARCHIVE=[];
+let dirty=false;
+
+/* ---------- calc ---------- */
+const count=(r,id)=>Object.values(r.s[id].sel).filter(Boolean).length;
+function rowTotals(r,x){const s=r.s[x.id],c=count(r,x.id),o={flat:0,brand:bz()};
+  if(x.price==='unit')o.flat=c*num(s.price);
+  else if(x.price==='flat')o.flat=(c||s.text||x.kind==='none')?num(s.price):0;
+  else if(x.price==='brandUnit')BRANDS.forEach(b=>o.brand[b.k]=c*num(s.bp[b.k]));
+  else if(x.price==='brand')BRANDS.forEach(b=>o.brand[b.k]=c?num(s.bp[b.k]):0);
+  return o}
+function totals(r){const surg=bz();let pros=0;
+  SECTIONS.forEach(x=>{const t=rowTotals(r,x);if(x.pros)pros+=t.flat;else BRANDS.forEach(b=>surg[b.k]+=t.flat+t.brand[b.k])});
+  return {surg,pros}}
+function payText(r){const T=totals(r),S=T.surg[r.brand],p=r.pay,out={surg:'',pros:''};
+  if(S){if(p.opt==='1'){const c=S*.3,n=num(p.n1);out.surg=`۳۰٪ نقد: ${fa(c)}`+(n?` · مانده در ${fa(n)} فقره چک به فواصل یک‌ماهه، هر چک ${fa((S-c)/n)}`:` · مانده: ${fa(S-c)}`)}
+    else{const c=S*.5,m=num(p.m2);out.surg=`۵۰٪ نقد: ${fa(c)} · مانده در یک فقره چک ${fa(S-c)}`+(m?` برای ${fa(m)} ماه بعد از تاریخ جراحی`:'')}}
+  if(T.pros){const c=T.pros*.3,n=num(p.n3);out.pros=`۳۰٪ نقد: ${fa(c)}`+(n?` · مانده در ${fa(n)} فقره چک به فواصل یک‌ماهه، هر چک ${fa((T.pros-c)/n)}`:` · مانده: ${fa(T.pros-c)}`)}
+  return out}
+
+/* ---------- form render ---------- */
+function toothBtn(sid,key,label){return `<button type="button" class="t" data-sid="${sid}" data-k="${key}" aria-pressed="${!!F.s[sid].sel[key]}">${label}</button>`}
+function chartHTML(x){let h='<div class="chart">';
+  [['U','بالا'],['L','پایین']].forEach(([j,l])=>{let r='',lf='';for(let i=x.n;i>=1;i--)r+=toothBtn(x.id,j+'R'+i,i);for(let i=1;i<=x.n;i++)lf+=toothBtn(x.id,j+'L'+i,i);
+    h+=`<div class="jaw"><span class="jlabel">${l}</span><div class="half">${r}</div><span class="mid"></span><div class="half">${lf}</div></div>`});
+  h+='</div><div class="sides"><span>راست بیمار</span><span>چپ بیمار</span></div>';
+  if(x.full)h+=`<div class="chips"><button type="button" class="chip" data-full="U" data-sid="${x.id}">Full EXT بالا</button><button type="button" class="chip" data-full="L" data-sid="${x.id}">Full EXT پایین</button></div>`;
+  return h}
+function chipsHTML(x){return x.groups.map((g,gi)=>`<div class="grp">${g.l?`<span>${g.l}</span>`:''}<div class="chips">${g.o.map(o=>{const k=gi+':'+o;return `<button type="button" class="chip" data-sid="${x.id}" data-k="${esc(k)}" data-g="${gi}" ${g.single?'data-single="1"':''} aria-pressed="${!!F.s[x.id].sel[k]}">${o}</button>`}).join('')}</div></div>`).join('')}
+function priceHTML(x){const s=F.s[x.id];
+  if(x.price==='brandUnit'||x.price==='brand')return `<div class="grp"><span>${x.price==='brandUnit'?'قیمت هر واحد':'قیمت'} به تفکیک برند</span><div class="brands">${BRANDS.map(b=>`<label class="f">${b.n}<input id="bp_${x.id}_${b.k}" class="price" inputmode="numeric" data-bp="${x.id}" data-b="${b.k}" value="${esc(s.bp[b.k])}"></label>`).join('')}</div></div>`;
+  if(!x.price)return '';
+  return `<label class="f">${x.price==='unit'?'قیمت هر واحد':'قیمت'}<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label>`}
+function renderForm(){
+  document.getElementById('sections').innerHTML=SECTIONS.map(x=>{const s=F.s[x.id];
+    const tag=x.pros?'<span class="tag p">پروتز</span>':(x.price?'<span class="tag">جراحی</span>':'');
+    return `<section class="card"><h2>${x.t}${tag}</h2>${x.kind==='teeth'?chartHTML(x):x.kind==='chips'?chipsHTML(x):''}
+    ${x.text?`<label class="f">${x.text}<input id="tx_${x.id}" data-tx="${x.id}" value="${esc(s.text)}"></label>`:''}
+    ${priceHTML(x)}<div class="calc" id="calc_${x.id}"></div></section>`}).join('');
+  document.querySelectorAll('[data-h]').forEach(i=>i.value=F.h[i.dataset.h]||'');
+  ['n1','m2','n3'].forEach(k=>document.getElementById('p_'+k).value=F.pay[k]||'');
+  const en=document.getElementById('editNote');
+  if(F.status==='confirmed'||F.status==='modified'){en.hidden=false;en.textContent=`این فرم در ${F.jalali||''} ثبت شده است. اگر چیزی را عوض کنید و دوباره «ثبت نهایی» بزنید، PDF تازه ساخته و دوباره ایمیل می‌شود.`}else en.hidden=true;
+  document.getElementById('confirmBtn').textContent=(F.status==='confirmed'||F.status==='modified')?'ثبت ویرایش و ارسال':'ثبت نهایی';
+  recalc()}
+function recalc(){
+  SECTIONS.forEach(x=>{const el=document.getElementById('calc_'+x.id);if(!el)return;const c=count(F,x.id),s=F.s[x.id];
+    if(x.price==='unit'&&c)el.innerHTML=`${fa(c)} واحد × ${fa(num(s.price))} = <b>${fa(c*num(s.price))}</b>`;
+    else if(x.price==='brandUnit'&&c)el.innerHTML=`${fa(c)} واحد · `+BRANDS.map(b=>`${b.n} <b>${fa(c*num(s.bp[b.k]))}</b>`).join(' · ');
+    else if(x.kind==='teeth')el.textContent=c?`${fa(c)} واحد انتخاب شده`:'';else el.textContent=''});
+  const T=totals(F),b=F.brand,bn=BRANDS.find(x=>x.k===b).n;
+  document.getElementById('brandTotals').innerHTML=BRANDS.map(x=>`<button type="button" class="tot" data-brand="${x.k}" aria-pressed="${x.k===b}"><small>${x.n}</small><b>${fa(T.surg[x.k]+T.pros)}</b></button>`).join('');
+  document.getElementById('t_surg').textContent=fa(T.surg[b])+' · '+bn;
+  document.getElementById('t_pros').textContent=fa(T.pros);
+  document.getElementById('t_all').textContent=fa(T.surg[b]+T.pros);
+  document.getElementById('barTotal').textContent=fa(T.surg[b]+T.pros)+' تومان';
+  document.getElementById('barLbl').textContent='جمع کل · '+bn;
+  const p=F.pay;document.querySelectorAll('#payOpt .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.opt===p.opt));
+  document.getElementById('lblN1').hidden=p.opt!=='1';document.getElementById('lblM2').hidden=p.opt!=='2';
+  const pt=payText(F);document.getElementById('paySurg').textContent=pt.surg;document.getElementById('payPros').textContent=pt.pros;
+  try{localStorage.setItem('implantPlanDraft',JSON.stringify(F))}catch(e){}}
+const touch=()=>{dirty=true;if(F.status==='confirmed')F.status='modified'};
+
+/* ---------- serialization (db stores selections as arrays) ---------- */
+function toDoc(r){const s={};SECTIONS.forEach(x=>{const v=r.s[x.id];s[x.id]={sel:Object.keys(v.sel).filter(k=>v.sel[k]),text:v.text,price:v.price,bp:{...v.bp}}});
+  const o={h:{...r.h},s,brand:r.brand,pay:{...r.pay},status:r.status==='new'?'draft':r.status};
+  ['jalali','confirmedAt','pdfName','pdfAssetId','pdfUrl','emailStatus','emailTo','emailError','emailedAt','edits','createdAt'].forEach(k=>{if(r[k]!==undefined)o[k]=r[k]});return o}
+function fromDoc(id,d){const r=blankForm();r.id=id;Object.assign(r.h,d.h||{});r.brand=d.brand||'ko';Object.assign(r.pay,d.pay||{});r.status=d.status||'draft';
+  SECTIONS.forEach(x=>{const v=(d.s||{})[x.id];if(!v)return;const t=r.s[x.id];(v.sel||[]).forEach(k=>t.sel[k]=true);t.text=v.text||'';t.price=v.price||'';Object.assign(t.bp,v.bp||{})});
+  ['jalali','confirmedAt','pdfName','pdfAssetId','pdfUrl','emailStatus','emailTo','emailError','emailedAt','edits','createdAt'].forEach(k=>{if(d[k]!==undefined)r[k]=d[k]});return r}
+const newId=()=>'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+async function saveRecord(r){const d=toDoc(r);d.updatedAt=new Date().toISOString();const T0=totals(r);
+  const j=await api('save',{record:{id:r.id,data:d,name:(r.h.name||'').trim(),nid:r.h.nid||'',status:d.status,total:T0.surg[r.brand]+T0.pros}});
+  r.id=j.id;dirty=false;return j}
+
+/* ---------- PDF drawing ---------- */
+const PW=1240,PH=1754,M=56,FONT='Vazirmatn, Tahoma, sans-serif';
+const C={R:PW-M,L:M,labW:235,priceW:255};C.labL=C.R-C.labW;C.priceR=C.L+C.priceW;C.midL=C.priceR;C.midR=C.labL;C.midW=C.midR-C.midL;
+const INK='#111',GREY='#8a8a8a',RULE='#555',FAINT='#f1f1f1';
+let MC=null;const mctx=()=>MC||(MC=document.createElement('canvas').getContext('2d'));
+function setF(c,o){c.font=`${o.w||400} ${o.s||21}px ${FONT}`}
+function T(c,str,X,Y,o={}){setF(c,o);c.fillStyle=o.c||INK;c.textAlign=o.a||'right';c.direction='rtl';c.textBaseline='middle';c.fillText(str,X,Y)}
+function Wd(c,str,o={}){setF(c,o);c.direction='rtl';return c.measureText(str).width}
+function wrap(c,str,maxW,o){const words=String(str).split(/\s+/).filter(Boolean),lines=[];let cur='';
+  for(const w of words){const t=cur?cur+' '+w:w;if(Wd(c,t,o)>maxW&&cur){lines.push(cur);cur=w}else cur=t}if(cur)lines.push(cur);return lines.length?lines:['']}
+function box(c,x,y,w,h,fill,stroke,lw=1.5){if(fill){c.fillStyle=fill;c.fillRect(x,y,w,h)}if(stroke){c.strokeStyle=stroke;c.lineWidth=lw;c.strokeRect(x,y,w,h)}}
+function checkbox(c,xR,yC,on){const s=20,x=xR-s,y=yC-s/2;if(on){box(c,x,y,s,s,INK);c.strokeStyle='#fff';c.lineWidth=3;c.beginPath();c.moveTo(x+4,y+10);c.lineTo(x+8,y+15);c.lineTo(x+16,y+5);c.stroke()}else box(c,x,y,s,s,null,'#999',1.5)}
+function tooth(c,x,y,w,h,n,on){if(on){box(c,x,y,w,h,INK);T(c,fa(n),x+w/2,y+h/2+1,{s:20,w:800,c:'#fff',a:'center'})}else{box(c,x,y,w,h,null,'#c4c4c4',1);T(c,fa(n),x+w/2,y+h/2+1,{s:18,c:'#a0a0a0',a:'center'})}}
+
+function layoutChips(c,x,sel,maxW){const lines=[];x.groups.forEach((g,gi)=>{let line=[],used=0;
+  if(g.l){const w=Wd(c,g.l+':',{w:700,s:19})+16;line.push({label:g.l+':',w});used=w}
+  g.o.forEach(o=>{const on=!!sel[gi+':'+o];const tx=faD(o),w=28+Wd(c,tx,{w:on?800:400,s:20})+26;if(used+w>maxW&&line.length){lines.push(line);line=[];used=0}line.push({text:tx,on,w});used+=w});
+  lines.push(line)});return lines}
+function priceLines(r,x){const s=r.s[x.id],c=count(r,x.id),L=[];if(!x.price)return L;
+  if(x.price==='unit'){const u=num(s.price);if(c&&u){L.push({t:`${fa(c)} واحد × ${fa(u)}`,c:'#444',s:18});L.push({t:fa(c*u),b:1})}}
+  else if(x.price==='flat'){const v=rowTotals(r,x).flat;if(v)L.push({t:fa(v),b:1})}
+  else{const t=rowTotals(r,x).brand;BRANDS.forEach(b=>{if(t[b.k])L.push({t:`${b.n}: ${fa(t[b.k])}`,b:b.k===r.brand,s:b.k===r.brand?20:18,c:b.k===r.brand?INK:'#555'})})}
+  return L}
+
+function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];let mh=0;
+  if(x.kind==='teeth'){const n=x.n,jl=60,gap=12,inner=C.midW-2*pad-jl;const cw=Math.min(40,Math.floor((inner-gap)/(2*n))),ch=36;
+    const gridW=cw*2*n+gap,gx=C.midL+pad+(inner-gridW)/2;
+    ['U','L'].forEach((j,ri)=>{const yo=ri*(ch+8);draws.push((cx,top)=>{const y=top+pad+yo;
+      T(cx,j==='U'?'بالا':'پایین',C.midR-pad,y+ch/2,{s:18,w:700,c:'#333'});
+      for(let i=0;i<n;i++){const k=n-i;tooth(cx,gx+i*cw,y,cw-4,ch,k,!!sel[j+'R'+k])}
+      cx.fillStyle=INK;cx.fillRect(gx+n*cw+gap/2-3,y-3,2.5,ch+6);
+      for(let i=0;i<n;i++){const k=i+1;tooth(cx,gx+n*cw+gap+i*cw,y,cw-4,ch,k,!!sel[j+'L'+k])}})});
+    draws.push((cx,top)=>{const y=top+pad+ch+4;cx.fillStyle='#999';cx.fillRect(gx,y-0.5,gridW-4,1)});
+    mh=2*ch+8;
+    const capY=mh;draws.push((cx,top)=>{const y=top+pad+capY+13;T(cx,'راست بیمار',gx,y,{s:15,c:GREY,a:'left'});T(cx,'چپ بیمار',gx+gridW-4,y,{s:15,c:GREY,a:'right'})});mh+=28;
+    if(x.full){const full=['U','L'].filter(j=>{for(let i=1;i<=n;i++)if(!sel[j+'R'+i]||!sel[j+'L'+i])return false;return true});
+      if(full.length){const yy=mh;draws.push((cx,top)=>T(cx,'Full EXT: '+full.map(j=>j==='U'?'فک بالا':'فک پایین').join(' و '),C.midR-pad,top+pad+yy+14,{s:19,w:800}));mh+=30}}}
+  else if(x.kind==='chips'){const lines=layoutChips(c,x,sel,C.midW-2*pad);lines.forEach((ln,li)=>{const yy=mh+li*36;
+      draws.push((cx,top)=>{let cur=C.midR-pad;const y=top+pad+yy+16;ln.forEach(it=>{if(it.label){T(cx,it.label,cur,y,{s:19,w:700,c:'#333'});cur-=it.w}else{checkbox(cx,cur,y,it.on);T(cx,it.text,cur-28,y,{s:20,w:it.on?800:400,c:it.on?INK:'#777'});cur-=it.w}})})});
+    mh+=lines.length*36}
+  if(x.text&&s.text){const lines=wrap(c,`${x.text}: ${s.text}`,C.midW-2*pad,{s:20,w:500});lines.forEach((ln,i)=>{const yy=mh+i*30;draws.push((cx,top)=>T(cx,ln,C.midR-pad,top+pad+yy+15,{s:20,w:500}))});mh+=lines.length*30}
+  else if(x.kind==='none'){draws.push((cx,top)=>T(cx,'—',C.midR-pad,top+pad+15,{s:20,c:GREY}));mh+=30}
+  const pl=priceLines(r,x),ph=pl.length*30;
+  const lab=wrap(c,x.t,C.labW-2*pad,{s:21,w:800}),lh=lab.length*30+(x.pros?24:0);
+  const h=Math.max(52,mh+2*pad,ph+2*pad,lh+2*pad);
+  return {h,table:true,draw(cx,top){
+    box(cx,C.L,top,C.R-C.L,h,null,RULE,1.2);cx.fillStyle=RULE;cx.fillRect(C.labL,top,1.2,h);cx.fillRect(C.priceR,top,1.2,h);
+    const ly=top+h/2-(lh)/2;lab.forEach((ln,i)=>T(cx,ln,C.R-pad,ly+15+i*30,{s:21,w:800}));
+    if(x.pros)T(cx,'(پارت پروتز)',C.R-pad,ly+lab.length*30+10,{s:15,c:GREY});
+    draws.forEach(d=>d(cx,top));
+    const py=top+h/2-ph/2;if(pl.length)pl.forEach((p,i)=>T(cx,p.t,C.priceR-pad,py+15+i*30,{s:p.s||20,w:p.b?800:400,c:p.c||INK}));
+    else T(cx,'—',C.L+C.priceW/2,top+h/2,{s:20,c:'#bbb',a:'center'})}}}
+
+function headerBlock(r,meta){return {h:290,draw(cx,top){
+  T(cx,SET.clinic||'',C.R,top+20,{s:22,w:800});T(cx,SET.doctor||'',C.L,top+20,{s:20,w:700,a:'left'});
+  T(cx,'طرح درمان ایمپلنت',PW/2,top+70,{s:42,w:800,a:'center'});T(cx,'(مشخصات فردی بیمار)',PW/2,top+112,{s:20,c:'#444',a:'center'});
+  const y0=top+140,rowH=50,colW=(C.R-C.L)/3;box(cx,C.L,y0,C.R-C.L,rowH*2,null,RULE,1.2);cx.fillStyle='#bbb';cx.fillRect(C.L,y0+rowH,C.R-C.L,1);
+  const f=[['نام و نام خانوادگی',r.h.name],['کد ملی',r.h.nid],['تاریخ مراجعه',r.h.date],['نام پزشک',r.h.doc],['نام دستیار',r.h.asst],['تماس جهت هماهنگی',SET.phone]];
+  f.forEach(([k,v],i)=>{const col=i%3,row=Math.floor(i/3),xr=C.R-col*colW-14,y=y0+row*rowH+rowH/2;T(cx,k+':',xr,y,{s:17,c:'#555'});const kw=Wd(cx,k+':',{s:17});
+    const val=faD(v||'—');let vs=22;while(Wd(cx,val,{s:vs,w:800})>colW-kw-36&&vs>14)vs--;T(cx,val,xr-kw-10,y,{s:vs,w:800})});
+  T(cx,'تاریخ تأیید طرح: '+(meta.jalali||''),C.R,top+266,{s:18,w:700,c:'#333'})}}}
+function miniHeader(r,meta){return {h:60,draw(cx,top){T(cx,'طرح درمان ایمپلنت · '+(r.h.name||''),C.R,top+20,{s:22,w:800});T(cx,'تاریخ تأیید: '+(meta.jalali||''),C.L,top+20,{s:18,a:'left',c:'#444'})}}}
+function tableHead(){return {h:46,draw(cx,top){box(cx,C.L,top,C.R-C.L,46,'#e6e6e6',RULE,1.2);cx.fillStyle=RULE;cx.fillRect(C.labL,top,1.2,46);cx.fillRect(C.priceR,top,1.2,46);
+  T(cx,'شرح درمان',C.R-14,top+23,{s:19,w:800});T(cx,'شماره دندان / توضیحات',(C.midL+C.midR)/2,top+23,{s:19,w:800,a:'center'});T(cx,'قیمت (تومان)',C.L+C.priceW/2,top+23,{s:19,w:800,a:'center'})}}}
+function totalsBlock(r){const T0=totals(r),rows=BRANDS.map(b=>({b,s:T0.surg[b.k],p:T0.pros,t:T0.surg[b.k]+T0.pros}));const rh=42,h=40+rh*(rows.length+1)+10;
+  return {h,draw(cx,top){T(cx,'جمع کل درمان',C.R,top+20,{s:23,w:800});const y0=top+40,cols=[C.R,C.R-260,C.R-560,C.R-820,C.L];
+    box(cx,C.L,y0,C.R-C.L,rh,'#e6e6e6');['برند','پارت جراحی','پارت پروتز (روکش)','جمع کل'].forEach((t,i)=>T(cx,t,cols[i]-14,y0+rh/2,{s:18,w:800}));
+    rows.forEach((x,i)=>{const y=y0+rh*(i+1),on=x.b.k===r.brand;if(on)box(cx,C.L,y,C.R-C.L,rh,FAINT);
+      T(cx,x.b.n+(on?'  (انتخاب بیمار)':''),cols[0]-14,y+rh/2,{s:19,w:on?800:400});[x.s,x.p,x.t].forEach((v,j)=>T(cx,fa(v),cols[j+1]-14,y+rh/2,{s:on?21:19,w:on?800:400}))});
+    box(cx,C.L,y0,C.R-C.L,rh*(rows.length+1),null,RULE,1.2);cols.slice(1,4).forEach(xx=>{cx.fillStyle='#bbb';cx.fillRect(xx,y0,1,rh*(rows.length+1))})}}}
+function textBlock(title,lines,o={}){const c=mctx(),ws=[];lines.forEach(l=>wrap(c,l,C.R-C.L-20,{s:19}).forEach(x=>ws.push(x)));const h=(title?40:8)+ws.length*30+10;
+  return {h,draw(cx,top){let y=top;if(title){T(cx,title,C.R,top+20,{s:21,w:800});y+=40}ws.forEach((l,i)=>T(cx,l,C.R-(o.indent||0),y+15+i*30,{s:19,c:o.c||INK}))}}}
+function signBlock(){return {h:150,draw(cx,top){const w=(C.R-C.L-30)/2;[['امضای بیمار',C.R],['امضا و مهر پزشک',C.R-w-30]].forEach(([t,xr])=>{box(cx,xr-w,top+20,w,110,null,'#999',1.2);T(cx,t,xr-14,top+42,{s:18,c:'#555'})})}}}
+
+async function buildPDF(r,meta){
+  try{await Promise.all([document.fonts.load(`400 20px Vazirmatn`),document.fonts.load(`700 20px Vazirmatn`),document.fonts.load(`800 20px Vazirmatn`)])}catch(e){}
+  const pt=payText(r),bn=BRANDS.find(b=>b.k===r.brand).n;
+  const blocks=[];SECTIONS.forEach(x=>blocks.push(sectionRow(r,x)));
+  blocks.push({h:24,spacer:true,draw(){}});blocks.push(totalsBlock(r));
+  const payLines=[];if(pt.surg)payLines.push(`پارت جراحی (${bn}): ${pt.surg}`);if(pt.pros)payLines.push(`پارت پروتز: ${pt.pros}`);if(!payLines.length)payLines.push('—');
+  blocks.push(textBlock('شرایط پرداخت',payLines));
+  blocks.push(textBlock('',['* قیمت‌های ارائه شده به صورت تقریبی می‌باشد.','* بیمارانی که زمان جراحی آنها از دی‌ماه سال جاری به بعد می‌باشد، پارت پروتز (روکش) به قیمت روز محاسبه می‌شود.'],{c:'#333'}));
+  blocks.push(signBlock());
+  const pages=[];let pg,y;const bottom=PH-M-36;
+  const start=first=>{const cv=document.createElement('canvas');cv.width=PW;cv.height=PH;const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,PW,PH);pg={cv,cx};pages.push(pg);y=M;
+    const hb=first?headerBlock(r,meta):miniHeader(r,meta);hb.draw(cx,y);y+=hb.h};
+  start(true);let th=tableHead();th.draw(pg.cx,y);y+=th.h;let inTable=true;
+  blocks.forEach(b=>{if(b.table===undefined&&inTable)inTable=false;if(y+b.h>bottom){start(false);if(b.table){th=tableHead();th.draw(pg.cx,y);y+=th.h}}b.draw(pg.cx,y);y+=b.h});
+  pages.forEach((p,i)=>T(p.cx,`صفحه ${fa(i+1)} از ${fa(pages.length)}`,PW/2,PH-M+6,{s:16,c:GREY,a:'center'}));
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'pt',format:'a4',compress:true});
+  pages.forEach((p,i)=>{if(i)doc.addPage();doc.addImage(p.cv.toDataURL('image/jpeg',0.92),'JPEG',0,0,595.28,841.89)});
+  const blob=doc.output('blob');const b64=doc.output('datauristring').split(',')[1];
+  return {blob,b64,previews:pages.map(p=>p.cv.toDataURL('image/jpeg',0.6))}}
+
+/* ---------- server (Google Apps Script) ---------- */
+const API_URL_DEFAULT='https://script.google.com/macros/s/AKfycbyiZAnyj0kCX56DqlG9wdoTs2N_9aMFQeB5xU9nwYZQbVQtXT9N9yyACgE9ELnyxzxh/exec';
+let API={url:'',pw:''};
+try{const a=JSON.parse(localStorage.getItem('implantApi')||'null');if(a)API=a}catch(e){}
+if(API_URL_DEFAULT)API.url=API_URL_DEFAULT;
+const saveApi=()=>{try{localStorage.setItem('implantApi',JSON.stringify(API))}catch(e){}};
+const IN_GAS=typeof google!=='undefined'&&google.script&&google.script.run;
+function gasCall(body){return new Promise((ok,no)=>google.script.run.withSuccessHandler(r=>{try{ok(JSON.parse(r))}catch(e){no(new Error('پاسخ سرور قابل خواندن نبود.'))}}).withFailureHandler(e=>no(new Error('اتصال به سرور برقرار نشد: '+(e&&e.message||e)))).api(body))}
+async function api(action,payload={}){
+  if(IN_GAS){const j=await gasCall(JSON.stringify({action,password:API.pw,...payload}));
+    if(!j.ok){if(j.error==='auth'){logout();throw new Error('رمز عبور اشتباه است.')}throw new Error(j.error||'خطای سرور')}return j}
+  if(!API.url)throw new Error('آدرس سرور تنظیم نشده است.');
+  let res;
+  try{res=await fetch(API.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,password:API.pw,...payload})})}
+  catch(e){throw new Error('اتصال به سرور برقرار نشد. اینترنت یا فیلترشکن را چک کنید.')}
+  let j;try{j=await res.json()}catch(e){throw new Error('پاسخ سرور قابل خواندن نبود. آدرس سرور را چک کنید.')}
+  if(!j.ok){if(j.error==='auth'){logout();throw new Error('رمز عبور اشتباه است.')}throw new Error(j.error||'خطای سرور')}
+  return j}
+
+/* ---------- email text ---------- */
+function summaryText(r){const T0=totals(r),bn=BRANDS.find(b=>b.k===r.brand).n,pt=payText(r),out=[];
+  out.push(`طرح درمان ایمپلنت بیمار: ${r.h.name||'—'}`);if(r.h.nid)out.push('کد ملی: '+r.h.nid);out.push('تاریخ تأیید: '+(r.jalali||''));
+  if(r.h.doc)out.push('پزشک: '+r.h.doc);if(r.h.asst)out.push('دستیار: '+r.h.asst);out.push('');
+  out.push(`برند انتخابی: ${bn}`);out.push(`پارت جراحی: ${fa(T0.surg[r.brand])} تومان`);out.push(`پارت پروتز: ${fa(T0.pros)} تومان`);out.push(`جمع کل: ${fa(T0.surg[r.brand]+T0.pros)} تومان`);
+  if(pt.surg)out.push('پرداخت جراحی: '+pt.surg);if(pt.pros)out.push('پرداخت پروتز: '+pt.pros);out.push('');out.push('فایل PDF کامل طرح درمان پیوست است.');return out.join('\n')}
+const mailFor=r=>({subject:`طرح درمان ایمپلنت - ${r.h.name} - ${r.jalali}`+((r.edits||0)>0?' (ویرایش شده)':''),body:summaryText(r)});
+
+/* ---------- confirm flow ---------- */
+let lastPDF=null,busy=false;
+const $=id=>document.getElementById(id);
+const validEmail=s=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s||'');
+function step(n,st){$('st'+n).className='s '+(st||'')}
+function safeName(s){return String(s||'').replace(/[\/\\:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim()}
+function alertMsg(t){const b=$('editNote');b.hidden=false;b.textContent=t;b.scrollIntoView({behavior:'smooth',block:'center'})}
+async function openConfirm(){
+  const msg=$('cMsg');msg.className='msg';msg.textContent='';$('cSteps').hidden=true;$('cPrev').innerHTML='';['st1','st2','st3'].forEach(id=>$(id).className='s');
+  if(!(F.h.name||'').trim()){alertMsg('نام بیمار را وارد کنید.');return}
+  const j=jalali(new Date());const fname=`${safeName(F.h.name)} - ${j.dash}.pdf`;
+  $('cFile').textContent=fname;$('cTo').textContent=SET.recipient||'تعیین نشده';
+  $('cTitle').textContent=(F.status==='confirmed'||F.status==='modified')?'ثبت ویرایش و ارسال مجدد':'ثبت نهایی و ارسال';
+  $('cSheet').hidden=false;$('cGo').disabled=true;$('cDl').disabled=true;$('cPrint').disabled=true;msg.textContent='در حال ساخت پیش‌نمایش PDF…';
+  try{lastPDF=await buildPDF(F,{jalali:j.slash});lastPDF.name=fname;lastPDF.jalali=j;
+    $('cPrev').innerHTML=lastPDF.previews.map((u,i)=>`<img src="${u}" alt="صفحه ${fa(i+1)} PDF">`).join('');
+    msg.textContent='پیش‌نمایش را چک کنید، بعد «تأیید و ارسال» را بزنید.';$('cDl').disabled=false;$('cPrint').disabled=false;
+    if(!validEmail(SET.recipient)){msg.className='msg err';msg.textContent='ایمیل گیرنده تعیین نشده. از «تنظیمات» واردش کنید.'}else $('cGo').disabled=false}
+  catch(e){msg.className='msg err';msg.textContent='ساخت PDF ناموفق بود: '+(e&&e.message||e)}}
+async function doConfirm(){if(busy||!lastPDF)return;busy=true;$('cGo').disabled=true;$('cClose').disabled=true;$('cSteps').hidden=false;const msg=$('cMsg');msg.className='msg';msg.textContent='';
+  const prev={status:F.status,jalali:F.jalali,pdfName:F.pdfName,edits:F.edits};
+  const wasConfirmed=F.status==='confirmed'||F.status==='modified';
+  try{step(1,'ok');step(2,'run');step(3,'run');
+    F.status='confirmed';F.jalali=lastPDF.jalali.slash;F.pdfName=lastPDF.name;if(wasConfirmed)F.edits=(F.edits||0)+1;
+    const d=toDoc(F);d.updatedAt=new Date().toISOString();const T0=totals(F);
+    const j=await api('confirm',{record:{id:F.id,data:d,name:F.h.name.trim(),nid:F.h.nid||'',status:'confirmed',total:T0.surg[F.brand]+T0.pros,jalali:F.jalali},
+      pdf:lastPDF.b64,fileName:lastPDF.name,mail:mailFor(F)});
+    F.id=j.id;F.emailStatus=j.emailStatus;dirty=false;step(2,'ok');
+    if(j.emailStatus==='sent'){step(3,'ok');msg.className='msg ok';msg.textContent=`ثبت شد، PDF در گوگل درایو ذخیره شد و برای ${j.emailTo} ایمیل شد.`}
+    if(j.fileUrl){const a=document.createElement('a');a.href=j.fileUrl;a.target='_blank';a.rel='noopener';a.textContent=' باز کردن PDF در گوگل درایو';msg.appendChild(a)}
+    else{step(3,'err');msg.className='msg err';msg.textContent='فرم ثبت و PDF در گوگل درایو ذخیره شد، ولی ایمیل نرفت: '+(j.emailError||'')+' از بایگانی می‌توانید دوباره بفرستید.'}
+    renderForm();loadList()}
+  catch(e){Object.assign(F,prev);step(2,'err');step(3,'');msg.className='msg err';msg.textContent='ثبت نشد: '+(e.message||'')+' فرم هنوز ثبت نشده است؛ دوباره امتحان کنید.'}
+  finally{busy=false;$('cClose').disabled=false}}
+function downloadBlob(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
+function openForPrint(blob){const u=URL.createObjectURL(blob);const w=window.open(u,'_blank');if(!w)downloadBlob(blob,'plan.pdf');setTimeout(()=>URL.revokeObjectURL(u),120000)}
+
+/* ---------- archive ---------- */
+function statusPill(d){if(d.status==='draft')return '<span class="pill draft">پیش‌نویس</span>';
+  if(d.status==='modified')return '<span class="pill mod">ویرایش ثبت‌نشده</span>';
+  if(d.emailStatus==='sent')return '<span class="pill sent">ثبت و ایمیل شد</span>';
+  if(d.emailStatus==='failed')return '<span class="pill fail">ایمیل نرفت</span>';
+  return '<span class="pill mod">ثبت شد</span>'}
+let listLoaded=false;
+function renderList(){const q=toEn($('q').value.trim()).toLowerCase();const el=$('list');
+  if(!listLoaded){el.innerHTML='<div class="empty">در حال بارگذاری بایگانی…</div>';return}
+  if(!ARCHIVE.length){el.innerHTML='<div class="empty">هنوز فرمی ثبت نشده. از «فرم جدید» اولین طرح درمان را پر کنید.</div>';return}
+  const rows=ARCHIVE.filter(d=>!q||(String(d.name||'').toLowerCase().includes(q)||toEn(d.nid||'').includes(q)));
+  if(!rows.length){el.innerHTML='<div class="empty">نتیجه‌ای پیدا نشد.</div>';return}
+  el.innerHTML=rows.map(d=>`<div class="item"><div class="row1"><div><div class="nm">${esc(d.name||'بدون نام')}</div>
+    <div class="meta">${d.nid?'کد ملی '+esc(faD(d.nid))+' · ':''}${d.jalali?'تأیید '+esc(d.jalali):'ثبت نشده'} · جمع ${fa(Number(d.total)||0)}</div>
+    ${d.emailStatus==='failed'&&d.emailError?`<div class="meta" style="color:var(--bad)">${esc(d.emailError)}</div>`:''}</div>${statusPill(d)}</div>
+    <div class="acts"><button class="btn sm" data-open="${esc(d.id)}" type="button">باز کردن / ویرایش</button>
+    ${d.status!=='draft'?`<button class="btn sm ghost" data-pdf="${esc(d.id)}" type="button">PDF</button><button class="btn sm ghost" data-resend="${esc(d.id)}" type="button">ارسال دوباره</button>`:''}</div></div>`).join('')}
+async function loadList(){try{const j=await api('list');ARCHIVE=j.items||[];listLoaded=true;renderList()}
+  catch(e){$('list').innerHTML=`<div class="empty">بایگانی بارگذاری نشد: ${esc(e.message)}</div>`}}
+async function fetchRecord(id){const j=await api('get',{id});const r=fromDoc(id,j.data||{});
+  ['status','jalali','emailStatus','emailError','pdfName','edits'].forEach(k=>{if(j[k]!==undefined&&j[k]!=='')r[k]=j[k]});return r}
+
+/* ---------- tariff settings ---------- */
+const unitLbl=x=>x.price==='unit'||x.price==='brandUnit'?' · هر واحد':'';
+function renderPriceSettings(){const P=SET.prices||{};
+  $('set_prices').innerHTML=SECTIONS.filter(x=>x.price).map(x=>{const t=P[x.id]||{},bp=t.bp||{};
+    const inner=(x.price==='brand'||x.price==='brandUnit')
+      ?`<div class="brands">${BRANDS.map(b=>`<label class="f">${b.n}<input class="price" inputmode="numeric" data-tp="${x.id}" data-tb="${b.k}" value="${esc(fmtInput(bp[b.k]))}"></label>`).join('')}</div>`
+      :`<input class="price" inputmode="numeric" data-tp="${x.id}" value="${esc(fmtInput(t.price))}">`;
+    return `<div class="grp"><span>${x.t}${unitLbl(x)}${x.pros?' (پروتز)':''}</span>${inner}</div>`}).join('')}
+function readPriceSettings(){const P={};document.querySelectorAll('#set_prices [data-tp]').forEach(i=>{const id=i.dataset.tp;P[id]=P[id]||{price:'',bp:{}};
+  if(i.dataset.tb)P[id].bp[i.dataset.tb]=String(num(i.value)||'');else P[id].price=String(num(i.value)||'')});return P}
+
+/* ---------- views ---------- */
+function show(v){$('viewLogin').hidden=v!=='login';$('nav').hidden=v==='login';$('viewList').hidden=v!=='list';$('viewForm').hidden=v!=='form';$('formBar').hidden=v!=='form';
+  $('tabList').setAttribute('aria-current',v==='list');$('tabNew').setAttribute('aria-current',v==='form'&&!F.id);window.scrollTo(0,0)}
+function openForm(r){F=r;dirty=false;renderForm();show('form')}
+function logout(){API.pw='';saveApi();show('login');$('lg_pw').value='';$('lgUrlWrap').hidden=!!API_URL_DEFAULT||IN_GAS;$('lg_url').value=API.url||''}
+function applySettings(s){if(s)SET={...DEFAULT_SET,...s};SET.prices=SET.prices||{};try{localStorage.setItem('implantPlanSettings',JSON.stringify(SET))}catch(e){}
+  if(F.status==='new'&&!dirty){F=blankForm();renderForm()}}
+async function login(){const m=$('lgMsg');m.className='msg';m.textContent='در حال ورود…';
+  if(!API_URL_DEFAULT&&!IN_GAS)API.url=$('lg_url').value.trim();API.pw=$('lg_pw').value;
+  try{const j=await api('ping');saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;m.textContent='';show('list');loadList()}
+  catch(e){m.className='msg err';m.textContent=e.message}}
+
+document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
+  if(t.id==='lgGo'){login();return}
+  if(t.id==='tabList'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن به بایگانی دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}
+    delete t.dataset.armed;show('list');loadList();return}
+  if(t.id==='tabNew'){openForm(blankForm());return}
+  if(t.id==='tabSet'){$('set_to').value=SET.recipient||'';$('set_clinic').value=SET.clinic||'';$('set_doctor').value=SET.doctor||'';$('set_phone').value=SET.phone||'';renderPriceSettings();$('sMsg').textContent='';$('sSheet').hidden=false;return}
+  if(t.id==='sClose'){$('sSheet').hidden=true;return}
+  if(t.id==='sOut'){$('sSheet').hidden=true;logout();return}
+  if(t.id==='sSave'){const to=$('set_to').value.trim(),m=$('sMsg');
+    if(to&&!validEmail(to)){m.className='msg err';m.textContent='ایمیل گیرنده درست نیست.';return}
+    const s={recipient:to,clinic:$('set_clinic').value.trim(),doctor:$('set_doctor').value.trim(),phone:$('set_phone').value.trim(),prices:readPriceSettings()};
+    t.disabled=true;try{const j=await api('settings',{settings:s});applySettings(j.settings||s);m.className='msg ok';m.textContent='ذخیره شد. روی هر دو لپ‌تاپ اعمال می‌شود.'}
+    catch(err){m.className='msg err';m.textContent='ذخیره نشد: '+err.message}finally{t.disabled=false}return}
+  if(t.id==='saveBtn'){if(!(F.h.name||'').trim()){alertMsg('برای ذخیره، نام بیمار را وارد کنید.');return}
+    t.disabled=true;try{if(F.status==='new')F.status='draft';await saveRecord(F);t.textContent='ذخیره شد';setTimeout(()=>t.textContent='ذخیره پیش‌نویس',1600)}catch(err){alertMsg('ذخیره نشد: '+err.message)}finally{t.disabled=false}return}
+  if(t.id==='confirmBtn'){openConfirm();return}
+  if(t.id==='cGo'){doConfirm();return}
+  if(t.id==='cDl'){if(lastPDF)downloadBlob(lastPDF.blob,lastPDF.name);return}
+  if(t.id==='cPrint'){if(lastPDF)openForPrint(lastPDF.blob);return}
+  if(t.id==='cClose'){$('cSheet').hidden=true;return}
+  if(t.dataset.open){t.disabled=true;try{openForm(await fetchRecord(t.dataset.open))}catch(err){alertMsg('باز نشد: '+err.message)}finally{t.disabled=false}return}
+  if(t.dataset.pdf){t.disabled=true;const old=t.textContent;t.textContent='در حال ساخت…';
+    try{const r=await fetchRecord(t.dataset.pdf);const p=await buildPDF(r,{jalali:r.jalali});downloadBlob(p.blob,r.pdfName||(safeName(r.h.name)+'.pdf'))}
+    catch(err){alertMsg('PDF ساخته نشد: '+err.message)}finally{t.disabled=false;t.textContent=old}return}
+  if(t.dataset.resend){if(!t.dataset.armed){t.dataset.armed='1';t.textContent='ارسال به '+(SET.recipient||'؟')+'؟ دوباره بزنید';setTimeout(()=>{if(t.dataset.armed){delete t.dataset.armed;t.textContent='ارسال دوباره'}},4000);return}
+    delete t.dataset.armed;if(!validEmail(SET.recipient)){alertMsg('ایمیل گیرنده تعیین نشده.');return}
+    t.disabled=true;t.textContent='در حال ارسال…';
+    try{const r=await fetchRecord(t.dataset.resend);const j=await api('resend',{id:r.id,mail:mailFor(r)});t.textContent=j.emailStatus==='sent'?'ارسال شد':'ارسال نشد'}
+    catch(err){t.textContent='ارسال نشد';alertMsg(err.message)}finally{t.disabled=false;loadList()}return}
+  if(t.dataset.full){const s=F.s[t.dataset.sid],j=t.dataset.full,x=SECTIONS.find(v=>v.id===t.dataset.sid);let all=true;
+    for(let i=1;i<=x.n;i++)if(!s.sel[j+'R'+i]||!s.sel[j+'L'+i])all=false;for(let i=1;i<=x.n;i++){s.sel[j+'R'+i]=!all;s.sel[j+'L'+i]=!all}
+    document.querySelectorAll(`.t[data-sid="${x.id}"]`).forEach(b=>b.setAttribute('aria-pressed',!!s.sel[b.dataset.k]));touch();recalc();return}
+  if(t.dataset.sid&&t.dataset.k){const s=F.s[t.dataset.sid],k=t.dataset.k,on=!s.sel[k];
+    if(t.dataset.single){Object.keys(s.sel).forEach(o=>{if(o.split(':')[0]===t.dataset.g)s.sel[o]=false});document.querySelectorAll(`.chip[data-sid="${t.dataset.sid}"][data-g="${t.dataset.g}"]`).forEach(c=>c.setAttribute('aria-pressed','false'))}
+    s.sel[k]=on;t.setAttribute('aria-pressed',on);touch();recalc();return}
+  if(t.dataset.brand){F.brand=t.dataset.brand;touch();recalc();return}
+  if(t.dataset.opt){F.pay.opt=t.dataset.opt;touch();recalc();return}
+});
+['cSheet','sSheet'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target.id===id&&!busy)e.target.hidden=true}));
+$('q').addEventListener('input',renderList);
+$('lg_pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+document.addEventListener('input',e=>{const i=e.target;if(i.dataset.tp){i.value=fmtInput(i.value);return}if(i.closest('#sSheet')||i.closest('#viewLogin')||i.id==='q')return;
+  if(i.dataset.h){F.h[i.dataset.h]=i.value;touch();recalc();return}
+  if(i.dataset.tx){F.s[i.dataset.tx].text=i.value;touch();recalc();return}
+  if(i.dataset.pr||i.dataset.bp){i.value=fmtInput(i.value);if(i.dataset.pr)F.s[i.dataset.pr].price=i.value;else F.s[i.dataset.bp].bp[i.dataset.b]=i.value;touch();recalc();return}
+  if(i.id&&i.id.startsWith('p_')){F.pay[i.id.slice(2)]=i.value;touch();recalc()}});
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+
+/* ---------- boot ---------- */
+try{const s=JSON.parse(localStorage.getItem('implantPlanSettings')||'null');if(s)SET={...DEFAULT_SET,...s}}catch(e){}
+renderForm();
+if((API.url||IN_GAS)&&API.pw){show('list');api('ping').then(j=>{applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;loadList()}).catch(err=>{$('list').innerHTML=`<div class="empty">${esc(err.message)}</div>`})}
+else logout();
+</script>
+</body>
+</html>
