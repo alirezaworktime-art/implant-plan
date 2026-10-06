@@ -28,6 +28,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font
 .wrap>*,.card>*{min-width:0}
 .wrap .wrap{margin:0;width:100%}
 .chart{max-width:100%}
+.chart-in{width:max-content;margin:0 auto;display:flex;flex-direction:column;gap:4px}
+.chart-in .jaw{padding-right:40px}
+.chart-in .sides{padding-right:40px}
 header.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 h1{font-size:1.25rem;font-weight:800;margin:0}
 nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
@@ -259,9 +262,9 @@ const bz=f=>Object.fromEntries(BRANDS.map(b=>[b.k,f?f(b.k):0]));
    price: unit (qty × price) · flat · brandUnit (qty × brand price) · implantBrand (implants × implant brand price) · items */
 const SECTIONS=[
  {id:'ext',t:'کشیدن دندان',kind:'teeth',n:8,price:'unit',cnt:'jaw',jmax:14},
- {id:'surg',t:'جراحی دندان نهفته',kind:'chips',groups:[{l:'عقل نهفته',o:['بالا راست','بالا چپ','پایین راست','پایین چپ']}],text:'دندان نهفته',price:'flat'},
- {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',cnt:'one',max:28,text:'توضیحات'},
- {id:'aox',t:'All on X',kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],text:'توضیحات',price:'flat'},
+ {id:'surg',t:'جراحی دندان نهفته',kind:'chips',groups:[{l:'عقل نهفته',o:['بالا راست','بالا چپ','پایین راست','پایین چپ']}],price:'flat'},
+ {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',cnt:'one',max:20,text:'توضیحات'},
+ {id:'aox',t:'All on X',kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'implantBrand',prosJaw:true,def:'19000000'},
  {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',cnt:'one',max:28,pros:true},
  {id:'gbr',t:'جراحی GBR',kind:'teeth',n:7,price:'unit',cnt:'one',max:28},
  {id:'vip',t:'جراحی VIP / GBR',kind:'items',price:'items',items:[{k:'cgf',l:'CGF',type:'count',max:28,pk:'vip_cgf'},{k:'mem',l:'ممبران و تگ',type:'count',max:28,pk:'vip_mem'}]},
@@ -288,7 +291,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 function jalali(d){const p={};new Intl.DateTimeFormat('fa-IR-u-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d).forEach(x=>p[x.type]=x.value);return {dash:`${p.year}-${p.month}-${p.day}`,slash:`${p.year}/${p.month}/${p.day}`}}
 function blankSections(){const s={},P=(SET&&SET.prices)||{};SECTIONS.forEach(x=>{const t=P[x.id]||{},bp=t.bp||{},ip={};
     (x.items||[]).forEach(it=>ip[it.k]=fmtInput((P[it.pk]||{}).price));
-    s[x.id]={sel:{},text:'',price:fmtInput(t.price),bp:bz(k=>fmtInput(bp[k])),cnt:'',jc:{U:'',L:''},ip,isel:{},icnt:{}}});
+    s[x.id]={sel:{},text:'',price:fmtInput(t.price||x.def),bp:bz(k=>fmtInput(bp[k])),cnt:'',jc:{U:'',L:''},ip,isel:{},icnt:{}}});
   return s}
 function blankForm(){return {id:null,h:{date:jalali(new Date()).slash},s:blankSections(),s2:null,alt:{mode:'none',text:''},brand:'ko',pay:{opt:'1',n1:'',m2:'',n3:''},status:'new'}}
 let F=blankForm();
@@ -315,10 +318,11 @@ function rowTotals(r,x){const s=r.s[x.id],q=qty(s,x),o={flat:0,brand:bz()};
   else if(x.price==='flat')o.flat=(q||s.text||x.kind==='none')?num(s.price):0;
   else if(x.price==='brandUnit')BRANDS.forEach(b=>o.brand[b.k]=q*num(s.bp[b.k]));
   else if(x.price==='implantBrand')BRANDS.forEach(b=>o.brand[b.k]=q*num(r.s.imp.bp[b.k]));
+  if(x.prosJaw)o.pros=chipSel(s)*num(s.price);
   else if(x.price==='items')o.flat=x.items.reduce((a,it)=>a+itemQty(s,it)*num(s.ip[it.k]),0);
   return o}
 function totals(r){const surg=bz();let pros=0;
-  SECTIONS.forEach(x=>{const t=rowTotals(r,x);if(x.pros)pros+=t.flat;else BRANDS.forEach(b=>surg[b.k]+=t.flat+t.brand[b.k])});
+  SECTIONS.forEach(x=>{const t=rowTotals(r,x);pros+=t.pros||0;if(x.pros)pros+=t.flat;else BRANDS.forEach(b=>surg[b.k]+=t.flat+t.brand[b.k])});
   return {surg,pros}}
 function cashFor(r,S,P){return (r.pay.opt==='1'?S*.3:S*.5)+P*.3}
 function payText(r,brand){const T=totals(r),b=brand||r.brand,S=T.surg[b],p=r.pay,out={surg:'',pros:''};
@@ -331,10 +335,10 @@ function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||s.text||(x.items&&x.
 /* ---------- form render ---------- */
 const opts=(max,v,from=1)=>`<option value="">—</option>`+Array.from({length:max-from+1},(_,i)=>i+from).map(n=>`<option value="${n}" ${String(v)===String(n)?'selected':''}>${fa(n)}</option>`).join('');
 function toothBtn(sid,key,label){return `<button type="button" class="t" data-sid="${sid}" data-k="${key}" aria-pressed="${!!AS()[sid].sel[key]}">${label}</button>`}
-function chartHTML(x){let h='<div class="chart">';
+function chartHTML(x){let h='<div class="chart"><div class="chart-in">';
   [['U','بالا'],['L','پایین']].forEach(([j,l])=>{let r='',lf='';for(let i=x.n;i>=1;i--)r+=toothBtn(x.id,j+'R'+i,i);for(let i=1;i<=x.n;i++)lf+=toothBtn(x.id,j+'L'+i,i);
     h+=`<div class="jaw"><span class="jlabel">${l}</span><div class="half">${r}</div><span class="mid"></span><div class="half">${lf}</div></div>`});
-  return h+'</div><div class="sides"><span>راست بیمار</span><span>چپ بیمار</span></div>'}
+  return h+'<div class="sides"><span>راست بیمار</span><span>چپ بیمار</span></div></div></div>'}
 function cntHTML(x){const s=AS()[x.id];
   if(x.cnt==='one')return `<div class="fields"><label class="f">تعداد کل (به جای انتخاب تک‌تک دندان‌ها)<select data-cnt="${x.id}">${opts(x.max,s.cnt)}</select></label></div>`;
   if(x.cnt==='jaw')return `<div class="fields">${[['U','Full EXT فک بالا · تعداد'],['L','Full EXT فک پایین · تعداد']].map(([j,l])=>`<label class="f">${l}<select data-jc="${x.id}" data-j="${j}">${opts(x.jmax,s.jc[j])}</select></label>`).join('')}</div>`;
@@ -348,7 +352,8 @@ function itemsHTML(x){const s=AS()[x.id];
     <div class="calc" id="icalc_${x.id}_${it.k}"></div></div>`).join('')}</div>`}
 function priceHTML(x){const s=AS()[x.id];
   if(x.price==='brandUnit')return `<div class="grp"><span>قیمت هر واحد به تفکیک برند</span><div class="brands">${BRANDS.map(b=>`<label class="f">${b.n}<input id="bp_${x.id}_${b.k}" class="price" inputmode="numeric" data-bp="${x.id}" data-b="${b.k}" value="${esc(s.bp[b.k])}"></label>`).join('')}</div></div>`;
-  if(x.price==='implantBrand')return '<p class="note">هزینه: تعداد پایه × تعرفه‌ی پایه ایمپلنت هر برند (از بخش «پایه ایمپلنت»).</p>';
+  if(x.price==='implantBrand')return '<p class="note">هزینه: تعداد پایه‌ی انتخاب‌شده × تعرفه‌ی پایه ایمپلنت هر برند (از بخش «پایه ایمپلنت»).</p>'+
+    (x.prosJaw?`<label class="f">پروتز هر فک (به پارت پروتز اضافه می‌شود)<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="pcalc_${x.id}"></div>`:'');
   if(!x.price||x.price==='items')return '';
   return `<label class="f">${x.price==='unit'?'قیمت هر واحد':'قیمت'}<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label>`}
 function sectionHTML(x){const s=AS()[x.id];
@@ -378,6 +383,7 @@ function recalc(){const pv={s:AS(),brand:F.brand,pay:F.pay};
     if(x.price==='unit'&&q)el.innerHTML=`${fa(q)} واحد × ${fa(num(s.price))} = <b>${fa(q*num(s.price))}</b>`;
     else if((x.price==='brandUnit'||x.price==='implantBrand')&&q){const t=rowTotals(pv,x).brand;el.innerHTML=`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'} · `+BRANDS.map(b=>`${b.n} <b>${fa(t[b.k])}</b>`).join(' · ')}
     else if(x.kind==='teeth')el.textContent=q?`${fa(q)} واحد`:'';else el.textContent='';
+    if(x.prosJaw){const e3=document.getElementById('pcalc_'+x.id),j=chipSel(s);if(e3)e3.innerHTML=j?`پروتز: ${fa(j)} فک × ${fa(num(s.price))} = <b>${fa(j*num(s.price))}</b>`:''}
     (x.items||[]).forEach(it=>{const e2=document.getElementById(`icalc_${x.id}_${it.k}`);if(!e2)return;const iq=itemQty(s,it),u=num(s.ip[it.k]);e2.innerHTML=iq?`${fa(iq)} × ${fa(u)} = <b>${fa(iq*u)}</b>`:''})});
   if(!(CUR===2&&F.alt.mode==='text')){
     const T=totals(pv),b=F.brand,bn=BRANDS.find(x=>x.k===b).n;
@@ -437,12 +443,12 @@ function priceLines(r,x){const s=r.s[x.id],q=qty(s,x),L=[];if(!x.price)return L;
   if(x.price==='unit'){const u=num(s.price);if(q&&u){L.push({t:`${fa(q)} واحد × ${fa(u)}`,c:'#444',s:18});L.push({t:fa(q*u),b:1})}}
   else if(x.price==='flat'){const v=rowTotals(r,x).flat;if(v)L.push({t:fa(v),b:1})}
   else if(x.price==='items'){let sum=0;x.items.forEach(it=>{const iq=itemQty(s,it),u=num(s.ip[it.k]);if(iq&&u){sum+=iq*u;L.push({t:`${it.l}: ${fa(iq)}×${fa(u)}`,c:'#444',s:17})}});if(sum)L.push({t:fa(sum),b:1})}
-  else{const t=rowTotals(r,x).brand;if(q)L.push({t:`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'}`,c:'#444',s:17});BRANDS.forEach(b=>{if(t[b.k])L.push({t:`${b.n}: ${fa(t[b.k])}`,b:b.k===r.brand,s:b.k===r.brand?19:17,c:b.k===r.brand?INK:'#555'})})}
+  else{const t=rowTotals(r,x).brand;if(x.prosJaw&&chipSel(s)&&num(s.price))L.push({t:`پروتز: ${fa(chipSel(s))} فک × ${fa(num(s.price))}`,c:'#444',s:17});if(q)L.push({t:`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'}`,c:'#444',s:17});BRANDS.forEach(b=>{if(t[b.k])L.push({t:`${b.n}: ${fa(t[b.k])}`,b:b.k===r.brand,s:b.k===r.brand?19:17,c:b.k===r.brand?INK:'#555'})})}
   return L}
 
 function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];let mh=0;const maxW=C.midW-2*pad;
-  if(x.kind==='teeth'){const n=x.n,jl=60,gap=12,inner=C.midW-2*pad-jl;const cw=Math.min(40,Math.floor((inner-gap)/(2*n))),ch=36;
-    const gridW=cw*2*n+gap,gx=C.midL+pad+(inner-gridW)/2;
+  if(x.kind==='teeth'){const n=x.n,jl=60,gap=12;const cw=Math.min(40,Math.floor((C.midW-2*pad-2*jl-gap)/(2*n))),ch=36;
+    const gridW=cw*2*n+gap,gx=C.midL+(C.midW-gridW)/2;
     ['U','L'].forEach((j,ri)=>{const yo=ri*(ch+8);draws.push((cx,top)=>{const y=top+pad+yo;
       T(cx,j==='U'?'بالا':'پایین',C.midR-pad,y+ch/2,{s:18,w:700,c:'#333'});
       for(let i=0;i<n;i++){const k=n-i;tooth(cx,gx+i*cw,y,cw-4,ch,k,!!sel[j+'R'+k])}
@@ -635,7 +641,8 @@ async function fetchRecord(id){const j=await api('get',{id});const r=fromDoc(id,
 /* ---------- tariff settings ---------- */
 const unitLbl=x=>x.price==='unit'||x.price==='brandUnit'?' · هر واحد':'';
 function renderPriceSettings(){const P=SET.prices||{};const inp=(k,v,b)=>`<input class="price" inputmode="numeric" data-tp="${k}" ${b?`data-tb="${b}"`:''} value="${esc(fmtInput(v))}">`;
-  $('set_prices').innerHTML=SECTIONS.filter(x=>x.price&&x.price!=='implantBrand').map(x=>{const t=P[x.id]||{},bp=t.bp||{};
+  $('set_prices').innerHTML=SECTIONS.filter(x=>x.price&&(x.price!=='implantBrand'||x.prosJaw)).map(x=>{const t=P[x.id]||{},bp=t.bp||{};
+    if(x.prosJaw)return `<div class="grp"><span>${x.t} · پروتز هر فک</span>${inp(x.id,t.price||x.def)}</div>`;
     if(x.price==='items')return x.items.map(it=>`<div class="grp"><span>${x.t} · ${it.l}${it.type==='chips'?' · هر طرف':' · هر واحد'}</span>${inp(it.pk,(P[it.pk]||{}).price)}</div>`).join('');
     const inner=x.price==='brandUnit'?`<div class="brands">${BRANDS.map(b=>`<label class="f">${b.n}${inp(x.id,bp[b.k],b.k)}</label>`).join('')}</div>`:inp(x.id,t.price);
     return `<div class="grp"><span>${x.t}${unitLbl(x)}${x.pros?' (پروتز)':''}</span>${inner}</div>`}).join('')+'<p class="note">اوردنچر از تعرفه‌ی «پایه ایمپلنت» هر برند حساب می‌شود.</p>'}
