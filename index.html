@@ -524,6 +524,7 @@ function fromDoc(id,d){const r=blankForm();r.id=id;Object.assign(r.h,d.h||{});r.
   r.s=secFrom(d.s);r.alt=Object.assign({mode:'none',text:''},d.alt||{});r.s2=r.alt.mode==='full'?secFrom(d.s2):null;if(r.alt.mode==='full'&&!d.s2)r.alt.mode='none';
   ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt','note'].forEach(k=>{if(d[k]!==undefined)r[k]=d[k]});return r}
 /* local safety copy of the open patient (survives reloads, flaky internet, re-opening) */
+const uuid=()=>(crypto.randomUUID?crypto.randomUUID():'x'+Date.now()+Math.random().toString(16).slice(2));
 const LD='implantDraft:';
 function ldSave(){if(!F||!F.id||!dirty||$('viewForm').hidden)return;try{const d=toDoc(F);d.updatedAt=new Date().toISOString();localStorage.setItem(LD+F.id,JSON.stringify({role:ROLE,d}))}catch(e){}}
 function ldGet(id){try{const x=JSON.parse(localStorage.getItem(LD+id)||'null');return x&&x.role===ROLE?x.d:null}catch(e){return null}}
@@ -539,7 +540,7 @@ function newestDoc(id,serverDoc){let best=serverDoc,bt=serverDoc&&serverDoc.upda
 const planTotal=r=>{const T0=totals(PV(r,1));return T0.surg[r.brand]+T0.pros};
 async function saveRecord(r){const d=toDoc(r);d.updatedAt=new Date().toISOString();
   const j=await api('save',{record:{id:r.id,data:d,name:(r.h.name||'').trim(),nid:r.h.nid||'',status:d.status,total:planTotal(r)}});
-  r.id=j.id;dirty=false;ldDel(r.id);const q=QITEMS.find(v=>v.id===r.id);if(q&&q.status==='queued')q.status='draft';return j}
+  r.id=j.id;dirty=false;ldDel(r.id);const q=QITEMS.find(v=>v.id===r.id);if(q){if(q.status==='queued')q.status='draft';q.data=d}return j}
 
 /* ---------- PDF drawing ---------- */
 const PW=1240,PH=1754,M=56,FONT='Vazirmatn, Tahoma, sans-serif';
@@ -693,15 +694,31 @@ if(API_URL_DEFAULT)API.url=API_URL_DEFAULT;
 const saveApi=()=>{try{localStorage.setItem('implantApi',JSON.stringify(API))}catch(e){}};
 const IN_GAS=typeof google!=='undefined'&&google.script&&google.script.run;
 function gasCall(body){return new Promise((ok,no)=>google.script.run.withSuccessHandler(r=>{try{ok(JSON.parse(r))}catch(e){no(new Error('پاسخ سرور قابل خواندن نبود.'))}}).withFailureHandler(e=>no(new Error('اتصال به سرور برقرار نشد: '+(e&&e.message||e)))).api(body))}
-async function api(action,payload={}){
+/* One request at a time. Two requests in flight at once stall each other for 10–30 s on the clinic's
+   connection, so every call goes through this queue: user actions first, background sends next, polls last.
+   A user action aborts a running poll; a stalled request is cut off and retried instead of waiting. */
+const RQ={list:[],cur:null};
+const RQ_OPT={user:{timeout:7000,tries:3},bg:{timeout:60000,tries:1},poll:{timeout:8000,tries:1}};
+function rqPump(){if(RQ.cur||!RQ.list.length)return;RQ.list.sort((a,b)=>a.rank-b.rank);const job=RQ.list.shift();RQ.cur=job;
+  rqRun(job).then(job.ok,job.no).finally(()=>{RQ.cur=null;rqPump()})}
+async function rqRun(job){const o=RQ_OPT[job.prio];let last;
+  for(let i=0;i<o.tries;i++){if(job.aborted)throw new Error('aborted');const ctrl=new AbortController();job.ctrl=ctrl;const tm=setTimeout(()=>ctrl.abort(),o.timeout);
+    try{const res=await fetch(API.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:job.body,signal:ctrl.signal});return await res.json()}
+    catch(e){last=e;if(job.aborted)throw new Error('aborted')}
+    finally{clearTimeout(tm)}}
+  throw last||new Error('fail')}
+function rqCall(body,prio){return new Promise((ok,no)=>{const job={body,prio,rank:prio==='user'?0:prio==='bg'?1:2,ok,no,aborted:false};
+  if(prio==='user'&&RQ.cur&&RQ.cur.prio==='poll'){RQ.cur.aborted=true;RQ.cur.ctrl&&RQ.cur.ctrl.abort()}
+  RQ.list.push(job);rqPump()})}
+async function api(action,payload={},opt={}){const prio=opt.prio||'user';
   if(IN_GAS){const j=await gasCall(JSON.stringify({action,password:API.pw,...payload}));
     if(!j.ok){if(j.error==='auth'){logout();throw new Error('رمز عبور اشتباه است.')}throw new Error(j.error||'خطای سرور')}return j}
   if(!API.url)throw new Error('آدرس سرور تنظیم نشده است.');
-  let res;
-  try{res=await fetch(API.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,password:API.pw,...payload})})}
-  catch(e){throw new Error('اتصال به سرور برقرار نشد. اینترنت یا فیلترشکن را چک کنید.')}
-  let j;try{j=await res.json()}catch(e){throw new Error('پاسخ سرور قابل خواندن نبود. آدرس سرور را چک کنید.')}
-  if(!j.ok){if(j.error==='auth'){logout();throw new Error('رمز عبور اشتباه است.')}throw new Error(j.error||'خطای سرور')}
+  let j;
+  try{j=await rqCall(JSON.stringify({action,password:API.pw,...payload}),prio)}
+  catch(e){if(e&&e.message==='aborted')throw new Error('aborted');throw new Error('اتصال به سرور برقرار نشد. اینترنت یا فیلترشکن را چک کنید.')}
+  if(!j||typeof j!=='object')throw new Error('پاسخ سرور قابل خواندن نبود. آدرس سرور را چک کنید.');
+  if(!j.ok){if(j.error==='auth'){try{const c=AUTHC();delete c[ROLE||LROLE];localStorage.setItem('implantAuth',JSON.stringify(c))}catch(e){}logout();throw new Error('رمز عبور اشتباه است.')}throw new Error(j.error||'خطای سرور')}
   return j}
 
 /* ---------- email text ---------- */
@@ -747,7 +764,7 @@ function toast(t,bad){const el=$('toast');el.textContent=t;el.className='toast'+
 async function processOutbox(){const mine=()=>OUTBOX.filter(o=>(o.role||'doctor')===ROLE);
   if(OB_RUN||!ROLE||!mine().length)return obBar();OB_RUN=true;clearTimeout(OB_TIMER);
   try{while(mine().length){const o=mine()[0];obBar();
-      try{const j=await api(o.kind==='consult'?'toConsult':'confirm',o.payload);OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(o.id){SENDING.delete(o.id);const l=ldGet(o.id);if(!l||(l.updatedAt||'')<=((o.payload.record||{}).data||{}).updatedAt)ldDel(o.id)}
+      try{if(!o.sid)o.sid=uuid();o.payload.sendId=o.sid;const j=await api(o.kind==='consult'?'toConsult':'confirm',o.payload,{prio:'bg'});OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(o.id){SENDING.delete(o.id);const l=ldGet(o.id);if(!l||(l.updatedAt||'')<=((o.payload.record||{}).data||{}).updatedAt)ldDel(o.id)}
         if(o.kind==='consult')toast(`${o.name} به کارتابل مشاور رسید.`);
         else if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
         if(!$('viewList').hidden)loadList();pollQ(true)}
@@ -826,7 +843,7 @@ function readPriceSettings(){const P={};document.querySelectorAll('#set_prices [
 
 /* ---------- roles, live queue, reception ---------- */
 let ROLE='',LROLE='staff',QV='',QITEMS=[],QSEEN=null,QTIMER=null,QBUSY=false,RC_EDIT=null,BACK_TO_Q=false;
-const QPOLL=4000;
+const QPOLL=5000;
 const ROLE_LBL={staff:'پرسنل',doctor:'پزشک',consultant:'مشاور'};
 function applyRole(){document.querySelectorAll('#nav [data-role]').forEach(b=>b.hidden=!b.dataset.role.split(' ').includes(ROLE));$('qTitle').textContent=ROLE==='consultant'?'کارتابل مشاور':'بیماران در صف انتظار'}
 function home(){if(ROLE==='staff'){show('recep');rcReset()}else show('queue');renderQ();pollQ(false)}
@@ -834,10 +851,10 @@ let AC=null;function beep(){try{AC=AC||new (window.AudioContext||window.webkitAu
 function startPoll(){stopPoll();QTIMER=setInterval(()=>pollQ(false),QPOLL)}
 function stopPoll(){if(QTIMER)clearInterval(QTIMER);QTIMER=null}
 async function pollQ(force){if(!ROLE||QBUSY)return;QBUSY=true;
-  try{const j=await api('queue',{ver:force?'':QV});setLive(true);applyQueue(j)}
-  catch(e){setLive(false)}finally{QBUSY=false}}
+  try{const j=await api('queue',{ver:force?'':QV},{prio:'poll'});setLive(true);applyQueue(j)}
+  catch(e){if(e.message!=='aborted')setLive(false)}finally{QBUSY=false}}
 const NEWQ={doctor:'waiting',consultant:'consult'};
-function applyQueue(j){if(!j||j.same||!j.items)return;QV=j.ver;const prev=QSEEN;QITEMS=j.items;
+function applyQueue(j){if(!j||j.same||!j.items)return;QV=j.ver;try{localStorage.setItem('implantQ:'+ROLE,JSON.stringify({ver:j.ver,items:j.items}))}catch(e){}const prev=QSEEN;QITEMS=j.items;
   const fresh=prev?QITEMS.filter(x=>x.queue===NEWQ[ROLE]&&!prev.has(x.id)).map(x=>x.id):[];
   QSEEN=new Set(QITEMS.map(x=>x.id));
   if(NEWQ[ROLE]&&fresh.length){beep();fresh.forEach(id=>FRESH.add(id));setTimeout(()=>{fresh.forEach(id=>FRESH.delete(id));renderQ()},15000)}
@@ -868,26 +885,29 @@ function rcEdit(id){const x=QITEMS.find(v=>v.id===id);if(!x)return;RC_EDIT=id;RC
 async function rcSend(t){const m=$('rcMsg'),p={};RCF.forEach(k=>p[k]=$('rc_'+k).value.trim());p.med=medNorm(RC_MED);
   if(!p.name){m.className='msg err';m.textContent='نام و نام خانوادگی بیمار را وارد کنید.';return}
   t.disabled=true;m.className='msg';m.textContent='در حال ارسال…';
-  try{if(RC_EDIT)await api('queueUpdate',{id:RC_EDIT,patient:p});else await api('queueAdd',{patient:p});
+  try{if(RC_EDIT)await api('queueUpdate',{id:RC_EDIT,patient:p});else{if(!t.dataset.nid)t.dataset.nid=uuid();await api('queueAdd',{id:t.dataset.nid,patient:p});delete t.dataset.nid}
     m.className='msg ok';m.textContent=RC_EDIT?'تغییرات ذخیره شد.':`${p.name} به کارتابل پزشک رفت.`;rcReset();pollQ(true)}
   catch(e){m.className='msg err';m.textContent=e.message}finally{t.disabled=false}}
 async function qOpen(t){if(t.disabled)return;const id=t.dataset.qopen,x=QITEMS.find(v=>v.id===id);
   const docName=()=>SET.doctor?SET.doctor.split('·')[0].trim():'';
-  const finish=r=>{if(!r.h.doc)r.h.doc=docName();openForm(r)};
-  // something newer than the server copy exists on this device (unsent or unsaved) → open it right away
+  const meta=(r,j)=>{['status','jalali','emailStatus','pdfName','edits'].forEach(k=>{if(j&&j[k]!==undefined&&j[k]!==''&&j[k]!==null)r[k]=j[k]});if(!r.h.doc)r.h.doc=docName();return r};
+  const mark=()=>{if(x){if(ROLE==='doctor'&&x.queue==='waiting')x.queue='reviewing';if(ROLE==='consultant'&&x.queue==='consult')x.queue='consulting'}
+    api('queueOpen',{id},{prio:'bg'}).then(()=>pollQ(true)).catch(()=>{})};
   const loc=newestDoc(id,null);
-  if(ROLE==='doctor'&&x&&x.status==='queued'&&!loc){ // nothing saved yet: open instantly from the inbox data
+  // the inbox already carries the plan (or a newer copy is on this device): open at once, tell the server in the background
+  if(x&&(x.data||loc)){const nd=newestDoc(id,x.data||null),d=nd||x.data||{},r=fromDoc(id,d),isLoc=!!(nd&&loc&&nd.updatedAt===loc.updatedAt);
+    if(!r.h.name)Object.assign(r.h,{name:x.name,nid:x.nid,date:x.date||r.h.date,phone:x.phone,age:x.age,asst:x.asst});
+    if(!r.note&&x.note)r.note=x.note;if(x.med&&!Object.keys(r.med.y).length)r.med=medNorm(x.med);
+    if(r.status==='queued')r.status='draft';
+    meta(r,x);openForm(r);if(isLoc){dirty=true;toast('آخرین تغییراتِ ذخیره‌نشده‌ی این بیمار روی این دستگاه بازیابی شد.')}
+    mark();return}
+  if(ROLE==='doctor'&&x&&x.status==='queued'){ // nothing saved yet: open instantly from the inbox data
     const r=blankForm();r.id=id;r.status='draft';Object.assign(r.h,{name:x.name,nid:x.nid,date:x.date||r.h.date,phone:x.phone,age:x.age,asst:x.asst,doc:docName()});r.note=x.note;r.med=medNorm(x.med);
-    openForm(r);x.queue='reviewing';
-    api('queueOpen',{id}).then(j=>{ // the server already had a plan (e.g. saved from another device): load it if nothing was changed here
-      if(F.id===id&&!dirty&&j&&j.data&&j.data.s&&!$('viewForm').hidden){const r2=fromDoc(id,j.data);if(!planEmpty(r2)){['status','jalali','emailStatus','pdfName','edits'].forEach(k=>{if(j[k]!==undefined&&j[k]!=='')r2[k]=j[k]});finish(r2)}}
-      pollQ(true)}).catch(()=>{});return}
+    openForm(r);mark();return}
   t.disabled=true;t.classList.add('loading');
-  try{let j=null;try{j=await api('queueOpen',{id})}catch(e){if(!loc)throw e}
-    const sd=j&&j.data||{},nd=newestDoc(id,j?sd:null);const r=fromDoc(id,nd||sd);
-    if(j)['status','jalali','emailStatus','pdfName','edits'].forEach(k=>{if(j[k]!==undefined&&j[k]!=='')r[k]=j[k]});
-    finish(r);if(nd){dirty=true;toast('آخرین تغییراتِ ذخیره‌نشده‌ی این بیمار روی این دستگاه بازیابی شد.')}pollQ(true)}
-  catch(e){alert0(e.message)}finally{t.disabled=false;t.classList.remove('loading')}}
+  try{const j=await api('queueOpen',{id});const sd=j.data||{},nd=newestDoc(id,sd);const r=meta(fromDoc(id,nd||sd),j);
+    openForm(r);if(nd){dirty=true;toast('آخرین تغییراتِ ذخیره‌نشده‌ی این بیمار روی این دستگاه بازیابی شد.')}pollQ(true)}
+  catch(e){if(e.message!=='aborted')alert0(e.message)}finally{t.disabled=false;t.classList.remove('loading')}}
 function alert0(t){const el=$('qList');el.insertAdjacentHTML('afterbegin',`<div class="banner">${esc(t)}</div>`)}
 
 /* ---------- views ---------- */
@@ -897,14 +917,23 @@ function show(v){$('viewLogin').hidden=v!=='login';$('nav').hidden=v==='login';$
   $('tabList').setAttribute('aria-current',v==='list');$('tabNew').setAttribute('aria-current',v==='form'&&!F.id);
   if(v==='queue'||v==='recep')renderQ();window.scrollTo(0,0)}
 function openForm(r){F=r;CUR=1;dirty=false;renderForm();show('form')}
-function logout(){API.pw='';ROLE='';QV='';QSEEN=null;QITEMS=[];stopPoll();saveApi();show('login');$('lg_pw').value='';$('lg_pw').type='password';$('lgShow').checked=false;$('lgUrlWrap').hidden=!!API_URL_DEFAULT||IN_GAS;$('lg_url').value=API.url||''}
+function logout(){API.pw='';ROLE='';RQ.list.forEach(j=>{j.aborted=true;j.no(new Error('aborted'))});RQ.list=[];if(RQ.cur){RQ.cur.aborted=true;RQ.cur.ctrl&&RQ.cur.ctrl.abort()}QV='';QSEEN=null;QITEMS=[];stopPoll();saveApi();show('login');$('lg_pw').value='';$('lg_pw').type='password';$('lgShow').checked=false;$('lgUrlWrap').hidden=!!API_URL_DEFAULT||IN_GAS;$('lg_url').value=API.url||''}
 function applySettings(s){if(s)SET={...DEFAULT_SET,...s};SET.prices=SET.prices||{};try{localStorage.setItem('implantPlanSettings',JSON.stringify(SET))}catch(e){}
   if(F.status==='new'&&!dirty){F=blankForm();renderForm()}}
+async function sha(t){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('implant|'+t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return null}}
+const AUTHC=()=>{try{return JSON.parse(localStorage.getItem('implantAuth')||'{}')}catch(e){return {}}};
+function enter(j){ROLE=j.role;API.role=ROLE;saveApi();if(j.settings)applySettings(j.settings);if(j.queue)applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender;$('lgMsg').textContent='';applyRole();home();startPoll();beep0();processOutbox()}
 async function login(){const m=$('lgMsg');m.className='msg';m.textContent='در حال ورود…';
   if(!API_URL_DEFAULT&&!IN_GAS)API.url=$('lg_url').value.trim();API.pw=$('lg_pw').value;
+  // a password that worked on this device before: go straight in with the cached inbox, verify in the background
+  const h=await sha(API.pw);
+  if(h&&AUTHC()[LROLE]===h){let q=null;try{q=JSON.parse(localStorage.getItem('implantQ:'+LROLE)||'null')}catch(e){}
+    enter({role:LROLE,queue:q});
+    api('ping').then(j=>{if(j.role!==ROLE){logout();$('lgMsg').className='msg err';$('lgMsg').textContent=`این رمز مربوط به ورود ${ROLE_LBL[j.role]||'دیگری'} است.`;return}applySettings(j.settings);applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender}).catch(()=>{});return}
   try{const j=await api('ping');
     if(j.role!==LROLE){API.pw='';m.className='msg err';m.textContent=`این رمز مربوط به ورود ${ROLE_LBL[j.role]||'دیگری'} است.`;return}
-    ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender;m.textContent='';applyRole();home();startPoll();beep0();processOutbox()}
+    if(h){const c=AUTHC();c[j.role]=h;try{localStorage.setItem('implantAuth',JSON.stringify(c))}catch(e){}}
+    enter(j)}
   catch(e){m.className='msg err';m.textContent=e.message}}
 function beep0(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
 
