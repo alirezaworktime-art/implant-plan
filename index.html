@@ -316,7 +316,7 @@ const bz=f=>Object.fromEntries(BRANDS.map(b=>[b.k,f?f(b.k):0]));
    price: unit (qty × price) · flat · brandUnit (qty × brand price) · implantBrand (implants × implant brand price) · items */
 const SECTIONS=[
  {id:'ext',t:'کشیدن دندان',kind:'teeth',n:8,price:'unit',cnt:'jaw',jmax:14},
- {id:'surg',t:'جراحی دندان نهفته',kind:'chips',groups:[{l:'عقل نهفته',o:['بالا راست','بالا چپ','پایین راست','پایین چپ']}],price:'flat'},
+ {id:'surg',t:'جراحی دندان نهفته',kind:'items',price:'items',two:true,items:[{k:'c',l:'جراحی نیش نهفته',type:'chips',o:['بالا راست','بالا چپ','پایین راست','پایین چپ'],pk:'surg_c',ul:'هر دندان'},{k:'w',l:'جراحی عقل نهفته',type:'chips',o:['بالا راست','بالا چپ','پایین راست','پایین چپ'],pk:'surg_w',ul:'هر دندان'}]},
  {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',cnt:'one',max:20,text:'توضیحات'},
  {id:'aox',t:'All on X',kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'implantBrand',prosJaw:true,def:'19000000'},
  {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',cnt:'one',max:28,pros:true},
@@ -402,7 +402,7 @@ function itemsHTML(x){const s=AS()[x.id];
   return `<div class="items${x.two?' two':''}">${x.items.map(it=>`<div class="item-box"><b>${it.l}</b>
     ${it.type==='chips'?`<div class="chips">${it.o.map(o=>`<button type="button" class="chip" data-isid="${x.id}" data-ik="${esc(it.k+':'+o)}" aria-pressed="${!!s.isel[it.k+':'+o]}">${o}</button>`).join('')}</div>`
       :`<label class="f">تعداد<select data-icnt="${x.id}" data-ik="${it.k}">${opts(it.max,s.icnt[it.k])}</select></label>`}
-    <label class="f">${it.type==='chips'?'قیمت هر طرف':'قیمت هر واحد'}<input class="price" inputmode="numeric" data-ip="${x.id}" data-ik="${it.k}" value="${esc(s.ip[it.k])}"></label>
+    <label class="f">قیمت ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}<input class="price" inputmode="numeric" data-ip="${x.id}" data-ik="${it.k}" value="${esc(s.ip[it.k])}"></label>
     <div class="calc" id="icalc_${x.id}_${it.k}"></div></div>`).join('')}</div>`}
 function priceHTML(x){const s=AS()[x.id];
   if(x.price==='brandUnit')return `<div class="grp"><span>قیمت هر واحد به تفکیک برند</span><div class="brands">${BRANDS.map(b=>`<label class="f">${b.n}<input id="bp_${x.id}_${b.k}" class="price" inputmode="numeric" data-bp="${x.id}" data-b="${b.k}" value="${esc(s.bp[b.k])}"></label>`).join('')}</div></div>`;
@@ -460,7 +460,8 @@ const onKeys=m=>Object.keys(m||{}).filter(k=>m[k]);
 function secDoc(S){const s={};SECTIONS.forEach(x=>{const v=S[x.id];s[x.id]={sel:onKeys(v.sel),text:v.text,price:v.price,bp:{...v.bp},cnt:v.cnt,jc:{...v.jc},ip:{...v.ip},isel:onKeys(v.isel),icnt:{...v.icnt}}});return s}
 function secFrom(d){const S=blankSections();SECTIONS.forEach(x=>{const v=(d||{})[x.id];if(!v)return;const t=S[x.id];
   (v.sel||[]).forEach(k=>t.sel[k]=true);t.text=v.text||'';t.price=v.price||'';Object.assign(t.bp,v.bp||{});t.cnt=v.cnt||'';Object.assign(t.jc,v.jc||{});
-  Object.assign(t.ip,v.ip||{});(v.isel||[]).forEach(k=>t.isel[k]=true);Object.assign(t.icnt,v.icnt||{})});return S}
+  Object.assign(t.ip,v.ip||{});(v.isel||[]).forEach(k=>t.isel[k]=true);Object.assign(t.icnt,v.icnt||{});
+  if(x.id==='surg'&&!(v.isel||[]).length)(v.sel||[]).forEach(k=>{const o=k.split(':')[1];if(o)t.isel['w:'+o]=true})});return S}
 function toDoc(r){const o={h:{...r.h},s:secDoc(r.s),s2:r.alt.mode==='full'&&r.s2?secDoc(r.s2):null,alt:{...r.alt},brand:r.brand,pay:{...r.pay},status:r.status==='new'?'draft':r.status};
   ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt','note'].forEach(k=>{if(r[k]!==undefined)o[k]=r[k]});return o}
 function fromDoc(id,d){const r=blankForm();r.id=id;Object.assign(r.h,d.h||{});r.brand=d.brand||'ko';Object.assign(r.pay,d.pay||{});r.status=d.status||'draft';
@@ -699,7 +700,7 @@ const unitLbl=x=>x.price==='unit'||x.price==='brandUnit'?' · هر واحد':'';
 function renderPriceSettings(){const P=SET.prices||{};const inp=(k,v,b)=>`<input class="price" inputmode="numeric" data-tp="${k}" ${b?`data-tb="${b}"`:''} value="${esc(fmtInput(v))}">`;
   $('set_prices').innerHTML=SECTIONS.filter(x=>x.price&&(x.price!=='implantBrand'||x.prosJaw)).map(x=>{const t=P[x.id]||{},bp=t.bp||{};
     if(x.prosJaw)return `<div class="grp"><span>${x.t} · پروتز هر فک</span>${inp(x.id,t.price||x.def)}</div>`;
-    if(x.price==='items')return x.items.map(it=>`<div class="grp"><span>${x.t} · ${it.l}${it.type==='chips'?' · هر طرف':' · هر واحد'}</span>${inp(it.pk,(P[it.pk]||{}).price)}</div>`).join('');
+    if(x.price==='items')return x.items.map(it=>`<div class="grp"><span>${x.t===it.l?'':x.t+' · '}${it.l} · ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}</span>${inp(it.pk,(P[it.pk]||{}).price)}</div>`).join('');
     const inner=x.price==='brandUnit'?`<div class="brands">${BRANDS.map(b=>`<label class="f">${b.n}${inp(x.id,bp[b.k],b.k)}</label>`).join('')}</div>`:inp(x.id,t.price);
     return `<div class="grp"><span>${x.t}${unitLbl(x)}${x.pros?' (پروتز)':''}</span>${inner}</div>`}).join('')+'<p class="note">اوردنچر از تعرفه‌ی «پایه ایمپلنت» هر برند حساب می‌شود.</p>'}
 function readPriceSettings(){const P={};document.querySelectorAll('#set_prices [data-tp]').forEach(i=>{const id=i.dataset.tp;P[id]=P[id]||{price:'',bp:{}};
