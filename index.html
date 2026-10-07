@@ -690,7 +690,10 @@ async function buildPDF(r,meta){
 const API_URL_DEFAULT='https://script.google.com/macros/s/AKfycbyiZAnyj0kCX56DqlG9wdoTs2N_9aMFQeB5xU9nwYZQbVQtXT9N9yyACgE9ELnyxzxh/exec';
 let API={url:'',pw:''};
 try{const a=JSON.parse(localStorage.getItem('implantApi')||'null');if(a)API=a}catch(e){}
+const CF_URL='https://implant-api.implant-yazd.workers.dev/'; // Cloudflare Worker (fast backend); empty = Apps Script only
+const CF_ON=!!CF_URL,GAS_URL=API_URL_DEFAULT;
 if(API_URL_DEFAULT)API.url=API_URL_DEFAULT;
+if(CF_ON)API.url=CF_URL;
 const saveApi=()=>{try{localStorage.setItem('implantApi',JSON.stringify(API))}catch(e){}};
 const IN_GAS=typeof google!=='undefined'&&google.script&&google.script.run;
 function fsErrMsg(e){const c=e&&e.code||'';if(c==='permission-denied')return 'auth';if(c==='unavailable'||c==='deadline-exceeded'||/network|fetch|offline/i.test(String(e&&e.message)))return 'اتصال به سرور برقرار نشد. اینترنت را چک کنید.';return String(e&&e.message||e)}
@@ -699,7 +702,15 @@ async function api(action,payload={},opt={}){
     try{j=await fsApi(action,payload)}catch(e){const m=fsErrMsg(e);j=m==='auth'?{ok:false,error:'auth'}:null;if(!j)throw new Error(m)}
     if(!j.ok){if(j.error==='auth'){try{const c=AUTHC();delete c[ROLE||LROLE];localStorage.setItem('implantAuth',JSON.stringify(c))}catch(e){}logout();throw new Error('رمز عبور اشتباه است.')}throw new Error(j.error||'خطا')}
     return j}
+  if(CF_ON&&(action==='resend'||action==='gasConfirm'||action==='gasSettings'))return gasDirect(action==='gasConfirm'?'confirm':action==='gasSettings'?'settings':action,payload,opt);
   return gasApi(action==='gasConfirm'?'confirm':action==='gasSettings'?'settings':action,payload,opt)}
+/* Apps Script direct call (CF mode: PDF copy in Drive, manual e-mail, settings backup) — outside the fast request queue */
+async function gasDirect(action,payload={},opt={}){if(!GAS_URL)throw new Error('آدرس سرور گوگل تنظیم نشده است.');const tries=opt.tries||1;let last;
+  for(let i=0;i<tries;i++){const ctrl=new AbortController(),tm=setTimeout(()=>ctrl.abort(),opt.timeout||60000);
+    try{const r=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,password:API.pw,...payload}),signal:ctrl.signal});const j=await r.json();
+      if(!j.ok)throw new Error(j.error==='auth'?'رمز سرور گوگل با این رمز یکی نیست.':(j.error||'خطای سرور گوگل'));return j}
+    catch(e){last=e}finally{clearTimeout(tm)}}
+  throw new Error(last&&last.name==='AbortError'?'اتصال به سرور گوگل برقرار نشد.':(last&&last.message||'اتصال به سرور گوگل برقرار نشد.'))}
 /* ---------- Firestore backend (fast path). Apps Script is kept only for the PDF copy in Drive and manual e-mail ---------- */
 const FS_ON=false;
 const FB_V='10.12.2',FB_PROJECT='implant-plan-yazd';
@@ -810,7 +821,7 @@ function gasCall(body){return new Promise((ok,no)=>google.script.run.withSuccess
    connection, so every call goes through this queue: user actions first, background sends next, polls last.
    A user action aborts a running poll; a stalled request is cut off and retried instead of waiting. */
 const RQ={list:[],cur:null};
-const RQ_OPT={user:{timeout:7000,tries:3},bg:{timeout:12000,tries:2},poll:{timeout:6000,tries:1}};
+const RQ_OPT=CF_ON?{user:{timeout:6000,tries:3},bg:{timeout:12000,tries:2},poll:{timeout:4000,tries:1}}:{user:{timeout:7000,tries:3},bg:{timeout:12000,tries:2},poll:{timeout:6000,tries:1}};
 function rqPump(){if(RQ.cur||!RQ.list.length)return;RQ.list.sort((a,b)=>a.rank-b.rank);const job=RQ.list.shift();RQ.cur=job;
   rqRun(job).then(job.ok,job.no).finally(()=>{RQ.cur=null;rqPump()})}
 async function rqRun(job){const o=Object.assign({},RQ_OPT[job.prio],job.opt||{});let last;
@@ -876,9 +887,9 @@ function toast(t,bad){const el=$('toast');el.textContent=t;el.className='toast'+
 async function processOutbox(){processPdf();const mine=()=>OUTBOX.filter(o=>(o.role||'doctor')===ROLE&&o.kind!=='pdf');
   if(OB_RUN||!ROLE||!mine().length)return obBar();OB_RUN=true;clearTimeout(OB_TIMER);
   try{while(mine().length){const o=mine()[0];obBar();
-      try{if(!o.sid)o.sid=uuid();o.payload.sendId=o.sid;const j=await api(o.kind==='consult'?'toConsult':'confirm',o.payload,{prio:'bg',timeout:o.kind==='confirm'?30000:10000,tries:2});OUTBOX=OUTBOX.filter(v=>v!==o);if(FS_ON&&o.kind==='confirm'&&o.payload.pdf){OUTBOX.push({kind:'pdf',pid:o.id||j.id,role:o.role,name:o.name,at:Date.now(),payload:Object.assign({},o.payload,{record:Object.assign({},o.payload.record,{id:o.id||j.id})})});processPdf()}saveOutbox();if(o.id){SENDING.delete(o.id);const l=ldGet(o.id);if(!l||(l.updatedAt||'')<=((o.payload.record||{}).data||{}).updatedAt)ldDel(o.id)}
+      try{if(!o.sid)o.sid=uuid();o.payload.sendId=o.sid;const j=await api(o.kind==='consult'?'toConsult':'confirm',CF_ON&&o.kind==='confirm'?Object.assign({},o.payload,{pdf:undefined}):o.payload,{prio:'bg',timeout:o.kind==='confirm'&&!CF_ON?30000:10000,tries:2});OUTBOX=OUTBOX.filter(v=>v!==o);if((FS_ON||CF_ON)&&o.kind==='confirm'&&o.payload.pdf){OUTBOX.push({kind:'pdf',pid:o.id||j.id,role:o.role,name:o.name,at:Date.now(),payload:Object.assign({},o.payload,{record:Object.assign({},o.payload.record,{id:o.id||j.id})})});processPdf()}saveOutbox();if(o.id){SENDING.delete(o.id);const l=ldGet(o.id);if(!l||(l.updatedAt||'')<=((o.payload.record||{}).data||{}).updatedAt)ldDel(o.id)}
         if(o.kind==='consult')toast(`${o.name} به کارتابل مشاور رسید.`);
-        else if(!j.emailStatus)toast(FS_ON?`طرح درمان ${o.name} ثبت شد.`:`طرح درمان ${o.name} ثبت و در Drive ذخیره شد.`);else if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
+        else if(!j.emailStatus)toast(FS_ON||CF_ON?`طرح درمان ${o.name} ثبت شد.`:`طرح درمان ${o.name} ثبت و در Drive ذخیره شد.`);else if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
         if(!$('viewList').hidden)loadList();pollQ(true)}
       catch(e){if(!API.pw)break;o.err=e.message||'خطا';o.tries=(o.tries||0)+1;saveOutbox();obBar();OB_TIMER=setTimeout(processOutbox,15000);break}}}
   finally{OB_RUN=false;obBar()}}
@@ -887,7 +898,7 @@ let PDF_RUN=false,PDF_TIMER=null;
 async function processPdf(){if(PDF_RUN||!ROLE)return;const mine=()=>OUTBOX.filter(o=>o.kind==='pdf'&&(o.role||'doctor')===ROLE);if(!mine().length)return;PDF_RUN=true;clearTimeout(PDF_TIMER);
   try{while(mine().length){const o=mine()[0];
     try{if(!o.sid)o.sid=uuid();o.payload.sendId=o.sid;const j=await api('gasConfirm',o.payload,{prio:'bg',timeout:60000,tries:1});
-      OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(j&&j.id&&o.pid){fbReady().then(({F})=>F.updateDoc(pRef(o.pid),{fileId:String(j.fileUrl||'')})).catch(()=>{})}}
+      OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(CF_ON&&j&&o.pid){api('setFile',{id:o.pid,fileId:String(j.fileUrl||''),emailStatus:j.emailStatus||'',emailError:j.emailError||''},{prio:'bg'}).catch(()=>{})}else if(j&&j.id&&o.pid&&FS_ON){fbReady().then(({F})=>F.updateDoc(pRef(o.pid),{fileId:String(j.fileUrl||'')})).catch(()=>{})}}
     catch(e){if(!API.pw)break;o.err=e.message;o.tries=(o.tries||0)+1;saveOutbox();PDF_TIMER=setTimeout(processPdf,30000);break}}}
   finally{PDF_RUN=false}}
 function enqueue(job){if(job.id)OUTBOX=OUTBOX.filter(o=>!(o.id===job.id&&o.kind===job.kind));OUTBOX.push(Object.assign({role:ROLE,at:Date.now()},job));if(job.id)SENDING.add(job.id);saveOutbox();processOutbox()}
@@ -963,7 +974,7 @@ function readPriceSettings(){const P={};document.querySelectorAll('#set_prices [
 
 /* ---------- roles, live queue, reception ---------- */
 let ROLE='',LROLE='staff',QV='',QITEMS=[],QSEEN=null,QTIMER=null,QBUSY=false,RC_EDIT=null,BACK_TO_Q=false;
-const QPOLL=5000;
+const QPOLL=CF_ON?3000:5000;
 const ROLE_LBL={staff:'پرسنل',doctor:'پزشک',consultant:'مشاور'};
 function applyRole(){document.querySelectorAll('#nav [data-role]').forEach(b=>b.hidden=!b.dataset.role.split(' ').includes(ROLE));$('qTitle').textContent=ROLE==='consultant'?'کارتابل مشاور':'بیماران در صف انتظار'}
 function home(){if(ROLE==='staff'){show('recep');rcReset()}else show('queue');renderQ();pollQ(false)}
@@ -1079,7 +1090,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.id==='sSave'){const to=$('set_to').value.trim(),m=$('sMsg');
     if(to&&!validEmail(to)){m.className='msg err';m.textContent='ایمیل گیرنده درست نیست.';return}
     const s={recipient:to,clinic:$('set_clinic').value.trim(),doctor:$('set_doctor').value.trim(),phone:$('set_phone').value.trim(),prices:readPriceSettings()};
-    t.disabled=true;try{const j=await api('settings',{settings:s});applySettings(j.settings||s);if(FS_ON)api('gasSettings',{settings:s},{prio:'bg'}).catch(()=>{});m.className='msg ok';m.textContent='ذخیره شد. روی هر دو لپ‌تاپ اعمال می‌شود.'}
+    t.disabled=true;try{const j=await api('settings',{settings:s});applySettings(j.settings||s);if(FS_ON||CF_ON)api('gasSettings',{settings:s},{prio:'bg'}).catch(()=>{});m.className='msg ok';m.textContent='ذخیره شد. روی هر دو لپ‌تاپ اعمال می‌شود.'}
     catch(err){m.className='msg err';m.textContent='ذخیره نشد: '+err.message}finally{t.disabled=false}return}
   if(t.id==='saveBtn'){if(!(F.h.name||'').trim()){alertMsg('برای ذخیره، نام بیمار را وارد کنید.');return}
     t.disabled=true;try{if(F.status==='new')F.status='draft';await saveRecord(F);t.textContent='ذخیره شد';setTimeout(()=>t.textContent='ذخیره پیش‌نویس',1600)}catch(err){alertMsg('ذخیره نشد: '+err.message)}finally{t.disabled=false}return}
