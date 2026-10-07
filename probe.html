@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تست بسترها</title>
+<style>
+body{font-family:Tahoma,sans-serif;background:#f6f7f9;color:#222;margin:0;padding:16px}
+h1{font-size:18px}p{font-size:13px;color:#555}
+button{font:inherit;padding:10px 18px;border:0;border-radius:8px;background:#1565c0;color:#fff;cursor:pointer}
+table{border-collapse:collapse;width:100%;max-width:720px;background:#fff;margin-top:12px;font-size:13px}
+td,th{border-bottom:1px solid #e3e3e3;padding:7px 8px;text-align:right}
+td.u{direction:ltr;text-align:left;color:#666;font-size:11px}
+.ok{color:#1b7f2a;font-weight:bold}.bad{color:#c62828;font-weight:bold}.slow{color:#b26a00;font-weight:bold}
+</style></head><body>
+<h1>تست بسترها بدون فیلترشکن</h1>
+<p>فیلترشکن را خاموش کنید و دکمه را بزنید. هر بستر ۳ بار تست می‌شود (حدود ۱ دقیقه). نتیجه روی همین دستگاه ذخیره می‌شود.</p>
+<button id="go">شروع تست</button> <span id="st"></span>
+<table><thead><tr><th>بستر</th><th>نتیجه</th><th>زمان (میلی‌ثانیه)</th><th class="u">آدرس</th></tr></thead><tbody id="tb"></tbody></table>
+<script>
+const T=[
+['GitHub Pages (سایت فعلی)','https://alirezaworktime-art.github.io/implant-plan/probe.html'],
+['Google Apps Script (سرور فعلی)','https://script.google.com/macros/s/AKfycbyiZAnyj0kCX56DqlG9wdoTs2N_9aMFQeB5xU9nwYZQbVQtXT9N9yyACgE9ELnyxzxh/exec'],
+['Firebase Firestore','https://firestore.googleapis.com/'],
+['Firebase Realtime DB','https://firebaseio.com/'],
+['Firebase Hosting','https://firebase.web.app/'],
+['Google Cloud Run','https://run.app/'],
+['Google Sheets API','https://sheets.googleapis.com/'],
+['Cloudflare','https://www.cloudflare.com/cdn-cgi/trace'],
+['Cloudflare Workers','https://workers.dev/'],
+['Cloudflare Pages','https://pages.dev/'],
+['Deno Deploy','https://deno.dev/'],
+['Vercel','https://vercel.app/'],
+['Netlify','https://netlify.app/'],
+['Render','https://onrender.com/'],
+['Koyeb','https://koyeb.app/'],
+['Railway','https://up.railway.app/'],
+['Fly.io','https://fly.dev/'],
+['Glitch','https://glitch.me/'],
+['Supabase','https://supabase.co/'],
+['Upstash','https://upstash.io/'],
+['Neon','https://neon.tech/'],
+['Appwrite','https://cloud.appwrite.io/v1/health/version'],
+['PocketHost','https://pockethost.io/'],
+['Back4App','https://parseapi.back4app.com/'],
+['JSONBin','https://api.jsonbin.io/'],
+['GitHub API','https://api.github.com/'],
+['jsDelivr','https://cdn.jsdelivr.net/'],
+['Azure','https://azurewebsites.net/'],
+['AWS Lambda','https://lambda-url.us-east-1.on.aws/'],
+['لیارا (ایرانی)','https://liara.ir/'],
+['ابر آروان (ایرانی)','https://www.arvancloud.ir/'],
+['همروش / داکوب (ایرانی)','https://hamravesh.com/'],
+];
+const tb=document.getElementById('tb'),st=document.getElementById('st');
+function row(n,u){const tr=document.createElement('tr');tr.innerHTML=`<td>${n}</td><td>…</td><td></td><td class="u">${u}</td>`;tb.appendChild(tr);return tr}
+async function hit(u){const c=new AbortController(),to=setTimeout(()=>c.abort(),8000),t=performance.now();
+  try{await fetch(u+(u.includes('?')?'&':'?')+'_='+Date.now(),{mode:'no-cors',cache:'no-store',signal:c.signal});return Math.round(performance.now()-t)}catch(e){return null}finally{clearTimeout(to)}}
+function show(tr,r){const ok=r.filter(x=>x!=null);const best=ok.length?Math.min(...ok):null;
+  tr.cells[1].innerHTML=!ok.length?'<span class="bad">باز نشد</span>':ok.length<r.length?'<span class="slow">ناپایدار</span>':best>1500?'<span class="slow">کند</span>':'<span class="ok">باز شد</span>';
+  tr.cells[2].textContent=r.map(x=>x==null?'×':x).join(' / ')}
+function load(){try{const s=JSON.parse(localStorage.getItem('probeResults')||'null');if(!s)return;st.textContent='آخرین تست: '+new Date(s.at).toLocaleString('fa-IR');
+  T.forEach(([n,u])=>{const tr=row(n,u);if(s.r[n])show(tr,s.r[n])})}catch(e){}}
+document.getElementById('go').onclick=async()=>{tb.innerHTML='';st.textContent='در حال تست…';const res={};
+  const rows=T.map(([n,u])=>row(n,u));
+  for(let k=0;k<3;k++){await Promise.all(T.map(async([n,u],i)=>{(res[n]=res[n]||[]).push(await hit(u));show(rows[i],res[n])}))}
+  try{localStorage.setItem('probeResults',JSON.stringify({at:Date.now(),vpn:'off?',r:res}))}catch(e){}
+  st.textContent='تمام شد ✓ (ذخیره شد)'};
+load();
+</script></body></html>
