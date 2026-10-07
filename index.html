@@ -701,7 +701,7 @@ async function api(action,payload={},opt={}){
     return j}
   return gasApi(action==='gasConfirm'?'confirm':action==='gasSettings'?'settings':action,payload,opt)}
 /* ---------- Firestore backend (fast path). Apps Script is kept only for the PDF copy in Drive and manual e-mail ---------- */
-const FS_ON=true;
+const FS_ON=false;
 const FB_V='10.12.2',FB_PROJECT='implant-plan-yazd';
 let FB=null,FBP=null;
 function fbReady(){if(FB)return Promise.resolve(FB);if(FBP)return FBP;
