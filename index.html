@@ -981,7 +981,10 @@ function home(){if(ROLE==='staff'){show('recep');rcReset()}else show('queue');re
 let AC=null;function beep(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;[0,0.18].forEach((d,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=i?1046:784;g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(0.25,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.16);o.connect(g).connect(AC.destination);o.start(t+d);o.stop(t+d+0.17)})}catch(e){}}
 function startPoll(){stopPoll();if(FS_ON){fsListen();return}QTIMER=setInterval(()=>pollQ(false),QPOLL)}
 function stopPoll(){if(QTIMER)clearInterval(QTIMER);QTIMER=null;if(FS_ON)fsStopListen()}
-async function pollQ(force){if(!ROLE||QBUSY)return;if(FS_ON&&FS_UNSUB.length){fsRebuild(ROLE);return}QBUSY=true;
+let LAST_ACT=Date.now(),LAST_POLL=0;['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{const idle=Date.now()-LAST_ACT>QIDLE;LAST_ACT=Date.now();if(idle)pollQ(false)},{passive:true}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ROLE)pollQ(false)});
+const QIDLE=15*60*1000;
+async function pollQ(force){if(!ROLE||QBUSY)return;if(!force){if(document.hidden)return;if(Date.now()-LAST_ACT>QIDLE&&Date.now()-LAST_POLL<30000)return}LAST_POLL=Date.now();if(FS_ON&&FS_UNSUB.length){fsRebuild(ROLE);return}QBUSY=true;
   try{const j=await api('queue',{ver:force?'':QV},{prio:'poll'});setLive(true);applyQueue(j)}
   catch(e){if(e.message!=='aborted')setLive(false)}finally{QBUSY=false}}
 const NEWQ={doctor:'waiting',consultant:'consult'};
