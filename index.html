@@ -119,6 +119,25 @@ textarea{resize:vertical}
 .tot small+b+small{font-size:.68rem}
 @media (max-width:860px){.planSw{top:auto;bottom:78px;flex-direction:row}}
 @media (max-width:420px){.items.two{grid-template-columns:1fr}}
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.role{font:inherit;text-align:right;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.role b{font-size:1rem}.role small{color:var(--muted);font-size:.75rem}
+.role[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.badge{display:inline-block;min-width:20px;padding:0 6px;border-radius:99px;background:var(--bad);color:#fff;font-size:.72rem;line-height:20px;text-align:center;margin-inline-start:4px}
+.qhead{display:flex;justify-content:space-between;align-items:center}
+.qhead h2{font-size:1rem;margin:0}
+.live{font-size:.72rem;color:var(--ok);display:flex;align-items:center;gap:6px}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.live.off{color:var(--bad)}
+.qitem{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:right;font:inherit;color:var(--ink);width:100%}
+.qitem.fresh{border-color:var(--warn);box-shadow:0 0 0 3px color-mix(in srgb,var(--warn) 35%,transparent)}
+.qitem .row1{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.qitem .nm{font-weight:800;font-size:1.02rem}
+.qitem .meta{font-size:.8rem;color:var(--muted)}
+.qitem .nt{font-size:.85rem;border-top:1px dashed var(--line);padding-top:6px;white-space:pre-wrap}
+.qn{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;margin-inline-end:6px}
+.pill.wait{color:var(--warn)} .pill.rev{color:var(--accent)} .pill.done{color:var(--ok)}
+.banner.info{border-color:var(--accent);color:var(--ink);white-space:pre-wrap}
 @media (prefers-reduced-motion:no-preference){.t,.chip,.tot{transition:background .12s,color .12s}}
 </style>
 </head>
@@ -128,18 +147,50 @@ textarea{resize:vertical}
   <header class="top">
     <h1>طرح درمان ایمپلنت</h1>
     <nav class="tabs" id="nav" hidden>
+      <button class="tab" id="tabQueue" type="button" data-role="doctor">کارتابل <span class="badge" id="qBadge" hidden></span></button>
+      <button class="tab" id="tabRecep" type="button" data-role="staff">پذیرش</button>
       <button class="tab" id="tabList" type="button">بایگانی</button>
-      <button class="tab" id="tabNew" type="button">فرم جدید</button>
-      <button class="tab" id="tabSet" type="button">تنظیمات</button>
+      <button class="tab" id="tabNew" type="button" data-role="doctor">فرم جدید</button>
+      <button class="tab" id="tabSet" type="button" data-role="doctor">تنظیمات</button>
+      <button class="tab" id="tabOut" type="button">خروج</button>
     </nav>
   </header>
   <section class="card" id="viewLogin" hidden>
     <h2>ورود</h2>
-    <p class="note">رمز عبور کلینیک را وارد کنید. روی هر لپ‌تاپ فقط یک بار لازم است.</p>
+    <div class="roles" id="lgRoles">
+      <button type="button" class="role" data-lrole="staff" aria-pressed="true"><b>ورود پرسنل</b><small>پذیرش بیمار و ارسال به کارتابل پزشک</small></button>
+      <button type="button" class="role" data-lrole="doctor" aria-pressed="false"><b>ورود پزشک</b><small>کارتابل، طرح درمان و تنظیمات</small></button>
+    </div>
     <label class="f" id="lgUrlWrap" hidden>آدرس سرور (Apps Script)<input id="lg_url" class="ltr" placeholder="https://script.google.com/macros/s/.../exec"></label>
-    <label class="f">رمز عبور<input id="lg_pw" type="password" autocomplete="current-password"></label>
+    <label class="f"><span id="lgPwLbl">رمز ورود پرسنل</span><input id="lg_pw" type="password" autocomplete="current-password"></label>
     <div class="msg" id="lgMsg"></div>
     <div class="btns"><button class="btn" id="lgGo" type="button">ورود</button></div>
+  </section>
+
+  <!-- doctor inbox -->
+  <section id="viewQueue" class="wrap" style="padding:0" hidden>
+    <div class="qhead"><h2>بیماران در صف انتظار</h2><span class="live" id="qLive">زنده</span></div>
+    <div class="list" id="qList"><div class="empty">در حال بارگذاری…</div></div>
+  </section>
+
+  <!-- staff reception -->
+  <section id="viewRecep" class="wrap" style="padding:0" hidden>
+    <section class="card" id="rcCard">
+      <h2 id="rcTitle">پذیرش بیمار</h2>
+      <div class="fields">
+        <label class="f full">نام و نام خانوادگی *<input id="rc_name"></label>
+        <label class="f">کد ملی<input id="rc_nid" inputmode="numeric"></label>
+        <label class="f">تاریخ مراجعه<input id="rc_date"></label>
+        <label class="f">شماره موبایل<input id="rc_phone" inputmode="tel" class="ltr"></label>
+        <label class="f">سن<input id="rc_age" inputmode="numeric"></label>
+        <label class="f full">نام دستیار / پذیرش‌کننده<input id="rc_asst"></label>
+        <label class="f full">توضیحات برای پزشک<textarea id="rc_note" rows="3" placeholder="شکایت اصلی، سابقه‌ی پزشکی، …"></textarea></label>
+      </div>
+      <div class="msg" id="rcMsg"></div>
+      <div class="btns"><button class="btn" id="rcSend" type="button">ارسال به کارتابل پزشک</button><button class="btn ghost" id="rcCancel" type="button" hidden>انصراف از ویرایش</button></div>
+    </section>
+    <div class="qhead"><h2>صف امروز</h2><span class="live" id="rLive">زنده</span></div>
+    <div class="list" id="rList"><div class="empty">در حال بارگذاری…</div></div>
   </section>
 
   <!-- archive -->
@@ -157,9 +208,12 @@ textarea{resize:vertical}
         <label class="f full">نام و نام خانوادگی<input id="h_name" data-h="name"></label>
         <label class="f">کد ملی<input id="h_nid" data-h="nid" inputmode="numeric"></label>
         <label class="f">تاریخ مراجعه<input id="h_date" data-h="date"></label>
+        <label class="f">شماره موبایل<input id="h_phone" data-h="phone" class="ltr" inputmode="tel"></label>
+        <label class="f">سن<input id="h_age" data-h="age" inputmode="numeric"></label>
         <label class="f">نام پزشک<input id="h_doc" data-h="doc"></label>
         <label class="f">نام دستیار<input id="h_asst" data-h="asst"></label>
       </div>
+      <div class="banner info" id="staffNote" hidden></div>
     </section>
     <div id="sections" class="wrap" style="padding:0"></div>
     <section class="card" id="totalsCard">
@@ -293,7 +347,7 @@ function blankSections(){const s={},P=(SET&&SET.prices)||{};SECTIONS.forEach(x=>
     (x.items||[]).forEach(it=>ip[it.k]=fmtInput((P[it.pk]||{}).price));
     s[x.id]={sel:{},text:'',price:fmtInput(t.price||x.def),bp:bz(k=>fmtInput(bp[k])),cnt:'',jc:{U:'',L:''},ip,isel:{},icnt:{}}});
   return s}
-function blankForm(){return {id:null,h:{date:jalali(new Date()).slash},s:blankSections(),s2:null,alt:{mode:'none',text:''},brand:'ko',pay:{opt:'1',n1:'',m2:'',n3:''},status:'new'}}
+function blankForm(){return {id:null,h:{date:jalali(new Date()).slash,doc:''},s:blankSections(),s2:null,alt:{mode:'none',text:''},brand:'ko',pay:{opt:'1',n1:'',m2:'',n3:''},status:'new'}}
 let F=blankForm();
 let CUR=1; // which plan is on screen (1 or 2)
 let ARCHIVE=[];
@@ -374,6 +428,7 @@ function renderForm(){
   const en=document.getElementById('editNote');
   if(F.status==='confirmed'||F.status==='modified'){en.hidden=false;en.textContent=`این فرم در ${F.jalali||''} ثبت شده است. اگر چیزی را عوض کنید و دوباره «ثبت نهایی» بزنید، PDF تازه ساخته و دوباره ایمیل می‌شود.`}else en.hidden=true;
   document.getElementById('confirmBtn').textContent=(F.status==='confirmed'||F.status==='modified')?'ثبت ویرایش و ارسال':'ثبت نهایی';
+  const sn=document.getElementById('staffNote');sn.hidden=!F.note;sn.textContent=F.note?'توضیحات پذیرش: '+F.note:'';
   renderPlanSw();recalc()}
 function renderPlanSw(){const m=F.alt.mode;
   document.getElementById('planSw').innerHTML=`<button type="button" class="ps" data-plan="1" aria-pressed="${CUR===1}">طرح ۱</button>`+
@@ -407,10 +462,10 @@ function secFrom(d){const S=blankSections();SECTIONS.forEach(x=>{const v=(d||{})
   (v.sel||[]).forEach(k=>t.sel[k]=true);t.text=v.text||'';t.price=v.price||'';Object.assign(t.bp,v.bp||{});t.cnt=v.cnt||'';Object.assign(t.jc,v.jc||{});
   Object.assign(t.ip,v.ip||{});(v.isel||[]).forEach(k=>t.isel[k]=true);Object.assign(t.icnt,v.icnt||{})});return S}
 function toDoc(r){const o={h:{...r.h},s:secDoc(r.s),s2:r.alt.mode==='full'&&r.s2?secDoc(r.s2):null,alt:{...r.alt},brand:r.brand,pay:{...r.pay},status:r.status==='new'?'draft':r.status};
-  ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt'].forEach(k=>{if(r[k]!==undefined)o[k]=r[k]});return o}
+  ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt','note'].forEach(k=>{if(r[k]!==undefined)o[k]=r[k]});return o}
 function fromDoc(id,d){const r=blankForm();r.id=id;Object.assign(r.h,d.h||{});r.brand=d.brand||'ko';Object.assign(r.pay,d.pay||{});r.status=d.status||'draft';
   r.s=secFrom(d.s);r.alt=Object.assign({mode:'none',text:''},d.alt||{});r.s2=r.alt.mode==='full'?secFrom(d.s2):null;if(r.alt.mode==='full'&&!d.s2)r.alt.mode='none';
-  ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt'].forEach(k=>{if(d[k]!==undefined)r[k]=d[k]});return r}
+  ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt','note'].forEach(k=>{if(d[k]!==undefined)r[k]=d[k]});return r}
 const planTotal=r=>{const T0=totals(PV(r,1));return T0.surg[r.brand]+T0.pros};
 async function saveRecord(r){const d=toDoc(r);d.updatedAt=new Date().toISOString();
   const j=await api('save',{record:{id:r.id,data:d,name:(r.h.name||'').trim(),nid:r.h.nid||'',status:d.status,total:planTotal(r)}});
@@ -480,14 +535,14 @@ function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];le
     const py=top+h/2-ph/2;if(pl.length)pl.forEach((p,i)=>T(cx,p.t,C.priceR-pad,py+14+i*28,{s:p.s||20,w:p.b?800:400,c:p.c||INK}));
     else T(cx,'—',C.L+C.priceW/2,top+h/2,{s:20,c:'#bbb',a:'center'})}}}
 
-function headerBlock(r,meta){return {h:290,draw(cx,top){
+function headerBlock(r,meta){return {h:340,draw(cx,top){
   T(cx,SET.clinic||'',C.R,top+20,{s:22,w:800});T(cx,SET.doctor||'',C.L,top+20,{s:20,w:700,a:'left'});
   T(cx,'طرح درمان ایمپلنت',PW/2,top+70,{s:42,w:800,a:'center'});T(cx,'(مشخصات فردی بیمار)',PW/2,top+112,{s:20,c:'#444',a:'center'});
-  const y0=top+140,rowH=50,colW=(C.R-C.L)/3;box(cx,C.L,y0,C.R-C.L,rowH*2,null,RULE,1.2);cx.fillStyle='#bbb';cx.fillRect(C.L,y0+rowH,C.R-C.L,1);
-  const f=[['نام و نام خانوادگی',r.h.name],['کد ملی',r.h.nid],['تاریخ مراجعه',r.h.date],['نام پزشک',r.h.doc],['نام دستیار',r.h.asst],['تماس جهت هماهنگی',SET.phone]];
+  const y0=top+140,rowH=50,colW=(C.R-C.L)/3;box(cx,C.L,y0,C.R-C.L,rowH*3,null,RULE,1.2);cx.fillStyle='#bbb';cx.fillRect(C.L,y0+rowH,C.R-C.L,1);cx.fillRect(C.L,y0+2*rowH,C.R-C.L,1);
+  const f=[['نام و نام خانوادگی',r.h.name],['کد ملی',r.h.nid],['سن',r.h.age],['تاریخ مراجعه',r.h.date],['موبایل',r.h.phone],['نام پزشک',r.h.doc],['نام دستیار',r.h.asst],['تماس جهت هماهنگی',SET.phone]];
   f.forEach(([k,v],i)=>{const col=i%3,row=Math.floor(i/3),xr=C.R-col*colW-14,y=y0+row*rowH+rowH/2;T(cx,k+':',xr,y,{s:17,c:'#555'});const kw=Wd(cx,k+':',{s:17});
     const val=faD(v||'—');let vs=22;while(Wd(cx,val,{s:vs,w:800})>colW-kw-36&&vs>14)vs--;T(cx,val,xr-kw-10,y,{s:vs,w:800})});
-  T(cx,'تاریخ تأیید طرح: '+(meta.jalali||''),C.R,top+266,{s:18,w:700,c:'#333'})}}}
+  T(cx,'تاریخ تأیید طرح: '+(meta.jalali||''),C.R,top+316,{s:18,w:700,c:'#333'})}}}
 function miniHeader(r,meta){return {h:60,draw(cx,top){T(cx,'طرح درمان ایمپلنت · '+(r.h.name||''),C.R,top+20,{s:22,w:800});T(cx,'تاریخ تأیید: '+(meta.jalali||''),C.L,top+20,{s:18,a:'left',c:'#444'})}}}
 function tableHead(){return {h:46,draw(cx,top){box(cx,C.L,top,C.R-C.L,46,'#e6e6e6',RULE,1.2);cx.fillStyle=RULE;cx.fillRect(C.labL,top,1.2,46);cx.fillRect(C.priceR,top,1.2,46);
   T(cx,'شرح درمان',C.R-14,top+23,{s:19,w:800});T(cx,'شماره دندان / توضیحات',(C.midL+C.midR)/2,top+23,{s:19,w:800,a:'center'});T(cx,'قیمت (تومان)',C.L+C.priceW/2,top+23,{s:19,w:800,a:'center'})}}}
@@ -586,7 +641,7 @@ const validEmail=s=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s||'');
 function step(n,st){$('st'+n).className='s '+(st||'')}
 function safeName(s){return String(s||'').replace(/[\/\\:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim()}
 function alertMsg(t){const b=$('editNote');b.hidden=false;b.textContent=t;b.scrollIntoView({behavior:'smooth',block:'center'})}
-async function openConfirm(){
+async function openConfirm(){$('cClose').textContent='بستن';BACK_TO_Q=false;
   const msg=$('cMsg');msg.className='msg';msg.textContent='';$('cSteps').hidden=true;$('cPrev').innerHTML='';['st1','st2','st3'].forEach(id=>$(id).className='s');
   if(!(F.h.name||'').trim()){alertMsg('نام بیمار را وارد کنید.');return}
   const j=jalali(new Date());const fname=`${safeName(F.h.name)} - ${j.dash}.pdf`;
@@ -606,7 +661,7 @@ async function doConfirm(){if(busy||!lastPDF)return;busy=true;$('cGo').disabled=
     const d=toDoc(F);d.updatedAt=new Date().toISOString();
     const j=await api('confirm',{record:{id:F.id,data:d,name:F.h.name.trim(),nid:F.h.nid||'',status:'confirmed',total:planTotal(F),jalali:F.jalali},
       pdf:lastPDF.b64,fileName:lastPDF.name,mail:mailFor(F)});
-    F.id=j.id;F.emailStatus=j.emailStatus;dirty=false;step(2,'ok');
+    F.id=j.id;F.emailStatus=j.emailStatus;dirty=false;step(2,'ok');BACK_TO_Q=true;$('cClose').textContent='بازگشت به کارتابل';
     if(j.emailStatus==='sent'){step(3,'ok');msg.className='msg ok';msg.textContent=`ثبت شد، PDF در گوگل درایو ذخیره شد و برای ${j.emailTo} ایمیل شد.`}
     else{step(3,'err');msg.className='msg err';msg.textContent='فرم ثبت و PDF در گوگل درایو ذخیره شد، ولی ایمیل نرفت: '+(j.emailError||'')+' از بایگانی می‌توانید دوباره بفرستید.'}
     if(j.fileUrl){const a=document.createElement('a');a.href=j.fileUrl;a.target='_blank';a.rel='noopener';a.textContent=' باز کردن PDF در گوگل درایو';msg.appendChild(a)}
@@ -617,7 +672,8 @@ function downloadBlob(blob,name){const u=URL.createObjectURL(blob);const a=docum
 function openForPrint(blob){const u=URL.createObjectURL(blob);const w=window.open(u,'_blank');if(!w)downloadBlob(blob,'plan.pdf');setTimeout(()=>URL.revokeObjectURL(u),120000)}
 
 /* ---------- archive ---------- */
-function statusPill(d){if(d.status==='draft')return '<span class="pill draft">پیش‌نویس</span>';
+function statusPill(d){if(d.status==='queued')return d.queue==='reviewing'?'<span class="pill rev">در حال بررسی پزشک</span>':'<span class="pill wait">در صف پزشک</span>';
+  if(d.status==='draft')return '<span class="pill draft">پیش‌نویس</span>';
   if(d.status==='modified')return '<span class="pill mod">ویرایش ثبت‌نشده</span>';
   if(d.emailStatus==='sent')return '<span class="pill sent">ثبت و ایمیل شد</span>';
   if(d.emailStatus==='failed')return '<span class="pill fail">ایمیل نرفت</span>';
@@ -631,8 +687,8 @@ function renderList(){const q=toEn($('q').value.trim()).toLowerCase();const el=$
   el.innerHTML=rows.map(d=>`<div class="item"><div class="row1"><div><div class="nm">${esc(d.name||'بدون نام')}</div>
     <div class="meta">${d.nid?'کد ملی '+esc(faD(d.nid))+' · ':''}${d.jalali?'تأیید '+esc(d.jalali):'ثبت نشده'} · جمع ${fa(Number(d.total)||0)}</div>
     ${d.emailStatus==='failed'&&d.emailError?`<div class="meta" style="color:var(--bad)">${esc(d.emailError)}</div>`:''}</div>${statusPill(d)}</div>
-    <div class="acts"><button class="btn sm" data-open="${esc(d.id)}" type="button">باز کردن / ویرایش</button>
-    ${d.status!=='draft'?`<button class="btn sm ghost" data-pdf="${esc(d.id)}" type="button">PDF</button><button class="btn sm ghost" data-resend="${esc(d.id)}" type="button">ارسال دوباره</button>`:''}</div></div>`).join('')}
+    <div class="acts">${ROLE==='doctor'?`<button class="btn sm" data-open="${esc(d.id)}" type="button">باز کردن / ویرایش</button>`:''}
+    ${d.status!=='draft'&&d.status!=='queued'?`<button class="btn sm ghost" data-pdf="${esc(d.id)}" type="button">PDF</button>${ROLE==='doctor'?`<button class="btn sm ghost" data-resend="${esc(d.id)}" type="button">ارسال دوباره</button>`:''}`:''}</div></div>`).join('')}
 async function loadList(){try{const j=await api('list');ARCHIVE=j.items||[];listLoaded=true;renderList()}
   catch(e){$('list').innerHTML=`<div class="empty">بایگانی بارگذاری نشد: ${esc(e.message)}</div>`}}
 async function fetchRecord(id){const j=await api('get',{id});const r=fromDoc(id,j.data||{});
@@ -649,20 +705,86 @@ function renderPriceSettings(){const P=SET.prices||{};const inp=(k,v,b)=>`<input
 function readPriceSettings(){const P={};document.querySelectorAll('#set_prices [data-tp]').forEach(i=>{const id=i.dataset.tp;P[id]=P[id]||{price:'',bp:{}};
   if(i.dataset.tb)P[id].bp[i.dataset.tb]=String(num(i.value)||'');else P[id].price=String(num(i.value)||'')});return P}
 
+/* ---------- roles, live queue, reception ---------- */
+let ROLE='',LROLE='staff',QV='',QITEMS=[],QSEEN=null,QTIMER=null,QBUSY=false,RC_EDIT=null,BACK_TO_Q=false;
+const QPOLL=4000;
+function applyRole(){document.querySelectorAll('#nav [data-role]').forEach(b=>b.hidden=b.dataset.role!==ROLE)}
+function home(){if(ROLE==='doctor'){show('queue')}else{show('recep');rcReset()}pollQ(true)}
+let AC=null;function beep(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;[0,0.18].forEach((d,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=i?1046:784;g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(0.25,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.16);o.connect(g).connect(AC.destination);o.start(t+d);o.stop(t+d+0.17)})}catch(e){}}
+function startPoll(){stopPoll();QTIMER=setInterval(()=>pollQ(false),QPOLL)}
+function stopPoll(){if(QTIMER)clearInterval(QTIMER);QTIMER=null}
+async function pollQ(force){if(!ROLE||QBUSY)return;QBUSY=true;
+  try{const j=await api('queue',{ver:force?'':QV});setLive(true);
+    if(!j.same){QV=j.ver;const prev=QSEEN;QITEMS=j.items||[];
+      const fresh=prev?QITEMS.filter(x=>x.queue==='waiting'&&!prev.has(x.id)).map(x=>x.id):[];
+      QSEEN=new Set(QITEMS.map(x=>x.id));
+      if(ROLE==='doctor'&&fresh.length){beep();fresh.forEach(id=>FRESH.add(id));setTimeout(()=>{fresh.forEach(id=>FRESH.delete(id));renderQ()},15000)}
+      renderQ()}}
+  catch(e){setLive(false)}finally{QBUSY=false}}
+const FRESH=new Set();
+function setLive(ok){['qLive','rLive'].forEach(id=>{const el=$(id);el.classList.toggle('off',!ok);el.textContent=ok?'زنده':'اتصال قطع است؛ دوباره تلاش می‌شود…'})}
+const qTime=iso=>{try{return new Date(iso).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}};
+function qPill(x){return x.queue==='waiting'?'<span class="pill wait">منتظر</span>':x.queue==='reviewing'?'<span class="pill rev">در حال بررسی</span>':'<span class="pill done">ثبت شد</span>'}
+function qMeta(x){return [x.age?'سن '+faD(x.age):'',x.phone?faD(x.phone):'',x.nid?'کد ملی '+faD(x.nid):'','پذیرش '+qTime(x.queuedAt),x.asst?'توسط '+x.asst:''].filter(Boolean).map(esc).join(' · ')}
+function renderQ(){
+  const active=QITEMS.filter(x=>x.queue!=='done');
+  const b=$('qBadge');const w=QITEMS.filter(x=>x.queue==='waiting').length;b.hidden=!w;b.textContent=fa(w);
+  if(ROLE==='doctor'){
+    $('qList').innerHTML=active.length?active.map((x,i)=>`<button type="button" class="qitem${FRESH.has(x.id)?' fresh':''}" data-qopen="${esc(x.id)}">
+      <div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span></div>${qPill(x)}</div>
+      <div class="meta">${qMeta(x)}</div>${x.note?`<div class="nt">${esc(x.note)}</div>`:''}</button>`).join(''):'<div class="empty">بیماری در صف انتظار نیست.</div>';
+    document.title=(w?`(${fa(w)}) `:'')+'کارتابل · طرح درمان ایمپلنت'}
+  else{
+    $('rList').innerHTML=QITEMS.length?QITEMS.map((x,i)=>`<div class="item"><div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span>
+      <div class="meta">${qMeta(x)}</div>${x.note?`<div class="meta">${esc(x.note)}</div>`:''}</div>${qPill(x)}</div>
+      ${x.queue==='waiting'?`<div class="acts"><button class="btn sm ghost" data-qedit="${esc(x.id)}" type="button">ویرایش</button><button class="btn sm ghost" data-qdel="${esc(x.id)}" type="button">حذف از صف</button></div>`:''}</div>`).join(''):'<div class="empty">امروز هنوز بیماری پذیرش نشده.</div>'}}
+const RCF=['name','nid','date','phone','age','asst','note'];
+function rcReset(){RC_EDIT=null;const keep=$('rc_asst').value;RCF.forEach(k=>$('rc_'+k).value='');$('rc_asst').value=keep;$('rc_date').value=jalali(new Date()).slash;
+  $('rcTitle').textContent='پذیرش بیمار';$('rcSend').textContent='ارسال به کارتابل پزشک';$('rcCancel').hidden=true}
+function rcEdit(id){const x=QITEMS.find(v=>v.id===id);if(!x)return;RC_EDIT=id;RCF.forEach(k=>$('rc_'+k).value=x[k]||'');
+  $('rcTitle').textContent='ویرایش بیمار در صف';$('rcSend').textContent='ذخیره‌ی تغییرات';$('rcCancel').hidden=false;$('rcMsg').textContent='';$('rcCard').scrollIntoView({behavior:'smooth'})}
+async function rcSend(t){const m=$('rcMsg'),p={};RCF.forEach(k=>p[k]=$('rc_'+k).value.trim());
+  if(!p.name){m.className='msg err';m.textContent='نام و نام خانوادگی بیمار را وارد کنید.';return}
+  t.disabled=true;m.className='msg';m.textContent='در حال ارسال…';
+  try{if(RC_EDIT)await api('queueUpdate',{id:RC_EDIT,patient:p});else await api('queueAdd',{patient:p});
+    m.className='msg ok';m.textContent=RC_EDIT?'تغییرات ذخیره شد.':`${p.name} به کارتابل پزشک رفت.`;rcReset();pollQ(true)}
+  catch(e){m.className='msg err';m.textContent=e.message}finally{t.disabled=false}}
+async function qOpen(t){if(t.disabled)return;t.disabled=true;
+  try{await api('queueOpen',{id:t.dataset.qopen});const r=await fetchRecord(t.dataset.qopen);if(!r.h.doc&&SET.doctor)r.h.doc=SET.doctor.split('·')[0].trim();openForm(r);pollQ(true)}
+  catch(e){alert0(e.message)}finally{t.disabled=false}}
+function alert0(t){const el=$('qList');el.insertAdjacentHTML('afterbegin',`<div class="banner">${esc(t)}</div>`)}
+
 /* ---------- views ---------- */
 function show(v){$('viewLogin').hidden=v!=='login';$('nav').hidden=v==='login';$('viewList').hidden=v!=='list';$('viewForm').hidden=v!=='form';$('formBar').hidden=v!=='form';$('planSw').hidden=v!=='form';
-  $('tabList').setAttribute('aria-current',v==='list');$('tabNew').setAttribute('aria-current',v==='form'&&!F.id);window.scrollTo(0,0)}
+  $('viewQueue').hidden=v!=='queue';$('viewRecep').hidden=v!=='recep';
+  $('tabQueue').setAttribute('aria-current',v==='queue');$('tabRecep').setAttribute('aria-current',v==='recep');
+  $('tabList').setAttribute('aria-current',v==='list');$('tabNew').setAttribute('aria-current',v==='form'&&!F.id);
+  if(v==='queue'||v==='recep')renderQ();window.scrollTo(0,0)}
 function openForm(r){F=r;CUR=1;dirty=false;renderForm();show('form')}
-function logout(){API.pw='';saveApi();show('login');$('lg_pw').value='';$('lgUrlWrap').hidden=!!API_URL_DEFAULT||IN_GAS;$('lg_url').value=API.url||''}
+function logout(){API.pw='';ROLE='';QV='';QSEEN=null;QITEMS=[];stopPoll();saveApi();show('login');$('lg_pw').value='';$('lgUrlWrap').hidden=!!API_URL_DEFAULT||IN_GAS;$('lg_url').value=API.url||''}
 function applySettings(s){if(s)SET={...DEFAULT_SET,...s};SET.prices=SET.prices||{};try{localStorage.setItem('implantPlanSettings',JSON.stringify(SET))}catch(e){}
   if(F.status==='new'&&!dirty){F=blankForm();renderForm()}}
 async function login(){const m=$('lgMsg');m.className='msg';m.textContent='در حال ورود…';
   if(!API_URL_DEFAULT&&!IN_GAS)API.url=$('lg_url').value.trim();API.pw=$('lg_pw').value;
-  try{const j=await api('ping');saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;m.textContent='';show('list');loadList()}
+  try{const j=await api('ping');
+    if(j.role!==LROLE){API.pw='';m.className='msg err';m.textContent=LROLE==='doctor'?'این رمز مربوط به ورود پرسنل است.':'این رمز مربوط به ورود پزشک است.';return}
+    ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;m.textContent='';applyRole();home();startPoll();beep0()}
   catch(e){m.className='msg err';m.textContent=e.message}}
+function beep0(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
 
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
   if(t.id==='lgGo'){login();return}
+  if(t.dataset.lrole){LROLE=t.dataset.lrole;document.querySelectorAll('[data-lrole]').forEach(b=>b.setAttribute('aria-pressed',b===t));$('lgPwLbl').textContent=LROLE==='doctor'?'رمز ورود پزشک':'رمز ورود پرسنل';$('lg_pw').focus();return}
+  if(t.id==='tabOut'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای خروج دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}delete t.dataset.armed;logout();return}
+  if(t.id==='tabQueue'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن به کارتابل دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}
+    delete t.dataset.armed;dirty=false;show('queue');pollQ(true);return}
+  if(t.id==='tabRecep'){show('recep');pollQ(true);return}
+  if(t.dataset.qopen){qOpen(t);return}
+  if(t.id==='rcSend'){rcSend(t);return}
+  if(t.id==='rcCancel'){rcReset();$('rcMsg').textContent='';return}
+  if(t.dataset.qedit){rcEdit(t.dataset.qedit);return}
+  if(t.dataset.qdel){if(!t.dataset.armed){t.dataset.armed='1';t.textContent='مطمئنید؟ دوباره بزنید';setTimeout(()=>{if(t.isConnected){delete t.dataset.armed;t.textContent='حذف از صف'}},4000);return}
+    t.disabled=true;try{await api('queueDelete',{id:t.dataset.qdel});if(RC_EDIT===t.dataset.qdel)rcReset();pollQ(true)}catch(err){$('rcMsg').className='msg err';$('rcMsg').textContent=err.message;t.disabled=false}return}
   if(t.id==='tabList'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن به بایگانی دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}
     delete t.dataset.armed;show('list');loadList();return}
   if(t.id==='tabNew'){openForm(blankForm());return}
@@ -680,7 +802,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.id==='cGo'){doConfirm();return}
   if(t.id==='cDl'){if(lastPDF)downloadBlob(lastPDF.blob,lastPDF.name);return}
   if(t.id==='cPrint'){if(lastPDF)openForPrint(lastPDF.blob);return}
-  if(t.id==='cClose'){$('cSheet').hidden=true;return}
+  if(t.id==='cClose'){$('cSheet').hidden=true;if(BACK_TO_Q&&ROLE==='doctor'){BACK_TO_Q=false;show('queue');pollQ(true)}return}
   if(t.dataset.open){t.disabled=true;try{openForm(await fetchRecord(t.dataset.open))}catch(err){alertMsg('باز نشد: '+err.message)}finally{t.disabled=false}return}
   if(t.dataset.pdf){t.disabled=true;const old=t.textContent;t.textContent='در حال ساخت…';
     try{const r=await fetchRecord(t.dataset.pdf);const p=await buildPDF(r,{jalali:r.jalali});downloadBlob(p.blob,r.pdfName||(safeName(r.h.name)+'.pdf'))}
@@ -706,7 +828,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
 ['cSheet','sSheet','aSheet'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target.id===id&&!busy)e.target.hidden=true}));
 $('q').addEventListener('input',renderList);
 $('lg_pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-document.addEventListener('input',e=>{const i=e.target;if(i.dataset.tp){i.value=fmtInput(i.value);return}if(i.closest('#sSheet')||i.closest('#viewLogin')||i.id==='q')return;
+document.addEventListener('input',e=>{const i=e.target;if(i.dataset.tp){i.value=fmtInput(i.value);return}if(i.closest('#sSheet')||i.closest('#viewLogin')||i.closest('#viewRecep')||i.id==='q')return;
   if(i.dataset.h){F.h[i.dataset.h]=i.value;touch();recalc();return}
   if(i.id==='altText'){F.alt.text=i.value;touch();return}
   if(i.dataset.tx){AS()[i.dataset.tx].text=i.value;touch();recalc();return}
@@ -721,7 +843,7 @@ window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.return
 /* ---------- boot ---------- */
 try{const s=JSON.parse(localStorage.getItem('implantPlanSettings')||'null');if(s)SET={...DEFAULT_SET,...s}}catch(e){}
 renderForm();
-if((API.url||IN_GAS)&&API.pw){show('list');api('ping').then(j=>{applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;loadList()}).catch(err=>{$('list').innerHTML=`<div class="empty">${esc(err.message)}</div>`})}
+if((API.url||IN_GAS)&&API.pw){api('ping').then(j=>{ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;applyRole();home();startPoll()}).catch(err=>{logout();$('lgMsg').className='msg err';$('lgMsg').textContent=err.message})}
 else logout();
 </script>
 </body>
