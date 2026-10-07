@@ -698,16 +698,16 @@ function gasCall(body){return new Promise((ok,no)=>google.script.run.withSuccess
    connection, so every call goes through this queue: user actions first, background sends next, polls last.
    A user action aborts a running poll; a stalled request is cut off and retried instead of waiting. */
 const RQ={list:[],cur:null};
-const RQ_OPT={user:{timeout:7000,tries:3},bg:{timeout:60000,tries:1},poll:{timeout:8000,tries:1}};
+const RQ_OPT={user:{timeout:7000,tries:3},bg:{timeout:12000,tries:2},poll:{timeout:6000,tries:1}};
 function rqPump(){if(RQ.cur||!RQ.list.length)return;RQ.list.sort((a,b)=>a.rank-b.rank);const job=RQ.list.shift();RQ.cur=job;
   rqRun(job).then(job.ok,job.no).finally(()=>{RQ.cur=null;rqPump()})}
-async function rqRun(job){const o=RQ_OPT[job.prio];let last;
+async function rqRun(job){const o=Object.assign({},RQ_OPT[job.prio],job.opt||{});let last;
   for(let i=0;i<o.tries;i++){if(job.aborted)throw new Error('aborted');const ctrl=new AbortController();job.ctrl=ctrl;const tm=setTimeout(()=>ctrl.abort(),o.timeout);
     try{const res=await fetch(API.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:job.body,signal:ctrl.signal});return await res.json()}
     catch(e){last=e;if(job.aborted)throw new Error('aborted')}
     finally{clearTimeout(tm)}}
   throw last||new Error('fail')}
-function rqCall(body,prio){return new Promise((ok,no)=>{const job={body,prio,rank:prio==='user'?0:prio==='bg'?1:2,ok,no,aborted:false};
+function rqCall(body,prio,opt){return new Promise((ok,no)=>{const job={body,prio,opt,rank:prio==='user'?0:prio==='bg'?1:2,ok,no,aborted:false};
   if(prio==='user'&&RQ.cur&&RQ.cur.prio==='poll'){RQ.cur.aborted=true;RQ.cur.ctrl&&RQ.cur.ctrl.abort()}
   RQ.list.push(job);rqPump()})}
 async function api(action,payload={},opt={}){const prio=opt.prio||'user';
@@ -715,7 +715,7 @@ async function api(action,payload={},opt={}){const prio=opt.prio||'user';
     if(!j.ok){if(j.error==='auth'){logout();throw new Error('رمز عبور اشتباه است.')}throw new Error(j.error||'خطای سرور')}return j}
   if(!API.url)throw new Error('آدرس سرور تنظیم نشده است.');
   let j;
-  try{j=await rqCall(JSON.stringify({action,password:API.pw,...payload}),prio)}
+  try{const ro={};if(opt.timeout)ro.timeout=opt.timeout;if(opt.tries)ro.tries=opt.tries;j=await rqCall(JSON.stringify({action,password:API.pw,...payload}),prio,ro)}
   catch(e){if(e&&e.message==='aborted')throw new Error('aborted');throw new Error('اتصال به سرور برقرار نشد. اینترنت یا فیلترشکن را چک کنید.')}
   if(!j||typeof j!=='object')throw new Error('پاسخ سرور قابل خواندن نبود. آدرس سرور را چک کنید.');
   if(!j.ok){if(j.error==='auth'){try{const c=AUTHC();delete c[ROLE||LROLE];localStorage.setItem('implantAuth',JSON.stringify(c))}catch(e){}logout();throw new Error('رمز عبور اشتباه است.')}throw new Error(j.error||'خطای سرور')}
@@ -764,7 +764,7 @@ function toast(t,bad){const el=$('toast');el.textContent=t;el.className='toast'+
 async function processOutbox(){const mine=()=>OUTBOX.filter(o=>(o.role||'doctor')===ROLE);
   if(OB_RUN||!ROLE||!mine().length)return obBar();OB_RUN=true;clearTimeout(OB_TIMER);
   try{while(mine().length){const o=mine()[0];obBar();
-      try{if(!o.sid)o.sid=uuid();o.payload.sendId=o.sid;const j=await api(o.kind==='consult'?'toConsult':'confirm',o.payload,{prio:'bg'});OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(o.id){SENDING.delete(o.id);const l=ldGet(o.id);if(!l||(l.updatedAt||'')<=((o.payload.record||{}).data||{}).updatedAt)ldDel(o.id)}
+      try{if(!o.sid)o.sid=uuid();o.payload.sendId=o.sid;const j=await api(o.kind==='consult'?'toConsult':'confirm',o.payload,{prio:'bg',timeout:o.kind==='confirm'?30000:10000,tries:2});OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(o.id){SENDING.delete(o.id);const l=ldGet(o.id);if(!l||(l.updatedAt||'')<=((o.payload.record||{}).data||{}).updatedAt)ldDel(o.id)}
         if(o.kind==='consult')toast(`${o.name} به کارتابل مشاور رسید.`);
         else if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
         if(!$('viewList').hidden)loadList();pollQ(true)}
