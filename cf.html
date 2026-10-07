@@ -55,6 +55,13 @@ input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px soli
 .mid{width:2px;align-self:stretch;background:var(--ink);opacity:.5;border-radius:2px;margin-inline:2px}
 .t{width:32px;height:36px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer;padding:0;font-variant-numeric:tabular-nums;flex:none}
 .t[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.t:disabled{opacity:.25;cursor:not-allowed}
+.jcnt{direction:rtl;display:flex;flex-direction:column;align-items:stretch;width:58px;flex:none;margin-left:4px;padding-left:6px;border-left:1px dashed var(--line)}
+.jcnt small{font-size:.66rem;color:var(--muted);line-height:1.1;text-align:center}
+.jcnt select{font:inherit;font-size:.82rem;padding:2px 2px;height:26px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.chart-in.hascnt .jaw{padding-right:0}
+.chart-in.hascnt .sides{padding-right:74px}
+.chart-in.hascnt .t{width:30px}
 .sides{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);direction:ltr;padding-left:40px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;padding:5px 12px;cursor:pointer}
@@ -348,18 +355,18 @@ textarea{resize:vertical}
 /* ---------- model ---------- */
 const BRANDS=[{k:'ir',n:'ایرانی'},{k:'ko',n:'کره‌ای'},{k:'it',n:'ایتالیایی'},{k:'sw',n:'سوئیسی'}];
 const bz=f=>Object.fromEntries(BRANDS.map(b=>[b.k,f?f(b.k):0]));
-/* kinds: teeth (Palmer chart; optional cnt:'one' total-count select, cnt:'jaw' per-jaw count select; optional groups = extra chips)
+/* kinds: teeth (Palmer chart; optional cnt:'jaws' per-jaw total-count select ADDED to the selected teeth, cnt:'jaw' per-jaw Full EXT count that REPLACES and locks manual selection in that jaw; optional groups = extra chips)
           chips · items (sub-items each with its own price: chips per side, or a count select) · none
    price: unit (qty × price) · flat · brandUnit (qty × brand price) · implantBrand (implants × implant brand price) · items */
 const SECTIONS=[
  {id:'ext',t:'کشیدن دندان',kind:'teeth',n:8,price:'unit',cnt:'jaw',jmax:14},
- {id:'surg',t:'جراحی دندان نهفته',kind:'items',price:'items',two:true,items:[{k:'c',l:'جراحی نیش نهفته',type:'chips',o:['بالا راست','بالا چپ','پایین راست','پایین چپ'],pk:'surg_c',ul:'هر دندان'},{k:'w',l:'جراحی عقل نهفته',type:'chips',o:['بالا راست','بالا چپ','پایین راست','پایین چپ'],pk:'surg_w',ul:'هر دندان'}]},
- {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',cnt:'one',max:20,text:'توضیحات'},
+ {id:'surg',t:'جراحی دندان نهفته',kind:'items',price:'items',two:true,items:[{k:'c',l:'جراحی نیش نهفته',type:'quad',pk:'surg_c',ul:'هر دندان'},{k:'w',l:'جراحی عقل نهفته',type:'quad',pk:'surg_w',ul:'هر دندان'}]},
+ {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',cnt:'jaws',jmax:14,text:'توضیحات'},
  {id:'aox',t:'All on X',kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'implantBrand',prosJaw:true,def:'19000000'},
- {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',cnt:'one',max:28,pros:true},
- {id:'gbr',t:'جراحی GBR',kind:'teeth',n:7,price:'unit',cnt:'one',max:28},
+ {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14,pros:true},
+ {id:'gbr',t:'جراحی GBR',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
  {id:'vip',t:'جراحی VIP / GBR',kind:'items',n:7,price:'items',items:[{k:'cgf',l:'CGF',type:'count',max:28,pk:'vip_cgf'},{k:'mem',l:'ممبران و تگ',type:'count',max:28,pk:'vip_mem'}]},
- {id:'crw',t:'فقط روکش',kind:'teeth',n:7,price:'unit',cnt:'one',max:28,pros:true},
+ {id:'crw',t:'فقط روکش',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14,pros:true},
  {id:'sin',t:'سینوس لیفت',kind:'items',price:'items',two:true,items:[{k:'o',l:'سینوس باز',type:'chips',o:['راست','چپ'],pk:'sin_o'},{k:'c',l:'سینوس بسته',type:'chips',o:['راست','چپ'],pk:'sin_c'}]},
  {id:'alv',t:'آلوئولوپلاستی',kind:'quad',price:'unit',ul:'هر Q'},
  {id:'ram',t:'پیوند استخوان بلاک راموس',kind:'teeth',n:7,price:'unit'},
@@ -414,7 +421,7 @@ const chipSel=s=>Object.keys(s.sel).filter(k=>s.sel[k]&&!isTooth(k)).length;
 function qty(s,x){
   if(x.kind==='teeth'){
     if(x.cnt==='jaw')return ['U','L'].reduce((a,j)=>a+(num(s.jc[j])||teethSel(s,j)),0);
-    const t=(x.cnt&&num(s.cnt))||teethSel(s);
+    const t=x.cnt==='jaws'?['U','L'].reduce((a,j)=>a+num(s.jc[j])+teethSel(s,j),0):teethSel(s);
     return t||(x.groups&&chipSel(s)?1:0)}
   if(x.price==='implantBrand')return Object.keys(s.sel).filter(k=>s.sel[k]).reduce((a,k)=>a+num(k.split(':')[1]),0);
   return chipSel(s)}
@@ -440,21 +447,27 @@ function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||teethSel(s)||s.text|
 
 /* ---------- form render ---------- */
 const opts=(max,v,from=1)=>`<option value="">—</option>`+Array.from({length:max-from+1},(_,i)=>i+from).map(n=>`<option value="${n}" ${String(v)===String(n)?'selected':''}>${fa(n)}</option>`).join('');
-function toothBtn(sid,key,label){return `<button type="button" class="t" data-sid="${sid}" data-k="${key}" aria-pressed="${!!AS()[sid].sel[key]}">${label}</button>`}
-function chartHTML(x){let h='<div class="chart"><div class="chart-in">';
+const jawLocked=(x,j)=>x.cnt==='jaw'&&!!num(AS()[x.id].jc[j]);
+function toothBtn(sid,key,label){const lk=jawLocked(SEC[sid]||{},key[0]);return `<button type="button" class="t" data-sid="${sid}" data-k="${key}" aria-pressed="${!lk&&!!AS()[sid].sel[key]}"${lk?' disabled title="Full EXT این فک انتخاب شده"':''}>${label}</button>`}
+function jawCntHTML(x,j){if(x.cnt!=='jaw'&&x.cnt!=='jaws')return '';const s=AS()[x.id];
+  return `<label class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small><select data-jc="${x.id}" data-j="${j}" aria-label="${x.cnt==='jaw'?'Full EXT':'تعداد کل'} فک ${j==='U'?'بالا':'پایین'}">${opts(x.jmax,s.jc[j])}</select></label>`}
+function chartHTML(x){const hc=x.cnt==='jaw'||x.cnt==='jaws';let h=`<div class="chart"><div class="chart-in${hc?' hascnt':''}">`;
   [['U','بالا'],['L','پایین']].forEach(([j,l])=>{let r='',lf='';for(let i=x.n;i>=1;i--)r+=toothBtn(x.id,j+'R'+i,i);for(let i=1;i<=x.n;i++)lf+=toothBtn(x.id,j+'L'+i,i);
-    h+=`<div class="jaw"><span class="jlabel">${l}</span><div class="half">${r}</div><span class="mid"></span><div class="half">${lf}</div></div>`});
+    h+=`<div class="jaw"><span class="jlabel">${l}</span><div class="half">${r}</div><span class="mid"></span><div class="half">${lf}</div>${jawCntHTML(x,j)}</div>`});
   return h+'<div class="sides"><span>راست بیمار</span><span>چپ بیمار</span></div></div></div>'}
 function cntHTML(x){const s=AS()[x.id];
   if(x.cnt==='one')return `<div class="fields"><label class="f">تعداد کل (به جای انتخاب تک‌تک دندان‌ها)<select data-cnt="${x.id}">${opts(x.max,s.cnt)}</select></label></div>`;
-  if(x.cnt==='jaw')return `<div class="fields">${[['U','Full EXT فک بالا · تعداد'],['L','Full EXT فک پایین · تعداد']].map(([j,l])=>`<label class="f">${l}<select data-jc="${x.id}" data-j="${j}">${opts(x.jmax,s.jc[j])}</select></label>`).join('')}</div>`;
+  if(x.cnt==='jaw')return '<p class="note">با انتخاب Full EXT برای هر فک، دندان‌های همان فک قفل می‌شوند.</p>';
+  if(x.cnt==='jaws')return '<p class="note">«تعداد کل» هر فک با دندان‌های انتخاب‌شده جمع می‌شود.</p>';
   return ''}
 function chipsHTML(x){return x.groups.map((g,gi)=>`<div class="grp">${g.l?`<span>${g.l}</span>`:''}<div class="chips">${g.o.map(o=>{const k=gi+':'+o;return `<button type="button" class="chip" data-sid="${x.id}" data-k="${esc(k)}" data-g="${gi}" ${g.single?'data-single="1"':''} aria-pressed="${!!AS()[x.id].sel[k]}">${o}</button>`}).join('')}</div></div>`).join('')}
+const IQUADS=[['UR','بالا · راست بیمار'],['UL','بالا · چپ بیمار'],['LR','پایین · راست بیمار'],['LL','پایین · چپ بیمار']];
 const QUADS=[['q1','بالا · راست بیمار'],['q2','بالا · چپ بیمار'],['q4','پایین · راست بیمار'],['q3','پایین · چپ بیمار']];
 function quadHTML(x){const s=AS()[x.id];return `<div class="quad">${QUADS.map(([k,t])=>`<button type="button" class="qd" data-sid="${x.id}" data-k="${k}" title="${t}" aria-pressed="${!!s.sel[k]}">Q</button>`).join('')}</div><div class="sides quad-sides"><span>راست بیمار</span><span>چپ بیمار</span></div>`}
 function itemsHTML(x){const s=AS()[x.id];
   return `<div class="items${x.two?' two':''}">${x.items.map(it=>`<div class="item-box"><b>${it.l}</b>
-    ${it.type==='chips'?`<div class="chips">${it.o.map(o=>`<button type="button" class="chip" data-isid="${x.id}" data-ik="${esc(it.k+':'+o)}" aria-pressed="${!!s.isel[it.k+':'+o]}">${o}</button>`).join('')}</div>`
+    ${it.type==='quad'?`<div class="quad">${IQUADS.map(([q,t])=>`<button type="button" class="qd" data-isid="${x.id}" data-ik="${it.k}:${q}" title="${t}" aria-pressed="${!!s.isel[it.k+':'+q]}">${q}</button>`).join('')}</div><div class="sides quad-sides"><span>راست بیمار</span><span>چپ بیمار</span></div>`
+      :it.type==='chips'?`<div class="chips">${it.o.map(o=>`<button type="button" class="chip" data-isid="${x.id}" data-ik="${esc(it.k+':'+o)}" aria-pressed="${!!s.isel[it.k+':'+o]}">${o}</button>`).join('')}</div>`
       :`<label class="f">تعداد<select data-icnt="${x.id}" data-ik="${it.k}">${opts(it.max,s.icnt[it.k])}</select></label>`}
     <label class="f">قیمت ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}<input class="price" inputmode="numeric" data-ip="${x.id}" data-ik="${it.k}" value="${esc(s.ip[it.k])}"></label>
     <div class="calc" id="icalc_${x.id}_${it.k}"></div></div>`).join('')}</div>`}
@@ -517,7 +530,11 @@ function secFrom(d){const S=blankSections();SECTIONS.forEach(x=>{const v=(d||{})
   (v.sel||[]).forEach(k=>t.sel[k]=true);t.text=v.text||'';t.price=v.price||'';Object.assign(t.bp,v.bp||{});t.cnt=v.cnt||'';Object.assign(t.jc,v.jc||{});
   Object.assign(t.ip,v.ip||{});(v.isel||[]).forEach(k=>t.isel[k]=true);Object.assign(t.icnt,v.icnt||{});
   if(x.id==='alv')(v.sel||[]).forEach(k=>{const m={'½ فک راست بالا':'q1','½ فک چپ بالا':'q2','½ فک چپ پایین':'q3','½ فک راست پایین':'q4'}[k.split(':')[1]];if(m){delete t.sel[k];t.sel[m]=true}});
-  if(x.id==='surg'&&!(v.isel||[]).length)(v.sel||[]).forEach(k=>{const o=k.split(':')[1];if(o)t.isel['w:'+o]=true})});return S}
+  if(x.id==='surg'&&!(v.isel||[]).length)(v.sel||[]).forEach(k=>{const o=k.split(':')[1];if(o)t.isel['w:'+o]=true});
+  if(x.id==='surg'){const QM={'بالا راست':'UR','بالا چپ':'UL','پایین راست':'LR','پایین چپ':'LL'};Object.keys(t.isel).forEach(k=>{const [ik,o]=k.split(':');if(QM[o]){const on=t.isel[k];delete t.isel[k];if(on)t.isel[ik+':'+QM[o]]=true}})}
+  if(x.cnt==='jaws'&&num(t.cnt)&&!num(t.jc.U)&&!num(t.jc.L)){const extra=Math.max(0,num(t.cnt)-teethSel(t));t.jc.U=extra?String(Math.min(x.jmax,extra)):'';t.jc.L=extra>x.jmax?String(Math.min(x.jmax,extra-x.jmax)):''}
+  if(x.cnt==='jaws')t.cnt='';
+  if(x.cnt==='jaw')['U','L'].forEach(j=>{if(num(t.jc[j]))Object.keys(t.sel).forEach(k=>{if(isTooth(k)&&k[0]===j)delete t.sel[k]})})});return S}
 function toDoc(r){const o={h:{...r.h},med:medNorm(r.med),s:secDoc(r.s),s2:r.alt.mode==='full'&&r.s2?secDoc(r.s2):null,alt:{...r.alt},brand:r.brand,pay:{...r.pay},status:r.status==='new'?'draft':r.status};
   ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt','note'].forEach(k=>{if(r[k]!==undefined)o[k]=r[k]});return o}
 function fromDoc(id,d){const r=blankForm();r.id=id;Object.assign(r.h,d.h||{});r.med=medNorm(d.med);r.brand=d.brand||'ko';Object.assign(r.pay,d.pay||{});r.status=d.status||'draft';
@@ -585,7 +602,7 @@ function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];le
     const capY=mh;draws.push((cx,top)=>{const y=top+pad+capY+13;T(cx,'راست بیمار',gx,y,{s:15,c:GREY,a:'left'});T(cx,'چپ بیمار',gx+gridW-4,y,{s:15,c:GREY,a:'right'})});mh+=28;
     if(x.kind==='teeth'&&x.groups)mh+=drawChipLines(draws,chipLine(c,[].concat(...chipItems(c,x.groups,(gi,o)=>!!sel[gi+':'+o])),maxW),mh);
     const notes=[];
-    if(x.cnt==='one'&&num(s.cnt))notes.push(`تعداد کل: ${fa(num(s.cnt))}`);
+    if(x.cnt==='jaws')[['U','فک بالا'],['L','فک پایین']].forEach(([j,l])=>{if(num(s.jc[j]))notes.push(`تعداد کل ${l}: ${fa(num(s.jc[j]))}`)});
     if(x.cnt==='jaw')[['U','فک بالا'],['L','فک پایین']].forEach(([j,l])=>{if(num(s.jc[j]))notes.push(`Full EXT ${l}: ${fa(num(s.jc[j]))} عدد`)});
     if(notes.length){const yy=mh;draws.push((cx,top)=>T(cx,notes.join('   ·   '),C.midR-pad,top+pad+yy+14,{s:19,w:800}));mh+=32}}
   if(x.kind==='quad'){const cxm=(C.midL+C.midR)/2,bw=70,bh=34,yy=mh;
@@ -595,6 +612,12 @@ function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];le
       T(cx,'راست بیمار',cxm-2*bw-10,yc,{s:15,c:GREY,a:'right'});T(cx,'چپ بیمار',cxm+2*bw+10,yc,{s:15,c:GREY,a:'left'})});
     mh+=2*bh+18}
   else if(x.kind==='chips'){mh+=drawChipLines(draws,[].concat(...chipItems(c,x.groups,(gi,o)=>!!sel[gi+':'+o]).map(g=>chipLine(c,g,maxW))),mh)}
+  else if(x.kind==='items'&&x.items.every(it=>it.type==='quad')){const bw=46,bh=30,yy=mh,n=x.items.length;
+    x.items.forEach((it,ii)=>{const cxm=C.midR-(C.midW/n)*(ii+.5);draws.push((cx,top)=>{const y0=top+pad+yy;
+      T(cx,it.l,cxm,y0+14,{s:19,w:800,a:'center'});const yt=y0+34,yc=yt+bh+4;cx.fillStyle=INK;cx.fillRect(cxm-1.5,yt,3,2*bh+8);cx.fillRect(cxm-2*bw,yc-1.5,4*bw,3);
+      [['UR',-1,-1],['UL',1,-1],['LR',-1,1],['LL',1,1]].forEach(([q,dx,dy])=>{const on=!!s.isel[it.k+':'+q],xc=cxm+dx*bw,ycc=yc+dy*(bh/2+2);
+        checkbox(cx,xc+32,ycc,on);T(cx,q,xc-14,ycc,{s:19,w:on?800:400,c:on?INK:'#888',a:'center'})})})});
+    mh+=34+2*bh+16}
   else if(x.kind==='items'){const lines=[];x.items.forEach(it=>{
       if(it.type==='chips')lines.push(...chipLine(c,chipItems(c,[{l:it.l,o:it.o}],(gi,o)=>!!s.isel[it.k+':'+o])[0],maxW));
       else{const v=num(s.icnt[it.k]),tx=`${it.l}: ${v?fa(v)+' عدد':'—'}`;lines.push([{note:tx,w:Wd(c,tx,{s:19,w:700})+48}])}});
@@ -981,7 +1004,10 @@ function home(){if(ROLE==='staff'){show('recep');rcReset()}else show('queue');re
 let AC=null;function beep(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;[0,0.18].forEach((d,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=i?1046:784;g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(0.25,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.16);o.connect(g).connect(AC.destination);o.start(t+d);o.stop(t+d+0.17)})}catch(e){}}
 function startPoll(){stopPoll();if(FS_ON){fsListen();return}QTIMER=setInterval(()=>pollQ(false),QPOLL)}
 function stopPoll(){if(QTIMER)clearInterval(QTIMER);QTIMER=null;if(FS_ON)fsStopListen()}
-async function pollQ(force){if(!ROLE||QBUSY)return;if(FS_ON&&FS_UNSUB.length){fsRebuild(ROLE);return}QBUSY=true;
+let LAST_ACT=Date.now(),LAST_POLL=0;['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{const idle=Date.now()-LAST_ACT>QIDLE;LAST_ACT=Date.now();if(idle)pollQ(false)},{passive:true}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ROLE)pollQ(false)});
+const QIDLE=15*60*1000;
+async function pollQ(force){if(!ROLE||QBUSY)return;if(!force){if(document.hidden)return;if(Date.now()-LAST_ACT>QIDLE&&Date.now()-LAST_POLL<30000)return}LAST_POLL=Date.now();if(FS_ON&&FS_UNSUB.length){fsRebuild(ROLE);return}QBUSY=true;
   try{const j=await api('queue',{ver:force?'':QV},{prio:'poll'});setLive(true);applyQueue(j)}
   catch(e){if(e.message!=='aborted')setLive(false)}finally{QBUSY=false}}
 const NEWQ={doctor:'waiting',consultant:'consult'};
@@ -1108,7 +1134,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
     t.disabled=true;t.textContent='در حال ارسال…';
     try{const r=await fetchRecord(t.dataset.resend);const j=await api('resend',{id:r.id,mail:mailFor(r)});t.textContent=j.emailStatus==='sent'?'ارسال شد':'ارسال نشد'}
     catch(err){t.textContent='ارسال نشد';alertMsg(err.message)}finally{t.disabled=false;loadList()}return}
-  if(t.dataset.sid&&t.dataset.k){const s=AS()[t.dataset.sid],k=t.dataset.k,on=!s.sel[k];
+  if(t.dataset.sid&&t.dataset.k){if(t.disabled)return;const s=AS()[t.dataset.sid],k=t.dataset.k,on=!s.sel[k];
     if(t.dataset.single){Object.keys(s.sel).forEach(o=>{if(!isTooth(o)&&o.split(':')[0]===t.dataset.g)s.sel[o]=false});document.querySelectorAll(`.chip[data-sid="${t.dataset.sid}"][data-g="${t.dataset.g}"]`).forEach(c=>c.setAttribute('aria-pressed','false'))}
     s.sel[k]=on;t.setAttribute('aria-pressed',on);touch();recalc();return}
   if(t.dataset.isid){const s=AS()[t.dataset.isid],k=t.dataset.ik,on=!s.isel[k];s.isel[k]=on;t.setAttribute('aria-pressed',on);touch();recalc();return}
@@ -1139,7 +1165,9 @@ document.addEventListener('input',e=>{const i=e.target;if(i.dataset.tp){i.value=
   if(i.dataset.pr||i.dataset.bp){i.value=fmtInput(i.value);if(i.dataset.pr)AS()[i.dataset.pr].price=i.value;else AS()[i.dataset.bp].bp[i.dataset.b]=i.value;touch();recalc();return}
   if(i.id&&i.id.startsWith('p_')){F.pay[i.id.slice(2)]=i.value;touch();recalc()}});
 document.addEventListener('change',e=>{const i=e.target;if(i.tagName!=='SELECT')return;
-  if(i.dataset.cnt){AS()[i.dataset.cnt].cnt=i.value}else if(i.dataset.jc){AS()[i.dataset.jc].jc[i.dataset.j]=i.value}else if(i.dataset.icnt){AS()[i.dataset.icnt].icnt[i.dataset.ik]=i.value}else return;
+  if(i.dataset.cnt){AS()[i.dataset.cnt].cnt=i.value}else if(i.dataset.jc){const sid=i.dataset.jc,j=i.dataset.j,sc=AS()[sid];sc.jc[j]=i.value;
+    if(SEC[sid].cnt==='jaw'){const lk=!!num(i.value);if(lk)Object.keys(sc.sel).forEach(k=>{if(isTooth(k)&&k[0]===j)delete sc.sel[k]});
+      document.querySelectorAll(`.t[data-sid="${sid}"][data-k^="${j}"]`).forEach(b=>{b.disabled=lk;if(lk){b.setAttribute('aria-pressed','false');b.title='Full EXT این فک انتخاب شده'}else b.removeAttribute('title')})}}else if(i.dataset.icnt){AS()[i.dataset.icnt].icnt[i.dataset.ik]=i.value}else return;
   touch();recalc()});
 window.addEventListener('beforeunload',e=>{if(dirty||OUTBOX.length){e.preventDefault();e.returnValue=''}});
 
