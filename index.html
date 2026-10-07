@@ -6,7 +6,8 @@
 <meta name="robots" content="noindex,nofollow">
 <title>طرح درمان ایمپلنت</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <style>
 /* Layout: app shell with archive list + treatment-plan form; tooth charts in Palmer layout; sticky action bar */
 :root{
@@ -138,6 +139,10 @@ textarea{resize:vertical}
 .qn{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;margin-inline-end:6px}
 .pill.wait{color:var(--warn)} .pill.rev{color:var(--accent)} .pill.done{color:var(--ok)}
 .banner.info{border-color:var(--accent);color:var(--ink);white-space:pre-wrap}
+.obbar{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:20;background:var(--surface);border:1px solid var(--accent);color:var(--accent);border-radius:99px;padding:6px 14px;font-size:.8rem;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.obbar.err{border-color:var(--bad);color:var(--bad)}
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--bg);border-radius:10px;padding:10px 16px;font-size:.85rem;max-width:min(92vw,560px);box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.toast.err{background:var(--bad);color:#fff}
 @media (prefers-reduced-motion:no-preference){.t,.chip,.tot{transition:background .12s,color .12s}}
 </style>
 </head>
@@ -246,6 +251,8 @@ textarea{resize:vertical}
 </div>
 
 <div class="planSw" id="planSw"></div>
+<div class="obbar" id="obBar" hidden></div>
+<div class="toast" id="toast" hidden></div>
 <div class="sheet" id="aSheet" hidden>
   <div class="in">
     <h3>طرح درمان پیشنهادی دوم</h3>
@@ -281,7 +288,7 @@ textarea{resize:vertical}
       <div class="s" id="st3"><i></i>ارسال ایمیل</div>
     </div>
     <div class="btns" id="cBtns">
-      <button class="btn" id="cGo" type="button">تأیید و ارسال</button>
+      <button class="btn" id="cGo" type="button">تأیید و ارسال در پس‌زمینه</button>
       <button class="btn ghost" id="cDl" type="button">دانلود PDF</button>
       <button class="btn ghost" id="cPrint" type="button">باز کردن برای چاپ</button>
       <button class="btn ghost" id="cClose" type="button">بستن</button>
@@ -582,7 +589,7 @@ function jpegPDF(pages){const enc=new TextEncoder(),parts=[],offs=[];let len=0;
   const out=new Uint8Array(len);let o=0;parts.forEach(b=>{out.set(b,o);o+=b.length});return out}
 
 async function buildPDF(r,meta){
-  try{await Promise.all([document.fonts.load(`400 20px Vazirmatn`),document.fonts.load(`700 20px Vazirmatn`),document.fonts.load(`800 20px Vazirmatn`)])}catch(e){}
+  try{await Promise.race([Promise.all([document.fonts.load(`400 20px Vazirmatn`),document.fonts.load(`700 20px Vazirmatn`),document.fonts.load(`800 20px Vazirmatn`)]),new Promise(r=>setTimeout(r,1500))])}catch(e){}
   const p1=PV(r,1),blocks=[];
   SECTIONS.forEach(x=>blocks.push(sectionRow(p1,x)));
   blocks.push({h:24,draw(){}});blocks.push(totalsBlock(p1,r.alt.mode!=='none'?'طرح اول · جمع کل به تفکیک برند ایمپلنت':null));blocks.push(payBlock(p1));
@@ -600,9 +607,10 @@ async function buildPDF(r,meta){
   start(true);const th=tableHead();th.draw(pg.cx,y);y+=th.h;
   blocks.forEach(b=>{if(b.pageBreak){start(false);return}if(y+b.h>bottom){start(false);if(b.table){const t2=tableHead();t2.draw(pg.cx,y);y+=t2.h}}b.draw(pg.cx,y);y+=b.h});
   pages.forEach((p,i)=>T(p.cx,`صفحه ${fa(i+1)} از ${fa(pages.length)}`,PW/2,PH-M+6,{s:16,c:GREY,a:'center'}));
-  const bytes=jpegPDF(pages.map(p=>({jpg:dataUrlBytes(p.cv.toDataURL('image/jpeg',0.92)),w:PW,h:PH})));
+  const urls=pages.map(p=>p.cv.toDataURL('image/jpeg',0.82));
+  const bytes=jpegPDF(urls.map(u=>({jpg:dataUrlBytes(u),w:PW,h:PH})));
   const blob=new Blob([bytes],{type:'application/pdf'});const b64=bytesB64(bytes);
-  return {blob,b64,previews:pages.map(p=>p.cv.toDataURL('image/jpeg',0.6))}}
+  return {blob,b64,previews:urls}}
 
 /* ---------- server (Google Apps Script) ---------- */
 const API_URL_DEFAULT='https://script.google.com/macros/s/AKfycbyiZAnyj0kCX56DqlG9wdoTs2N_9aMFQeB5xU9nwYZQbVQtXT9N9yyACgE9ELnyxzxh/exec';
@@ -654,21 +662,36 @@ async function openConfirm(){$('cClose').textContent='بستن';BACK_TO_Q=false;
     msg.textContent='پیش‌نمایش را چک کنید، بعد «تأیید و ارسال» را بزنید.';$('cDl').disabled=false;$('cPrint').disabled=false;
     if(!validEmail(SET.recipient)){msg.className='msg err';msg.textContent='ایمیل گیرنده تعیین نشده. از «تنظیمات» واردش کنید.'}else $('cGo').disabled=false}
   catch(e){msg.className='msg err';msg.textContent='ساخت PDF ناموفق بود: '+(e&&e.message||e)}}
-async function doConfirm(){if(busy||!lastPDF)return;busy=true;$('cGo').disabled=true;$('cClose').disabled=true;$('cSteps').hidden=false;const msg=$('cMsg');msg.className='msg';msg.textContent='';
-  const prev={status:F.status,jalali:F.jalali,pdfName:F.pdfName,edits:F.edits};
-  const wasConfirmed=F.status==='confirmed'||F.status==='modified';
-  try{step(1,'ok');step(2,'run');step(3,'run');
+/* ---------- background send queue: the doctor never waits for upload/email ---------- */
+let OUTBOX=[],OB_RUN=false,OB_TIMER=null;const SENDING=new Set();
+try{OUTBOX=JSON.parse(localStorage.getItem('implantOutbox')||'[]')||[]}catch(e){OUTBOX=[]}
+OUTBOX.forEach(o=>o.id&&SENDING.add(o.id));
+function saveOutbox(){try{localStorage.setItem('implantOutbox',JSON.stringify(OUTBOX))}catch(e){}}
+function obBar(){const el=$('obBar'),n=OUTBOX.length;if(!n){el.hidden=true;return}
+  const err=OUTBOX.find(o=>o.err);el.hidden=false;el.className='obbar'+(err?' err':'');
+  el.textContent=err?`ارسال ${fa(n)} طرح درمان انجام نشد؛ خودکار دوباره تلاش می‌شود…`:`در حال ارسال ${fa(n)} طرح درمان در پس‌زمینه…`}
+function toast(t,bad){const el=$('toast');el.textContent=t;el.className='toast'+(bad?' err':'');el.hidden=false;clearTimeout(el._t);el._t=setTimeout(()=>el.hidden=true,6000)}
+async function processOutbox(){if(OB_RUN||!OUTBOX.length||ROLE!=='doctor')return obBar();OB_RUN=true;clearTimeout(OB_TIMER);
+  try{while(OUTBOX.length){const o=OUTBOX[0];obBar();
+      try{const j=await api('confirm',o.payload);OUTBOX.shift();saveOutbox();if(o.id)SENDING.delete(o.id);
+        if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
+        if(!$('viewList').hidden)loadList();pollQ(true)}
+      catch(e){if(!API.pw)break;o.err=e.message||'خطا';o.tries=(o.tries||0)+1;saveOutbox();obBar();OB_TIMER=setTimeout(processOutbox,15000);break}}}
+  finally{OB_RUN=false;obBar()}}
+async function doConfirm(){if(busy||!lastPDF)return;busy=true;
+  try{const wasConfirmed=F.status==='confirmed'||F.status==='modified';
     F.status='confirmed';F.jalali=lastPDF.jalali.slash;F.pdfName=lastPDF.name;if(wasConfirmed)F.edits=(F.edits||0)+1;
     const d=toDoc(F);d.updatedAt=new Date().toISOString();
-    const j=await api('confirm',{record:{id:F.id,data:d,name:F.h.name.trim(),nid:F.h.nid||'',status:'confirmed',total:planTotal(F),jalali:F.jalali},
-      pdf:lastPDF.b64,fileName:lastPDF.name,mail:mailFor(F)});
-    F.id=j.id;F.emailStatus=j.emailStatus;dirty=false;step(2,'ok');BACK_TO_Q=true;$('cClose').textContent='بازگشت به کارتابل';
-    if(j.emailStatus==='sent'){step(3,'ok');msg.className='msg ok';msg.textContent=`ثبت شد، PDF در گوگل درایو ذخیره شد و برای ${j.emailTo} ایمیل شد.`}
-    else{step(3,'err');msg.className='msg err';msg.textContent='فرم ثبت و PDF در گوگل درایو ذخیره شد، ولی ایمیل نرفت: '+(j.emailError||'')+' از بایگانی می‌توانید دوباره بفرستید.'}
-    if(j.fileUrl){const a=document.createElement('a');a.href=j.fileUrl;a.target='_blank';a.rel='noopener';a.textContent=' باز کردن PDF در گوگل درایو';msg.appendChild(a)}
-    renderForm();loadList()}
-  catch(e){Object.assign(F,prev);step(2,'err');step(3,'');msg.className='msg err';msg.textContent='ثبت نشد: '+(e.message||'')+' فرم هنوز ثبت نشده است؛ دوباره امتحان کنید.'}
-  finally{busy=false;$('cClose').disabled=false}}
+    const payload={record:{id:F.id,data:d,name:F.h.name.trim(),nid:F.h.nid||'',status:'confirmed',total:planTotal(F),jalali:F.jalali},pdf:lastPDF.b64,fileName:lastPDF.name,mail:mailFor(F)};
+    if(F.id)OUTBOX=OUTBOX.filter(o=>o.id!==F.id);
+    OUTBOX.push({id:F.id,name:F.h.name.trim(),payload,at:Date.now()});
+    if(F.id)SENDING.add(F.id);
+    saveOutbox();dirty=false;lastPDF=null;$('cSheet').hidden=true;
+    toast(`طرح درمان ${F.h.name.trim()} در صف ارسال قرار گرفت.`);
+    F=blankForm();CUR=1;renderForm();
+    if(ROLE==='doctor'){show('queue');renderQ()}else show('list');
+    processOutbox()}
+  finally{busy=false}}
 function downloadBlob(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
 function openForPrint(blob){const u=URL.createObjectURL(blob);const w=window.open(u,'_blank');if(!w)downloadBlob(blob,'plan.pdf');setTimeout(()=>URL.revokeObjectURL(u),120000)}
 
@@ -728,8 +751,8 @@ const qTime=iso=>{try{return new Date(iso).toLocaleTimeString('fa-IR',{hour:'2-d
 function qPill(x){return x.queue==='waiting'?'<span class="pill wait">منتظر</span>':x.queue==='reviewing'?'<span class="pill rev">در حال بررسی</span>':'<span class="pill done">ثبت شد</span>'}
 function qMeta(x){return [x.age?'سن '+faD(x.age):'',x.phone?faD(x.phone):'',x.nid?'کد ملی '+faD(x.nid):'','پذیرش '+qTime(x.queuedAt),x.asst?'توسط '+x.asst:''].filter(Boolean).map(esc).join(' · ')}
 function renderQ(){
-  const active=QITEMS.filter(x=>x.queue!=='done');
-  const b=$('qBadge');const w=QITEMS.filter(x=>x.queue==='waiting').length;b.hidden=!w;b.textContent=fa(w);
+  const active=QITEMS.filter(x=>x.queue!=='done'&&!SENDING.has(x.id));
+  const b=$('qBadge');const w=QITEMS.filter(x=>x.queue==='waiting'&&!SENDING.has(x.id)).length;b.hidden=!w;b.textContent=fa(w);
   if(ROLE==='doctor'){
     $('qList').innerHTML=active.length?active.map((x,i)=>`<button type="button" class="qitem${FRESH.has(x.id)?' fresh':''}" data-qopen="${esc(x.id)}">
       <div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span></div>${qPill(x)}</div>
@@ -769,7 +792,7 @@ async function login(){const m=$('lgMsg');m.className='msg';m.textContent='در 
   if(!API_URL_DEFAULT&&!IN_GAS)API.url=$('lg_url').value.trim();API.pw=$('lg_pw').value;
   try{const j=await api('ping');
     if(j.role!==LROLE){API.pw='';m.className='msg err';m.textContent=LROLE==='doctor'?'این رمز مربوط به ورود پرسنل است.':'این رمز مربوط به ورود پزشک است.';return}
-    ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;m.textContent='';applyRole();home();startPoll();beep0()}
+    ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;m.textContent='';applyRole();home();startPoll();beep0();processOutbox()}
   catch(e){m.className='msg err';m.textContent=e.message}}
 function beep0(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
 
@@ -839,12 +862,14 @@ document.addEventListener('input',e=>{const i=e.target;if(i.dataset.tp){i.value=
 document.addEventListener('change',e=>{const i=e.target;if(i.tagName!=='SELECT')return;
   if(i.dataset.cnt){AS()[i.dataset.cnt].cnt=i.value}else if(i.dataset.jc){AS()[i.dataset.jc].jc[i.dataset.j]=i.value}else if(i.dataset.icnt){AS()[i.dataset.icnt].icnt[i.dataset.ik]=i.value}else return;
   touch();recalc()});
-window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+window.addEventListener('beforeunload',e=>{if(dirty||OUTBOX.length){e.preventDefault();e.returnValue=''}});
 
 /* ---------- boot ---------- */
 try{const s=JSON.parse(localStorage.getItem('implantPlanSettings')||'null');if(s)SET={...DEFAULT_SET,...s}}catch(e){}
 renderForm();
-if((API.url||IN_GAS)&&API.pw){api('ping').then(j=>{ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;applyRole();home();startPoll()}).catch(err=>{logout();$('lgMsg').className='msg err';$('lgMsg').textContent=err.message})}
+if((API.url||IN_GAS)&&API.pw&&API.role){ROLE=API.role;applyRole();home();startPoll();processOutbox();
+  api('ping').then(j=>{if(j.role!==ROLE){ROLE=j.role;API.role=ROLE;saveApi();applyRole();home()}applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender}).catch(()=>{})}
+else if((API.url||IN_GAS)&&API.pw){api('ping').then(j=>{ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;applyRole();home();startPoll();processOutbox()}).catch(err=>{logout();$('lgMsg').className='msg err';$('lgMsg').textContent=err.message})}
 else logout();
 </script>
 </body>
