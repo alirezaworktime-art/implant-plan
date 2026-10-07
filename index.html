@@ -523,10 +523,23 @@ function toDoc(r){const o={h:{...r.h},med:medNorm(r.med),s:secDoc(r.s),s2:r.alt.
 function fromDoc(id,d){const r=blankForm();r.id=id;Object.assign(r.h,d.h||{});r.med=medNorm(d.med);r.brand=d.brand||'ko';Object.assign(r.pay,d.pay||{});r.status=d.status||'draft';
   r.s=secFrom(d.s);r.alt=Object.assign({mode:'none',text:''},d.alt||{});r.s2=r.alt.mode==='full'?secFrom(d.s2):null;if(r.alt.mode==='full'&&!d.s2)r.alt.mode='none';
   ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt','note'].forEach(k=>{if(d[k]!==undefined)r[k]=d[k]});return r}
+/* local safety copy of the open patient (survives reloads, flaky internet, re-opening) */
+const LD='implantDraft:';
+function ldSave(){if(!F||!F.id||!dirty||$('viewForm').hidden)return;try{const d=toDoc(F);d.updatedAt=new Date().toISOString();localStorage.setItem(LD+F.id,JSON.stringify({role:ROLE,d}))}catch(e){}}
+function ldGet(id){try{const x=JSON.parse(localStorage.getItem(LD+id)||'null');return x&&x.role===ROLE?x.d:null}catch(e){return null}}
+function ldDel(id){try{localStorage.removeItem(LD+id)}catch(e){}}
+setInterval(ldSave,1500);addEventListener('pagehide',ldSave);document.addEventListener('visibilitychange',ldSave);
+function planEmpty(r){const has=S=>S&&Object.values(S).some(v=>Object.values(v.sel||{}).some(Boolean)||num(v.cnt)||(v.text||'').trim()||(v.jc&&(num(v.jc.U)||num(v.jc.L)))||Object.values(v.icnt||{}).some(x=>num(x))||Object.values(v.isel||{}).some(Boolean));
+  return !has(r.s)&&!(r.alt.mode==='full'&&has(r.s2))&&!(r.alt.mode==='text'&&(r.alt.text||'').trim())}
+/* prefer the newest of: server copy, unsent outbox copy, local safety copy */
+function newestDoc(id,serverDoc){let best=serverDoc,bt=serverDoc&&serverDoc.updatedAt||'';
+  OUTBOX.filter(o=>o.id===id&&o.payload&&o.payload.record).forEach(o=>{const d=o.payload.record.data;if(d&&(d.updatedAt||'')>bt){best=d;bt=d.updatedAt}});
+  const l=ldGet(id);if(l&&(l.updatedAt||'')>bt){best=l;bt=l.updatedAt}
+  return best===serverDoc?null:best}
 const planTotal=r=>{const T0=totals(PV(r,1));return T0.surg[r.brand]+T0.pros};
 async function saveRecord(r){const d=toDoc(r);d.updatedAt=new Date().toISOString();
   const j=await api('save',{record:{id:r.id,data:d,name:(r.h.name||'').trim(),nid:r.h.nid||'',status:d.status,total:planTotal(r)}});
-  r.id=j.id;dirty=false;return j}
+  r.id=j.id;dirty=false;ldDel(r.id);const q=QITEMS.find(v=>v.id===r.id);if(q&&q.status==='queued')q.status='draft';return j}
 
 /* ---------- PDF drawing ---------- */
 const PW=1240,PH=1754,M=56,FONT='Vazirmatn, Tahoma, sans-serif';
@@ -734,16 +747,17 @@ function toast(t,bad){const el=$('toast');el.textContent=t;el.className='toast'+
 async function processOutbox(){const mine=()=>OUTBOX.filter(o=>(o.role||'doctor')===ROLE);
   if(OB_RUN||!ROLE||!mine().length)return obBar();OB_RUN=true;clearTimeout(OB_TIMER);
   try{while(mine().length){const o=mine()[0];obBar();
-      try{const j=await api(o.kind==='consult'?'toConsult':'confirm',o.payload);OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(o.id)SENDING.delete(o.id);
+      try{const j=await api(o.kind==='consult'?'toConsult':'confirm',o.payload);OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(o.id){SENDING.delete(o.id);const l=ldGet(o.id);if(!l||(l.updatedAt||'')<=((o.payload.record||{}).data||{}).updatedAt)ldDel(o.id)}
         if(o.kind==='consult')toast(`${o.name} به کارتابل مشاور رسید.`);
         else if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
         if(!$('viewList').hidden)loadList();pollQ(true)}
       catch(e){if(!API.pw)break;o.err=e.message||'خطا';o.tries=(o.tries||0)+1;saveOutbox();obBar();OB_TIMER=setTimeout(processOutbox,15000);break}}}
   finally{OB_RUN=false;obBar()}}
 function enqueue(job){if(job.id)OUTBOX=OUTBOX.filter(o=>!(o.id===job.id&&o.kind===job.kind));OUTBOX.push(Object.assign({role:ROLE,at:Date.now()},job));if(job.id)SENDING.add(job.id);saveOutbox();processOutbox()}
-function leaveForm(msg){toast(msg);dirty=false;F=blankForm();CUR=1;renderForm();show('queue');renderQ()}
+function leaveForm(msg){toast(msg);if(F.id)ldDel(F.id);dirty=false;F=blankForm();CUR=1;renderForm();show('queue');renderQ()}
 /* doctor: treatment plan goes to the consultant's inbox (background, no waiting) */
 function sendToConsult(t){if(!(F.h.name||'').trim()){alertMsg('نام بیمار را وارد کنید.');return}
+  if(planEmpty(F)&&!t.dataset.armed){t.dataset.armed='1';alertMsg('هیچ درمانی در طرح انتخاب نشده است. اگر درست است، دوباره «ارسال به مشاور» را بزنید.');setTimeout(()=>delete t.dataset.armed,5000);return}delete t.dataset.armed;
   const d=toDoc(F);d.updatedAt=new Date().toISOString();const name=F.h.name.trim();
   enqueue({kind:'consult',id:F.id,name,payload:{record:{id:F.id,data:d,name,nid:F.h.nid||'',status:'draft',total:planTotal(F)}}});
   leaveForm(`طرح درمان ${name} برای مشاور فرستاده شد.`)}
@@ -859,12 +873,20 @@ async function rcSend(t){const m=$('rcMsg'),p={};RCF.forEach(k=>p[k]=$('rc_'+k).
   catch(e){m.className='msg err';m.textContent=e.message}finally{t.disabled=false}}
 async function qOpen(t){if(t.disabled)return;const id=t.dataset.qopen,x=QITEMS.find(v=>v.id===id);
   const docName=()=>SET.doctor?SET.doctor.split('·')[0].trim():'';
-  if(ROLE==='doctor'&&x&&x.status==='queued'){ // nothing saved yet: open instantly from the inbox data
+  const finish=r=>{if(!r.h.doc)r.h.doc=docName();openForm(r)};
+  // something newer than the server copy exists on this device (unsent or unsaved) → open it right away
+  const loc=newestDoc(id,null);
+  if(ROLE==='doctor'&&x&&x.status==='queued'&&!loc){ // nothing saved yet: open instantly from the inbox data
     const r=blankForm();r.id=id;r.status='draft';Object.assign(r.h,{name:x.name,nid:x.nid,date:x.date||r.h.date,phone:x.phone,age:x.age,asst:x.asst,doc:docName()});r.note=x.note;r.med=medNorm(x.med);
-    openForm(r);x.queue='reviewing';api('queueOpen',{id}).then(()=>pollQ(true)).catch(()=>{});return}
+    openForm(r);x.queue='reviewing';
+    api('queueOpen',{id}).then(j=>{ // the server already had a plan (e.g. saved from another device): load it if nothing was changed here
+      if(F.id===id&&!dirty&&j&&j.data&&j.data.s&&!$('viewForm').hidden){const r2=fromDoc(id,j.data);if(!planEmpty(r2)){['status','jalali','emailStatus','pdfName','edits'].forEach(k=>{if(j[k]!==undefined&&j[k]!=='')r2[k]=j[k]});finish(r2)}}
+      pollQ(true)}).catch(()=>{});return}
   t.disabled=true;t.classList.add('loading');
-  try{const j=await api('queueOpen',{id});const r=fromDoc(id,j.data||{});['status','jalali','emailStatus','pdfName','edits'].forEach(k=>{if(j[k]!==undefined&&j[k]!=='')r[k]=j[k]});
-    if(!r.h.doc)r.h.doc=docName();openForm(r);pollQ(true)}
+  try{let j=null;try{j=await api('queueOpen',{id})}catch(e){if(!loc)throw e}
+    const sd=j&&j.data||{},nd=newestDoc(id,j?sd:null);const r=fromDoc(id,nd||sd);
+    if(j)['status','jalali','emailStatus','pdfName','edits'].forEach(k=>{if(j[k]!==undefined&&j[k]!=='')r[k]=j[k]});
+    finish(r);if(nd){dirty=true;toast('آخرین تغییراتِ ذخیره‌نشده‌ی این بیمار روی این دستگاه بازیابی شد.')}pollQ(true)}
   catch(e){alert0(e.message)}finally{t.disabled=false;t.classList.remove('loading')}}
 function alert0(t){const el=$('qList');el.insertAdjacentHTML('afterbegin',`<div class="banner">${esc(t)}</div>`)}
 
