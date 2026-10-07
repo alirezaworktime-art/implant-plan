@@ -120,7 +120,8 @@ textarea{resize:vertical}
 .tot small+b+small{font-size:.68rem}
 @media (max-width:860px){.planSw{top:auto;bottom:78px;flex-direction:row}}
 @media (max-width:420px){.items.two{grid-template-columns:1fr}}
-.roles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media (max-width:560px){.roles{grid-template-columns:1fr}}
 .role{font:inherit;text-align:right;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
 .role b{font-size:1rem}.role small{color:var(--muted);font-size:.75rem}
 .role[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
@@ -131,6 +132,7 @@ textarea{resize:vertical}
 .live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
 .live.off{color:var(--bad)}
 .qitem{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:right;font:inherit;color:var(--ink);width:100%}
+.qitem.loading{opacity:.6;cursor:progress}
 .qitem.fresh{border-color:var(--warn);box-shadow:0 0 0 3px color-mix(in srgb,var(--warn) 35%,transparent)}
 .qitem .row1{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
 .qitem .nm{font-weight:800;font-size:1.02rem}
@@ -143,6 +145,14 @@ textarea{resize:vertical}
 .obbar.err{border-color:var(--bad);color:var(--bad)}
 .toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--bg);border-radius:10px;padding:10px 16px;font-size:.85rem;max-width:min(92vw,560px);box-shadow:0 4px 16px rgba(0,0,0,.25)}
 .toast.err{background:var(--bad);color:#fff}
+.quad{display:grid;grid-template-columns:auto auto;width:max-content;margin:4px auto 0;direction:ltr}
+.qd{font:inherit;font-weight:800;font-size:1rem;width:84px;height:44px;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:8px}
+.qd:nth-child(1){border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);border-radius:8px 0 0 0}
+.qd:nth-child(2){border-bottom:3px solid var(--ink);border-radius:0 8px 0 0}
+.qd:nth-child(3){border-right:3px solid var(--ink);border-radius:0 0 0 8px}
+.qd:nth-child(4){border-radius:0 0 8px 0}
+.qd[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.quad-sides{width:168px;margin:0 auto;padding:0}
 @media (prefers-reduced-motion:no-preference){.t,.chip,.tot{transition:background .12s,color .12s}}
 </style>
 </head>
@@ -152,11 +162,11 @@ textarea{resize:vertical}
   <header class="top">
     <h1>طرح درمان ایمپلنت</h1>
     <nav class="tabs" id="nav" hidden>
-      <button class="tab" id="tabQueue" type="button" data-role="doctor">کارتابل <span class="badge" id="qBadge" hidden></span></button>
+      <button class="tab" id="tabQueue" type="button" data-role="doctor consultant">کارتابل <span class="badge" id="qBadge" hidden></span></button>
       <button class="tab" id="tabRecep" type="button" data-role="staff">پذیرش</button>
       <button class="tab" id="tabList" type="button">بایگانی</button>
       <button class="tab" id="tabNew" type="button" data-role="doctor">فرم جدید</button>
-      <button class="tab" id="tabSet" type="button" data-role="doctor">تنظیمات</button>
+      <button class="tab" id="tabSet" type="button" data-role="doctor consultant">تنظیمات</button>
       <button class="tab" id="tabOut" type="button">خروج</button>
     </nav>
   </header>
@@ -164,7 +174,8 @@ textarea{resize:vertical}
     <h2>ورود</h2>
     <div class="roles" id="lgRoles">
       <button type="button" class="role" data-lrole="staff" aria-pressed="true"><b>ورود پرسنل</b><small>پذیرش بیمار و ارسال به کارتابل پزشک</small></button>
-      <button type="button" class="role" data-lrole="doctor" aria-pressed="false"><b>ورود پزشک</b><small>کارتابل، طرح درمان و تنظیمات</small></button>
+      <button type="button" class="role" data-lrole="doctor" aria-pressed="false"><b>ورود پزشک</b><small>کارتابل پزشک و طرح درمان</small></button>
+      <button type="button" class="role" data-lrole="consultant" aria-pressed="false"><b>ورود مشاور</b><small>شرایط پرداخت، تأیید نهایی و PDF</small></button>
     </div>
     <label class="f" id="lgUrlWrap" hidden>آدرس سرور (Apps Script)<input id="lg_url" class="ltr" placeholder="https://script.google.com/macros/s/.../exec"></label>
     <label class="f"><span id="lgPwLbl">رمز ورود پرسنل</span><input id="lg_pw" type="password" autocomplete="current-password"></label>
@@ -174,7 +185,7 @@ textarea{resize:vertical}
 
   <!-- doctor inbox -->
   <section id="viewQueue" class="wrap" style="padding:0" hidden>
-    <div class="qhead"><h2>بیماران در صف انتظار</h2><span class="live" id="qLive">زنده</span></div>
+    <div class="qhead"><h2 id="qTitle">بیماران در صف انتظار</h2><span class="live" id="qLive">زنده</span></div>
     <div class="list" id="qList"><div class="empty">در حال بارگذاری…</div></div>
   </section>
 
@@ -229,8 +240,8 @@ textarea{resize:vertical}
       <div class="rowline"><span>پارت پروتز (روکش)</span><span id="t_pros"></span></div>
       <div class="rowline big"><span>جمع کل</span><span id="t_all"></span></div>
     </section>
-    <section class="card">
-      <h2>شرایط پرداخت</h2>
+    <section class="card" id="payCard">
+      <h2>شرایط پرداخت <span class="tag">مشاور</span></h2>
       <div class="grp"><span>پارت جراحی</span>
         <div class="chips" id="payOpt">
           <button type="button" class="chip" data-opt="1">۳۰٪ نقد، باقی چک ماهانه</button>
@@ -328,15 +339,15 @@ const SECTIONS=[
  {id:'aox',t:'All on X',kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'implantBrand',prosJaw:true,def:'19000000'},
  {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',cnt:'one',max:28,pros:true},
  {id:'gbr',t:'جراحی GBR',kind:'teeth',n:7,price:'unit',cnt:'one',max:28},
- {id:'vip',t:'جراحی VIP / GBR',kind:'items',price:'items',items:[{k:'cgf',l:'CGF',type:'count',max:28,pk:'vip_cgf'},{k:'mem',l:'ممبران و تگ',type:'count',max:28,pk:'vip_mem'}]},
+ {id:'vip',t:'جراحی VIP / GBR',kind:'items',n:7,price:'items',items:[{k:'cgf',l:'CGF',type:'count',max:28,pk:'vip_cgf'},{k:'mem',l:'ممبران و تگ',type:'count',max:28,pk:'vip_mem'}]},
  {id:'crw',t:'فقط روکش',kind:'teeth',n:7,price:'unit',cnt:'one',max:28,pros:true},
  {id:'sin',t:'سینوس لیفت',kind:'items',price:'items',two:true,items:[{k:'o',l:'سینوس باز',type:'chips',o:['راست','چپ'],pk:'sin_o'},{k:'c',l:'سینوس بسته',type:'chips',o:['راست','چپ'],pk:'sin_c'}]},
- {id:'alv',t:'آلوئولوپلاستی',kind:'chips',groups:[{o:['½ فک راست بالا','½ فک چپ بالا','½ فک راست پایین','½ فک چپ پایین']}],price:'unit'},
+ {id:'alv',t:'آلوئولوپلاستی',kind:'quad',price:'unit',ul:'هر Q'},
  {id:'ram',t:'پیوند استخوان بلاک راموس',kind:'teeth',n:7,price:'unit'},
  {id:'ovd',t:'اوردنچر',kind:'chips',groups:[{l:'فک بالا، تعداد پایه',o:['2','3','4','5'],single:true},{l:'فک پایین، تعداد پایه',o:['2','3','4','5'],single:true}],price:'implantBrand'},
  {id:'fgg',t:'FGG و وستیبولوپلاستی',kind:'chips',groups:[{l:'فک بالا',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']},{l:'فک پایین',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']}],text:'زمان',price:'unit'},
  {id:'tmp',t:'روکش موقت',kind:'teeth',n:7,groups:[{l:'نوع',o:['دنچر','Essix','PMMA']}],price:'unit',pros:true},
- {id:'cbct',t:'عکس CBCT',kind:'chips',groups:[{o:['لازم است']}],price:'flat'},
+ {id:'cbct',t:'عکس CBCT',kind:'quad',price:'flat'},
  {id:'cons',t:'رضایت‌نامه',kind:'chips',groups:[{o:['نزدیک به عصب','دندان سالم']}]},
  {id:'anes',t:'زمان بیهوشی',kind:'none',text:'مدت',price:'flat'}
 ];
@@ -391,7 +402,7 @@ function payText(r,brand){const T=totals(r),b=brand||r.brand,S=T.surg[b],p=r.pay
     else{const c=S*.5,m=num(p.m2);out.surg=`۵۰٪ نقد: ${fa(c)} · مانده در یک فقره چک ${fa(S-c)}`+(m?` برای ${fa(m)} ماه بعد از تاریخ جراحی`:'')}}
   if(T.pros){const c=T.pros*.3,n=num(p.n3);out.pros=`۳۰٪ نقد: ${fa(c)}`+(n?` · مانده در ${fa(n)} فقره چک به فواصل یک‌ماهه، هر چک ${fa((T.pros-c)/n)}`:` · مانده: ${fa(T.pros-c)}`)}
   return out}
-function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||s.text||(x.items&&x.items.some(it=>itemQty(s,it))))}
+function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||teethSel(s)||s.text||(x.items&&x.items.some(it=>itemQty(s,it))))}
 
 /* ---------- form render ---------- */
 const opts=(max,v,from=1)=>`<option value="">—</option>`+Array.from({length:max-from+1},(_,i)=>i+from).map(n=>`<option value="${n}" ${String(v)===String(n)?'selected':''}>${fa(n)}</option>`).join('');
@@ -405,6 +416,8 @@ function cntHTML(x){const s=AS()[x.id];
   if(x.cnt==='jaw')return `<div class="fields">${[['U','Full EXT فک بالا · تعداد'],['L','Full EXT فک پایین · تعداد']].map(([j,l])=>`<label class="f">${l}<select data-jc="${x.id}" data-j="${j}">${opts(x.jmax,s.jc[j])}</select></label>`).join('')}</div>`;
   return ''}
 function chipsHTML(x){return x.groups.map((g,gi)=>`<div class="grp">${g.l?`<span>${g.l}</span>`:''}<div class="chips">${g.o.map(o=>{const k=gi+':'+o;return `<button type="button" class="chip" data-sid="${x.id}" data-k="${esc(k)}" data-g="${gi}" ${g.single?'data-single="1"':''} aria-pressed="${!!AS()[x.id].sel[k]}">${o}</button>`}).join('')}</div></div>`).join('')}
+const QUADS=[['q1','بالا · راست بیمار'],['q2','بالا · چپ بیمار'],['q4','پایین · راست بیمار'],['q3','پایین · چپ بیمار']];
+function quadHTML(x){const s=AS()[x.id];return `<div class="quad">${QUADS.map(([k,t])=>`<button type="button" class="qd" data-sid="${x.id}" data-k="${k}" title="${t}" aria-pressed="${!!s.sel[k]}">Q</button>`).join('')}</div><div class="sides quad-sides"><span>راست بیمار</span><span>چپ بیمار</span></div>`}
 function itemsHTML(x){const s=AS()[x.id];
   return `<div class="items${x.two?' two':''}">${x.items.map(it=>`<div class="item-box"><b>${it.l}</b>
     ${it.type==='chips'?`<div class="chips">${it.o.map(o=>`<button type="button" class="chip" data-isid="${x.id}" data-ik="${esc(it.k+':'+o)}" aria-pressed="${!!s.isel[it.k+':'+o]}">${o}</button>`).join('')}</div>`
@@ -416,10 +429,10 @@ function priceHTML(x){const s=AS()[x.id];
   if(x.price==='implantBrand')return '<p class="note">هزینه: تعداد پایه‌ی انتخاب‌شده × تعرفه‌ی پایه ایمپلنت هر برند (از بخش «پایه ایمپلنت»).</p>'+
     (x.prosJaw?`<label class="f">پروتز هر فک (به پارت پروتز اضافه می‌شود)<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="pcalc_${x.id}"></div>`:'');
   if(!x.price||x.price==='items')return '';
-  return `<label class="f">${x.price==='unit'?'قیمت هر واحد':'قیمت'}<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label>`}
+  return `<label class="f">${x.price==='unit'?'قیمت '+(x.ul||'هر واحد'):'قیمت'}<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label>`}
 function sectionHTML(x){const s=AS()[x.id];
   const tag=x.pros?'<span class="tag p">پروتز</span>':(x.price?'<span class="tag">جراحی</span>':'');
-  return `<section class="card"><h2>${x.t}${tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x):x.kind==='chips'?chipsHTML(x):x.kind==='items'?itemsHTML(x):''}
+  return `<section class="card"><h2>${x.t}${tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x):x.kind==='chips'?chipsHTML(x):x.kind==='items'?(x.n?chartHTML(x):'')+itemsHTML(x):x.kind==='quad'?quadHTML(x):''}
     ${x.text?`<label class="f">${x.text}<input id="tx_${x.id}" data-tx="${x.id}" value="${esc(s.text)}"></label>`:''}
     ${priceHTML(x)}<div class="calc" id="calc_${x.id}"></div></section>`}
 function renderForm(){
@@ -434,7 +447,8 @@ function renderForm(){
   ['n1','m2','n3'].forEach(k=>document.getElementById('p_'+k).value=F.pay[k]||'');
   const en=document.getElementById('editNote');
   if(F.status==='confirmed'||F.status==='modified'){en.hidden=false;en.textContent=`این فرم در ${F.jalali||''} ثبت شده است. اگر چیزی را عوض کنید و دوباره «ثبت نهایی» بزنید، PDF تازه ساخته و دوباره ایمیل می‌شود.`}else en.hidden=true;
-  document.getElementById('confirmBtn').textContent=(F.status==='confirmed'||F.status==='modified')?'ثبت ویرایش و ارسال':'ثبت نهایی';
+  document.getElementById('confirmBtn').textContent=ROLE==='doctor'?'ارسال به مشاور':(F.status==='confirmed'||F.status==='modified')?'تأیید ویرایش و دانلود PDF':'تأیید نهایی و دانلود PDF';
+  document.getElementById('payCard').hidden=ROLE==='doctor';
   const sn=document.getElementById('staffNote');sn.hidden=!F.note;sn.textContent=F.note?'توضیحات پذیرش: '+F.note:'';
   renderPlanSw();recalc()}
 function renderPlanSw(){const m=F.alt.mode;
@@ -442,7 +456,7 @@ function renderPlanSw(){const m=F.alt.mode;
     (m==='none'?`<button type="button" class="ps add" id="altAdd">+ طرح دوم</button>`:`<button type="button" class="ps" data-plan="2" aria-pressed="${CUR===2}">طرح ۲${m==='text'?' (توضیحات)':''}</button>`)}
 function recalc(){const pv={s:AS(),brand:F.brand,pay:F.pay};
   SECTIONS.forEach(x=>{const el=document.getElementById('calc_'+x.id);if(!el)return;const s=pv.s[x.id],q=qty(s,x);
-    if(x.price==='unit'&&q)el.innerHTML=`${fa(q)} واحد × ${fa(num(s.price))} = <b>${fa(q*num(s.price))}</b>`;
+    if(x.price==='unit'&&q)el.innerHTML=`${fa(q)} ${x.kind==='quad'?'Q':'واحد'} × ${fa(num(s.price))} = <b>${fa(q*num(s.price))}</b>`;
     else if((x.price==='brandUnit'||x.price==='implantBrand')&&q){const t=rowTotals(pv,x).brand;el.innerHTML=`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'} · `+BRANDS.map(b=>`${b.n} <b>${fa(t[b.k])}</b>`).join(' · ')}
     else if(x.kind==='teeth')el.textContent=q?`${fa(q)} واحد`:'';else el.textContent='';
     if(x.prosJaw){const e3=document.getElementById('pcalc_'+x.id),j=chipSel(s);if(e3)e3.innerHTML=j?`پروتز: ${fa(j)} فک × ${fa(num(s.price))} = <b>${fa(j*num(s.price))}</b>`:''}
@@ -468,6 +482,7 @@ function secDoc(S){const s={};SECTIONS.forEach(x=>{const v=S[x.id];s[x.id]={sel:
 function secFrom(d){const S=blankSections();SECTIONS.forEach(x=>{const v=(d||{})[x.id];if(!v)return;const t=S[x.id];
   (v.sel||[]).forEach(k=>t.sel[k]=true);t.text=v.text||'';t.price=v.price||'';Object.assign(t.bp,v.bp||{});t.cnt=v.cnt||'';Object.assign(t.jc,v.jc||{});
   Object.assign(t.ip,v.ip||{});(v.isel||[]).forEach(k=>t.isel[k]=true);Object.assign(t.icnt,v.icnt||{});
+  if(x.id==='alv')(v.sel||[]).forEach(k=>{const m={'½ فک راست بالا':'q1','½ فک چپ بالا':'q2','½ فک چپ پایین':'q3','½ فک راست پایین':'q4'}[k.split(':')[1]];if(m){delete t.sel[k];t.sel[m]=true}});
   if(x.id==='surg'&&!(v.isel||[]).length)(v.sel||[]).forEach(k=>{const o=k.split(':')[1];if(o)t.isel['w:'+o]=true})});return S}
 function toDoc(r){const o={h:{...r.h},s:secDoc(r.s),s2:r.alt.mode==='full'&&r.s2?secDoc(r.s2):null,alt:{...r.alt},brand:r.brand,pay:{...r.pay},status:r.status==='new'?'draft':r.status};
   ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt','note'].forEach(k=>{if(r[k]!==undefined)o[k]=r[k]});return o}
@@ -503,14 +518,14 @@ function drawChipLines(draws,lines,mh){lines.forEach((ln,li)=>{const yy=mh+li*36
     else{checkbox(cx,cur,y,it.on);T(cx,it.text,cur-28,y,{s:20,w:it.on?800:400,c:it.on?INK:'#777'});cur-=it.w}})})});
   return lines.length*36}
 function priceLines(r,x){const s=r.s[x.id],q=qty(s,x),L=[];if(!x.price)return L;
-  if(x.price==='unit'){const u=num(s.price);if(q&&u){L.push({t:`${fa(q)} واحد × ${fa(u)}`,c:'#444',s:18});L.push({t:fa(q*u),b:1})}}
+  if(x.price==='unit'){const u=num(s.price);if(q&&u){L.push({t:`${fa(q)} ${x.kind==='quad'?'Q':'واحد'} × ${fa(u)}`,c:'#444',s:18});L.push({t:fa(q*u),b:1})}}
   else if(x.price==='flat'){const v=rowTotals(r,x).flat;if(v)L.push({t:fa(v),b:1})}
   else if(x.price==='items'){let sum=0;x.items.forEach(it=>{const iq=itemQty(s,it),u=num(s.ip[it.k]);if(iq&&u){sum+=iq*u;L.push({t:`${it.l}: ${fa(iq)}×${fa(u)}`,c:'#444',s:17})}});if(sum)L.push({t:fa(sum),b:1})}
   else{const t=rowTotals(r,x).brand;if(x.prosJaw&&chipSel(s)&&num(s.price))L.push({t:`پروتز: ${fa(chipSel(s))} فک × ${fa(num(s.price))}`,c:'#444',s:17});if(q)L.push({t:`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'}`,c:'#444',s:17});BRANDS.forEach(b=>{if(t[b.k])L.push({t:`${b.n}: ${fa(t[b.k])}`,b:b.k===r.brand,s:b.k===r.brand?19:17,c:b.k===r.brand?INK:'#555'})})}
   return L}
 
 function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];let mh=0;const maxW=C.midW-2*pad;
-  if(x.kind==='teeth'){const n=x.n,jl=60,gap=12;const cw=Math.min(40,Math.floor((C.midW-2*pad-2*jl-gap)/(2*n))),ch=36;
+  if(x.n){const n=x.n,jl=60,gap=12;const cw=Math.min(40,Math.floor((C.midW-2*pad-2*jl-gap)/(2*n))),ch=36;
     const gridW=cw*2*n+gap,gx=C.midL+(C.midW-gridW)/2;
     ['U','L'].forEach((j,ri)=>{const yo=ri*(ch+8);draws.push((cx,top)=>{const y=top+pad+yo;
       T(cx,j==='U'?'بالا':'پایین',C.midR-pad,y+ch/2,{s:18,w:700,c:'#333'});
@@ -520,11 +535,17 @@ function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];le
     draws.push((cx,top)=>{const y=top+pad+ch+4;cx.fillStyle='#999';cx.fillRect(gx,y-0.5,gridW-4,1)});
     mh=2*ch+8;
     const capY=mh;draws.push((cx,top)=>{const y=top+pad+capY+13;T(cx,'راست بیمار',gx,y,{s:15,c:GREY,a:'left'});T(cx,'چپ بیمار',gx+gridW-4,y,{s:15,c:GREY,a:'right'})});mh+=28;
-    if(x.groups)mh+=drawChipLines(draws,chipLine(c,[].concat(...chipItems(c,x.groups,(gi,o)=>!!sel[gi+':'+o])),maxW),mh);
+    if(x.kind==='teeth'&&x.groups)mh+=drawChipLines(draws,chipLine(c,[].concat(...chipItems(c,x.groups,(gi,o)=>!!sel[gi+':'+o])),maxW),mh);
     const notes=[];
     if(x.cnt==='one'&&num(s.cnt))notes.push(`تعداد کل: ${fa(num(s.cnt))}`);
     if(x.cnt==='jaw')[['U','فک بالا'],['L','فک پایین']].forEach(([j,l])=>{if(num(s.jc[j]))notes.push(`Full EXT ${l}: ${fa(num(s.jc[j]))} عدد`)});
     if(notes.length){const yy=mh;draws.push((cx,top)=>T(cx,notes.join('   ·   '),C.midR-pad,top+pad+yy+14,{s:19,w:800}));mh+=32}}
+  if(x.kind==='quad'){const cxm=(C.midL+C.midR)/2,bw=70,bh=34,yy=mh;
+    draws.push((cx,top)=>{const y0=top+pad+yy,yc=y0+bh+4;cx.fillStyle=INK;cx.fillRect(cxm-1.5,y0,3,2*bh+8);cx.fillRect(cxm-2*bw,yc-1.5,4*bw,3);
+      [['q1',-1,-1],['q2',1,-1],['q4',-1,1],['q3',1,1]].forEach(([k,dx,dy])=>{const on=!!sel[k],xc=cxm+dx*bw,ycc=yc+dy*(bh/2+2);
+        checkbox(cx,xc+22,ycc,on);T(cx,'Q',xc-6,ycc,{s:22,w:on?800:400,c:on?INK:'#888',a:'center'})});
+      T(cx,'راست بیمار',cxm-2*bw-10,yc,{s:15,c:GREY,a:'right'});T(cx,'چپ بیمار',cxm+2*bw+10,yc,{s:15,c:GREY,a:'left'})});
+    mh+=2*bh+18}
   else if(x.kind==='chips'){mh+=drawChipLines(draws,[].concat(...chipItems(c,x.groups,(gi,o)=>!!sel[gi+':'+o]).map(g=>chipLine(c,g,maxW))),mh)}
   else if(x.kind==='items'){const lines=[];x.items.forEach(it=>{
       if(it.type==='chips')lines.push(...chipLine(c,chipItems(c,[{l:it.l,o:it.o}],(gi,o)=>!!s.isel[it.k+':'+o])[0],maxW));
@@ -667,17 +688,38 @@ let OUTBOX=[],OB_RUN=false,OB_TIMER=null;const SENDING=new Set();
 try{OUTBOX=JSON.parse(localStorage.getItem('implantOutbox')||'[]')||[]}catch(e){OUTBOX=[]}
 OUTBOX.forEach(o=>o.id&&SENDING.add(o.id));
 function saveOutbox(){try{localStorage.setItem('implantOutbox',JSON.stringify(OUTBOX))}catch(e){}}
-function obBar(){const el=$('obBar'),n=OUTBOX.length;if(!n){el.hidden=true;return}
-  const err=OUTBOX.find(o=>o.err);el.hidden=false;el.className='obbar'+(err?' err':'');
+function obBar(){const el=$('obBar'),n=OUTBOX.filter(o=>(o.role||'doctor')===ROLE).length;if(!n){el.hidden=true;return}
+  const err=OUTBOX.find(o=>o.err&&(o.role||'doctor')===ROLE);el.hidden=false;el.className='obbar'+(err?' err':'');
   el.textContent=err?`ارسال ${fa(n)} طرح درمان انجام نشد؛ خودکار دوباره تلاش می‌شود…`:`در حال ارسال ${fa(n)} طرح درمان در پس‌زمینه…`}
 function toast(t,bad){const el=$('toast');el.textContent=t;el.className='toast'+(bad?' err':'');el.hidden=false;clearTimeout(el._t);el._t=setTimeout(()=>el.hidden=true,6000)}
-async function processOutbox(){if(OB_RUN||!OUTBOX.length||ROLE!=='doctor')return obBar();OB_RUN=true;clearTimeout(OB_TIMER);
-  try{while(OUTBOX.length){const o=OUTBOX[0];obBar();
-      try{const j=await api('confirm',o.payload);OUTBOX.shift();saveOutbox();if(o.id)SENDING.delete(o.id);
-        if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
+async function processOutbox(){const mine=()=>OUTBOX.filter(o=>(o.role||'doctor')===ROLE);
+  if(OB_RUN||!ROLE||!mine().length)return obBar();OB_RUN=true;clearTimeout(OB_TIMER);
+  try{while(mine().length){const o=mine()[0];obBar();
+      try{const j=await api(o.kind==='consult'?'toConsult':'confirm',o.payload);OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(o.id)SENDING.delete(o.id);
+        if(o.kind==='consult')toast(`${o.name} به کارتابل مشاور رسید.`);
+        else if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
         if(!$('viewList').hidden)loadList();pollQ(true)}
       catch(e){if(!API.pw)break;o.err=e.message||'خطا';o.tries=(o.tries||0)+1;saveOutbox();obBar();OB_TIMER=setTimeout(processOutbox,15000);break}}}
   finally{OB_RUN=false;obBar()}}
+function enqueue(job){if(job.id)OUTBOX=OUTBOX.filter(o=>!(o.id===job.id&&o.kind===job.kind));OUTBOX.push(Object.assign({role:ROLE,at:Date.now()},job));if(job.id)SENDING.add(job.id);saveOutbox();processOutbox()}
+function leaveForm(msg){toast(msg);dirty=false;F=blankForm();CUR=1;renderForm();show('queue');renderQ()}
+/* doctor: treatment plan goes to the consultant's inbox (background, no waiting) */
+function sendToConsult(t){if(!(F.h.name||'').trim()){alertMsg('نام بیمار را وارد کنید.');return}
+  const d=toDoc(F);d.updatedAt=new Date().toISOString();const name=F.h.name.trim();
+  enqueue({kind:'consult',id:F.id,name,payload:{record:{id:F.id,data:d,name,nid:F.h.nid||'',status:'draft',total:planTotal(F)}}});
+  leaveForm(`طرح درمان ${name} برای مشاور فرستاده شد.`)}
+/* consultant: final approval → PDF downloads on this device now; Drive + email in the background */
+async function finalize(t){if(busy)return;if(!(F.h.name||'').trim()){alertMsg('نام بیمار را وارد کنید.');return}
+  busy=true;const old=t.textContent;t.disabled=true;t.textContent='در حال ساخت PDF…';
+  try{const j=jalali(new Date()),fname=`${safeName(F.h.name)} - ${j.dash}.pdf`;
+    const wasConfirmed=F.status==='confirmed'||F.status==='modified';
+    F.status='confirmed';F.jalali=j.slash;F.pdfName=fname;if(wasConfirmed)F.edits=(F.edits||0)+1;
+    const pdf=await buildPDF(F,{jalali:j.slash});downloadBlob(pdf.blob,fname);
+    const d=toDoc(F);d.updatedAt=new Date().toISOString();const name=F.h.name.trim();
+    enqueue({kind:'confirm',id:F.id,name,payload:{record:{id:F.id,data:d,name,nid:F.h.nid||'',status:'confirmed',total:planTotal(F),jalali:F.jalali},pdf:pdf.b64,fileName:fname,mail:mailFor(F)}});
+    leaveForm(`PDF ${name} دانلود شد؛ ذخیره و ایمیل در پس‌زمینه انجام می‌شود.`)}
+  catch(e){alertMsg('ساخت PDF ناموفق بود: '+(e&&e.message||e))}
+  finally{busy=false;t.disabled=false;t.textContent=old}}
 async function doConfirm(){if(busy||!lastPDF)return;busy=true;
   try{const wasConfirmed=F.status==='confirmed'||F.status==='modified';
     F.status='confirmed';F.jalali=lastPDF.jalali.slash;F.pdfName=lastPDF.name;if(wasConfirmed)F.edits=(F.edits||0)+1;
@@ -696,7 +738,7 @@ function downloadBlob(blob,name){const u=URL.createObjectURL(blob);const a=docum
 function openForPrint(blob){const u=URL.createObjectURL(blob);const w=window.open(u,'_blank');if(!w)downloadBlob(blob,'plan.pdf');setTimeout(()=>URL.revokeObjectURL(u),120000)}
 
 /* ---------- archive ---------- */
-function statusPill(d){if(d.status==='queued')return d.queue==='reviewing'?'<span class="pill rev">در حال بررسی پزشک</span>':'<span class="pill wait">در صف پزشک</span>';
+function statusPill(d){if(d.queue&&d.queue!=='done'&&QLBL[d.queue])return qPill(d);if(d.status==='queued')return '<span class="pill wait">در صف پزشک</span>';
   if(d.status==='draft')return '<span class="pill draft">پیش‌نویس</span>';
   if(d.status==='modified')return '<span class="pill mod">ویرایش ثبت‌نشده</span>';
   if(d.emailStatus==='sent')return '<span class="pill sent">ثبت و ایمیل شد</span>';
@@ -711,15 +753,15 @@ function renderList(){const q=toEn($('q').value.trim()).toLowerCase();const el=$
   el.innerHTML=rows.map(d=>`<div class="item"><div class="row1"><div><div class="nm">${esc(d.name||'بدون نام')}</div>
     <div class="meta">${d.nid?'کد ملی '+esc(faD(d.nid))+' · ':''}${d.jalali?'تأیید '+esc(d.jalali):'ثبت نشده'} · جمع ${fa(Number(d.total)||0)}</div>
     ${d.emailStatus==='failed'&&d.emailError?`<div class="meta" style="color:var(--bad)">${esc(d.emailError)}</div>`:''}</div>${statusPill(d)}</div>
-    <div class="acts">${ROLE==='doctor'?`<button class="btn sm" data-open="${esc(d.id)}" type="button">باز کردن / ویرایش</button>`:''}
-    ${d.status!=='draft'&&d.status!=='queued'?`<button class="btn sm ghost" data-pdf="${esc(d.id)}" type="button">PDF</button>${ROLE==='doctor'?`<button class="btn sm ghost" data-resend="${esc(d.id)}" type="button">ارسال دوباره</button>`:''}`:''}</div></div>`).join('')}
+    <div class="acts">${ROLE!=='staff'?`<button class="btn sm" data-open="${esc(d.id)}" type="button">باز کردن / ویرایش</button>`:''}
+    ${d.status!=='draft'&&d.status!=='queued'?`<button class="btn sm ghost" data-pdf="${esc(d.id)}" type="button">PDF</button>${ROLE!=='staff'?`<button class="btn sm ghost" data-resend="${esc(d.id)}" type="button">ارسال دوباره</button>`:''}`:''}</div></div>`).join('')}
 async function loadList(){try{const j=await api('list');ARCHIVE=j.items||[];listLoaded=true;renderList()}
   catch(e){$('list').innerHTML=`<div class="empty">بایگانی بارگذاری نشد: ${esc(e.message)}</div>`}}
 async function fetchRecord(id){const j=await api('get',{id});const r=fromDoc(id,j.data||{});
   ['status','jalali','emailStatus','emailError','pdfName','edits'].forEach(k=>{if(j[k]!==undefined&&j[k]!=='')r[k]=j[k]});return r}
 
 /* ---------- tariff settings ---------- */
-const unitLbl=x=>x.price==='unit'||x.price==='brandUnit'?' · هر واحد':'';
+const unitLbl=x=>x.ul?' · '+x.ul:(x.price==='unit'||x.price==='brandUnit'?' · هر واحد':'');
 function renderPriceSettings(){const P=SET.prices||{};const inp=(k,v,b)=>`<input class="price" inputmode="numeric" data-tp="${k}" ${b?`data-tb="${b}"`:''} value="${esc(fmtInput(v))}">`;
   $('set_prices').innerHTML=SECTIONS.filter(x=>x.price&&(x.price!=='implantBrand'||x.prosJaw)).map(x=>{const t=P[x.id]||{},bp=t.bp||{};
     if(x.prosJaw)return `<div class="grp"><span>${x.t} · پروتز هر فک</span>${inp(x.id,t.price||x.def)}</div>`;
@@ -732,32 +774,35 @@ function readPriceSettings(){const P={};document.querySelectorAll('#set_prices [
 /* ---------- roles, live queue, reception ---------- */
 let ROLE='',LROLE='staff',QV='',QITEMS=[],QSEEN=null,QTIMER=null,QBUSY=false,RC_EDIT=null,BACK_TO_Q=false;
 const QPOLL=4000;
-function applyRole(){document.querySelectorAll('#nav [data-role]').forEach(b=>b.hidden=b.dataset.role!==ROLE)}
-function home(){if(ROLE==='doctor'){show('queue')}else{show('recep');rcReset()}pollQ(true)}
+const ROLE_LBL={staff:'پرسنل',doctor:'پزشک',consultant:'مشاور'};
+function applyRole(){document.querySelectorAll('#nav [data-role]').forEach(b=>b.hidden=!b.dataset.role.split(' ').includes(ROLE));$('qTitle').textContent=ROLE==='consultant'?'کارتابل مشاور':'بیماران در صف انتظار'}
+function home(){if(ROLE==='staff'){show('recep');rcReset()}else show('queue');renderQ();pollQ(false)}
 let AC=null;function beep(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;[0,0.18].forEach((d,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=i?1046:784;g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(0.25,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.16);o.connect(g).connect(AC.destination);o.start(t+d);o.stop(t+d+0.17)})}catch(e){}}
 function startPoll(){stopPoll();QTIMER=setInterval(()=>pollQ(false),QPOLL)}
 function stopPoll(){if(QTIMER)clearInterval(QTIMER);QTIMER=null}
 async function pollQ(force){if(!ROLE||QBUSY)return;QBUSY=true;
-  try{const j=await api('queue',{ver:force?'':QV});setLive(true);
-    if(!j.same){QV=j.ver;const prev=QSEEN;QITEMS=j.items||[];
-      const fresh=prev?QITEMS.filter(x=>x.queue==='waiting'&&!prev.has(x.id)).map(x=>x.id):[];
-      QSEEN=new Set(QITEMS.map(x=>x.id));
-      if(ROLE==='doctor'&&fresh.length){beep();fresh.forEach(id=>FRESH.add(id));setTimeout(()=>{fresh.forEach(id=>FRESH.delete(id));renderQ()},15000)}
-      renderQ()}}
+  try{const j=await api('queue',{ver:force?'':QV});setLive(true);applyQueue(j)}
   catch(e){setLive(false)}finally{QBUSY=false}}
+const NEWQ={doctor:'waiting',consultant:'consult'};
+function applyQueue(j){if(!j||j.same||!j.items)return;QV=j.ver;const prev=QSEEN;QITEMS=j.items;
+  const fresh=prev?QITEMS.filter(x=>x.queue===NEWQ[ROLE]&&!prev.has(x.id)).map(x=>x.id):[];
+  QSEEN=new Set(QITEMS.map(x=>x.id));
+  if(NEWQ[ROLE]&&fresh.length){beep();fresh.forEach(id=>FRESH.add(id));setTimeout(()=>{fresh.forEach(id=>FRESH.delete(id));renderQ()},15000)}
+  renderQ()}
 const FRESH=new Set();
 function setLive(ok){['qLive','rLive'].forEach(id=>{const el=$(id);el.classList.toggle('off',!ok);el.textContent=ok?'زنده':'اتصال قطع است؛ دوباره تلاش می‌شود…'})}
 const qTime=iso=>{try{return new Date(iso).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}};
-function qPill(x){return x.queue==='waiting'?'<span class="pill wait">منتظر</span>':x.queue==='reviewing'?'<span class="pill rev">در حال بررسی</span>':'<span class="pill done">ثبت شد</span>'}
+const QLBL={waiting:['wait','منتظر پزشک'],reviewing:['rev','نزد پزشک'],consult:['wait','منتظر مشاور'],consulting:['rev','نزد مشاور'],done:['done','ثبت شد']};
+function qPill(x){const l=QLBL[x.queue]||['draft',x.queue];return `<span class="pill ${l[0]}">${l[1]}</span>`}
 function qMeta(x){return [x.age?'سن '+faD(x.age):'',x.phone?faD(x.phone):'',x.nid?'کد ملی '+faD(x.nid):'','پذیرش '+qTime(x.queuedAt),x.asst?'توسط '+x.asst:''].filter(Boolean).map(esc).join(' · ')}
 function renderQ(){
   const active=QITEMS.filter(x=>x.queue!=='done'&&!SENDING.has(x.id));
-  const b=$('qBadge');const w=QITEMS.filter(x=>x.queue==='waiting'&&!SENDING.has(x.id)).length;b.hidden=!w;b.textContent=fa(w);
-  if(ROLE==='doctor'){
+  const b=$('qBadge');const w=QITEMS.filter(x=>x.queue===NEWQ[ROLE]&&!SENDING.has(x.id)).length;b.hidden=!w;b.textContent=fa(w);
+  if(ROLE!=='staff'){
     $('qList').innerHTML=active.length?active.map((x,i)=>`<button type="button" class="qitem${FRESH.has(x.id)?' fresh':''}" data-qopen="${esc(x.id)}">
       <div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span></div>${qPill(x)}</div>
-      <div class="meta">${qMeta(x)}</div>${x.note?`<div class="nt">${esc(x.note)}</div>`:''}</button>`).join(''):'<div class="empty">بیماری در صف انتظار نیست.</div>';
-    document.title=(w?`(${fa(w)}) `:'')+'کارتابل · طرح درمان ایمپلنت'}
+      <div class="meta">${qMeta(x)}</div>${x.note?`<div class="nt">${esc(x.note)}</div>`:''}</button>`).join(''):(ROLE==='consultant'?'<div class="empty">طرح درمانی منتظر مشاور نیست.</div>':'<div class="empty">بیماری در صف انتظار نیست.</div>');
+    document.title=(w?`(${fa(w)}) `:'')+'کارتابل '+ROLE_LBL[ROLE]+' · طرح درمان ایمپلنت'}
   else{
     $('rList').innerHTML=QITEMS.length?QITEMS.map((x,i)=>`<div class="item"><div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span>
       <div class="meta">${qMeta(x)}</div>${x.note?`<div class="meta">${esc(x.note)}</div>`:''}</div>${qPill(x)}</div>
@@ -773,9 +818,15 @@ async function rcSend(t){const m=$('rcMsg'),p={};RCF.forEach(k=>p[k]=$('rc_'+k).
   try{if(RC_EDIT)await api('queueUpdate',{id:RC_EDIT,patient:p});else await api('queueAdd',{patient:p});
     m.className='msg ok';m.textContent=RC_EDIT?'تغییرات ذخیره شد.':`${p.name} به کارتابل پزشک رفت.`;rcReset();pollQ(true)}
   catch(e){m.className='msg err';m.textContent=e.message}finally{t.disabled=false}}
-async function qOpen(t){if(t.disabled)return;t.disabled=true;
-  try{await api('queueOpen',{id:t.dataset.qopen});const r=await fetchRecord(t.dataset.qopen);if(!r.h.doc&&SET.doctor)r.h.doc=SET.doctor.split('·')[0].trim();openForm(r);pollQ(true)}
-  catch(e){alert0(e.message)}finally{t.disabled=false}}
+async function qOpen(t){if(t.disabled)return;const id=t.dataset.qopen,x=QITEMS.find(v=>v.id===id);
+  const docName=()=>SET.doctor?SET.doctor.split('·')[0].trim():'';
+  if(ROLE==='doctor'&&x&&x.status==='queued'){ // nothing saved yet: open instantly from the inbox data
+    const r=blankForm();r.id=id;r.status='draft';Object.assign(r.h,{name:x.name,nid:x.nid,date:x.date||r.h.date,phone:x.phone,age:x.age,asst:x.asst,doc:docName()});r.note=x.note;
+    openForm(r);x.queue='reviewing';api('queueOpen',{id}).then(()=>pollQ(true)).catch(()=>{});return}
+  t.disabled=true;t.classList.add('loading');
+  try{const j=await api('queueOpen',{id});const r=fromDoc(id,j.data||{});['status','jalali','emailStatus','pdfName','edits'].forEach(k=>{if(j[k]!==undefined&&j[k]!=='')r[k]=j[k]});
+    if(!r.h.doc)r.h.doc=docName();openForm(r);pollQ(true)}
+  catch(e){alert0(e.message)}finally{t.disabled=false;t.classList.remove('loading')}}
 function alert0(t){const el=$('qList');el.insertAdjacentHTML('afterbegin',`<div class="banner">${esc(t)}</div>`)}
 
 /* ---------- views ---------- */
@@ -791,8 +842,8 @@ function applySettings(s){if(s)SET={...DEFAULT_SET,...s};SET.prices=SET.prices||
 async function login(){const m=$('lgMsg');m.className='msg';m.textContent='در حال ورود…';
   if(!API_URL_DEFAULT&&!IN_GAS)API.url=$('lg_url').value.trim();API.pw=$('lg_pw').value;
   try{const j=await api('ping');
-    if(j.role!==LROLE){API.pw='';m.className='msg err';m.textContent=LROLE==='doctor'?'این رمز مربوط به ورود پرسنل است.':'این رمز مربوط به ورود پزشک است.';return}
-    ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;m.textContent='';applyRole();home();startPoll();beep0();processOutbox()}
+    if(j.role!==LROLE){API.pw='';m.className='msg err';m.textContent=`این رمز مربوط به ورود ${ROLE_LBL[j.role]||'دیگری'} است.`;return}
+    ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender;m.textContent='';applyRole();home();startPoll();beep0();processOutbox()}
   catch(e){m.className='msg err';m.textContent=e.message}}
 function beep0(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
 
@@ -822,7 +873,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
     catch(err){m.className='msg err';m.textContent='ذخیره نشد: '+err.message}finally{t.disabled=false}return}
   if(t.id==='saveBtn'){if(!(F.h.name||'').trim()){alertMsg('برای ذخیره، نام بیمار را وارد کنید.');return}
     t.disabled=true;try{if(F.status==='new')F.status='draft';await saveRecord(F);t.textContent='ذخیره شد';setTimeout(()=>t.textContent='ذخیره پیش‌نویس',1600)}catch(err){alertMsg('ذخیره نشد: '+err.message)}finally{t.disabled=false}return}
-  if(t.id==='confirmBtn'){openConfirm();return}
+  if(t.id==='confirmBtn'){if(ROLE==='doctor')sendToConsult(t);else finalize(t);return}
   if(t.id==='cGo'){doConfirm();return}
   if(t.id==='cDl'){if(lastPDF)downloadBlob(lastPDF.blob,lastPDF.name);return}
   if(t.id==='cPrint'){if(lastPDF)openForPrint(lastPDF.blob);return}
@@ -868,7 +919,7 @@ window.addEventListener('beforeunload',e=>{if(dirty||OUTBOX.length){e.preventDef
 try{const s=JSON.parse(localStorage.getItem('implantPlanSettings')||'null');if(s)SET={...DEFAULT_SET,...s}}catch(e){}
 renderForm();
 if((API.url||IN_GAS)&&API.pw&&API.role){ROLE=API.role;applyRole();home();startPoll();processOutbox();
-  api('ping').then(j=>{if(j.role!==ROLE){ROLE=j.role;API.role=ROLE;saveApi();applyRole();home()}applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender}).catch(()=>{})}
+  api('ping').then(j=>{if(j.role!==ROLE){ROLE=j.role;API.role=ROLE;saveApi();applyRole();home()}applySettings(j.settings);applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender}).catch(()=>{})}
 else if((API.url||IN_GAS)&&API.pw){api('ping').then(j=>{ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;applyRole();home();startPoll();processOutbox()}).catch(err=>{logout();$('lgMsg').className='msg err';$('lgMsg').textContent=err.message})}
 else logout();
 </script>
