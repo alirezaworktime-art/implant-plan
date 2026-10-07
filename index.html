@@ -766,7 +766,7 @@ async function processOutbox(){const mine=()=>OUTBOX.filter(o=>(o.role||'doctor'
   try{while(mine().length){const o=mine()[0];obBar();
       try{if(!o.sid)o.sid=uuid();o.payload.sendId=o.sid;const j=await api(o.kind==='consult'?'toConsult':'confirm',o.payload,{prio:'bg',timeout:o.kind==='confirm'?30000:10000,tries:2});OUTBOX=OUTBOX.filter(v=>v!==o);saveOutbox();if(o.id){SENDING.delete(o.id);const l=ldGet(o.id);if(!l||(l.updatedAt||'')<=((o.payload.record||{}).data||{}).updatedAt)ldDel(o.id)}
         if(o.kind==='consult')toast(`${o.name} به کارتابل مشاور رسید.`);
-        else if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
+        else if(!j.emailStatus)toast(`طرح درمان ${o.name} ثبت و در Drive ذخیره شد.`);else if(j.emailStatus==='sent')toast(`طرح درمان ${o.name} ثبت و ایمیل شد.`);else toast(`طرح درمان ${o.name} ثبت شد ولی ایمیل نرفت: ${j.emailError||''} (از بایگانی دوباره بفرستید)`,true);
         if(!$('viewList').hidden)loadList();pollQ(true)}
       catch(e){if(!API.pw)break;o.err=e.message||'خطا';o.tries=(o.tries||0)+1;saveOutbox();obBar();OB_TIMER=setTimeout(processOutbox,15000);break}}}
   finally{OB_RUN=false;obBar()}}
@@ -787,7 +787,7 @@ async function finalize(t){if(busy)return;if(!(F.h.name||'').trim()){alertMsg('�
     const pdf=await buildPDF(F,{jalali:j.slash});downloadBlob(pdf.blob,fname);
     const d=toDoc(F);d.updatedAt=new Date().toISOString();const name=F.h.name.trim();
     enqueue({kind:'confirm',id:F.id,name,payload:{record:{id:F.id,data:d,name,nid:F.h.nid||'',status:'confirmed',total:planTotal(F),jalali:F.jalali},pdf:pdf.b64,fileName:fname,mail:mailFor(F)}});
-    leaveForm(`PDF ${name} دانلود شد؛ ذخیره و ایمیل در پس‌زمینه انجام می‌شود.`)}
+    leaveForm(`PDF ${name} دانلود شد؛ ذخیره در پس‌زمینه انجام می‌شود.`)}
   catch(e){alertMsg('ساخت PDF ناموفق بود: '+(e&&e.message||e))}
   finally{busy=false;t.disabled=false;t.textContent=old}}
 async function doConfirm(){if(busy||!lastPDF)return;busy=true;
