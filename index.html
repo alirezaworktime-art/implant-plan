@@ -360,7 +360,7 @@ const bz=f=>Object.fromEntries(BRANDS.map(b=>[b.k,f?f(b.k):0]));
           chips · items (sub-items each with its own price: chips per side, or a count select) · none
    price: unit (qty × price) · flat · brandUnit (qty × brand price) · implantBrand (implants × implant brand price) · items */
 const SECTIONS=[
- {id:'ext',t:'کشیدن دندان',kind:'teeth',n:8,price:'unit',cnt:'jaw',jmax:14},
+ {id:'ext',t:'کشیدن دندان',kind:'teeth',n:8,price:'unit',cnt:'jaw',jmax:16},
  {id:'surg',t:'جراحی دندان نهفته',kind:'items',price:'items',two:true,items:[{k:'c',l:'جراحی نیش نهفته',type:'quad',pk:'surg_c',ul:'هر دندان'},{k:'w',l:'جراحی عقل نهفته',type:'quad',pk:'surg_w',ul:'هر دندان'}]},
  {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',cnt:'jaws',jmax:14,text:'توضیحات'},
  {id:'aox',t:'All on X',kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'implantBrand',prosJaw:true,def:'19000000'},
@@ -429,7 +429,7 @@ function qty(s,x){
 function itemQty(s,it){return it.type==='count'?num(s.icnt[it.k]):Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':')).length}
 function rowTotals(r,x){const s=r.s[x.id],q=qty(s,x),o={flat:0,brand:bz()};
   if(x.price==='unit')o.flat=q*num(s.price);
-  else if(x.price==='flat')o.flat=(q||s.text||x.kind==='none')?num(s.price):0;
+  else if(x.price==='flat')o.flat=(q||(s.text||'').trim())?num(s.price):0;
   else if(x.price==='brandUnit')BRANDS.forEach(b=>o.brand[b.k]=q*num(s.bp[b.k]));
   else if(x.price==='implantBrand')BRANDS.forEach(b=>o.brand[b.k]=q*num(r.s.imp.bp[b.k]));
   if(x.prosJaw)o.pros=chipSel(s)*num(s.price);
@@ -444,7 +444,7 @@ function payText(r,brand){const T=totals(r),b=brand||r.brand,S=T.surg[b],p=r.pay
     else{const c=S*.5,m=num(p.m2);out.surg=`۵۰٪ نقد: ${fa(c)} · مانده در یک فقره چک ${fa(S-c)}`+(m?` برای ${fa(m)} ماه بعد از تاریخ جراحی`:'')}}
   if(T.pros){const c=T.pros*.3,n=num(p.n3);out.pros=`۳۰٪ نقد: ${fa(c)}`+(n?` · مانده در ${fa(n)} فقره چک به فواصل یک‌ماهه، هر چک ${fa((T.pros-c)/n)}`:` · مانده: ${fa(T.pros-c)}`)}
   return out}
-function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||teethSel(s)||s.text||(x.items&&x.items.some(it=>itemQty(s,it))))}
+function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||teethSel(s)||(x.cnt&&(num(s.jc.U)||num(s.jc.L)))||s.text||(x.items&&x.items.some(it=>itemQty(s,it))))}
 
 /* ---------- form render ---------- */
 const opts=(max,v,from=1)=>`<option value="">—</option>`+Array.from({length:max-from+1},(_,i)=>i+from).map(n=>`<option value="${n}" ${String(v)===String(n)?'selected':''}>${fa(n)}</option>`).join('');
@@ -529,11 +529,11 @@ const touch=()=>{dirty=true;if(F.status==='confirmed')F.status='modified'};
 const onKeys=m=>Object.keys(m||{}).filter(k=>m[k]);
 function secDoc(S){const s={};SECTIONS.forEach(x=>{const v=S[x.id];s[x.id]={lock:1,sel:onKeys(v.sel),text:v.text,price:v.price,bp:{...v.bp},cnt:v.cnt,jc:{...v.jc},ip:{...v.ip},isel:onKeys(v.isel),icnt:{...v.icnt}}});return s}
 function secFrom(d){const S=blankSections();SECTIONS.forEach(x=>{const v=(d||{})[x.id];if(!v)return;const t=S[x.id];
-  (v.sel||[]).forEach(k=>t.sel[k]=true);t.text=v.text||'';t.price=v.price||'';Object.assign(t.bp,v.bp||{});t.cnt=v.cnt||'';Object.assign(t.jc,v.jc||{});
+  (v.sel||[]).forEach(k=>t.sel[k]=true);t.text=v.text||'';t.price=v.price||(x.base&&!v.lock?t.price:'');Object.assign(t.bp,v.bp||{});t.cnt=v.cnt||'';Object.assign(t.jc,v.jc||{});
   Object.assign(t.ip,v.ip||{});(v.isel||[]).forEach(k=>t.isel[k]=true);Object.assign(t.icnt,v.icnt||{});
   if(x.id==='alv')(v.sel||[]).forEach(k=>{const m={'½ فک راست بالا':'q1','½ فک چپ بالا':'q2','½ فک چپ پایین':'q3','½ فک راست پایین':'q4'}[k.split(':')[1]];if(m){delete t.sel[k];t.sel[m]=true}});
   if(x.id==='surg'&&!(v.isel||[]).length)(v.sel||[]).forEach(k=>{const o=k.split(':')[1];if(o)t.isel['w:'+o]=true});
-  if(x.id==='surg'){const QM={'بالا راست':'UR','بالا چپ':'UL','پایین راست':'LR','پایین چپ':'LL'};Object.keys(t.isel).forEach(k=>{const [ik,o]=k.split(':');if(QM[o]){const on=t.isel[k];delete t.isel[k];if(on)t.isel[ik+':'+QM[o]]=true}})}
+  if(x.id==='surg'){t.sel={};const QM={'بالا راست':'UR','بالا چپ':'UL','پایین راست':'LR','پایین چپ':'LL'};Object.keys(t.isel).forEach(k=>{const [ik,o]=k.split(':');if(QM[o]){const on=t.isel[k];delete t.isel[k];if(on)t.isel[ik+':'+QM[o]]=true}})}
   const clrJ=j=>Object.keys(t.sel).forEach(k=>{if(isTooth(k)&&(!j||k[0]===j))delete t.sel[k]});
   if(x.cnt==='jaws'&&num(t.cnt)&&!num(t.jc.U)&&!num(t.jc.L)){const n=num(t.cnt);t.jc.U=String(Math.min(x.jmax,n));t.jc.L=n>x.jmax?String(Math.min(x.jmax,n-x.jmax)):'';clrJ('')}
   if(x.cnt)t.cnt='';
@@ -949,7 +949,7 @@ async function finalize(t){if(busy)return;if(!(F.h.name||'').trim()){alertMsg('�
     leaveForm(`PDF ${name} دانلود شد؛ ذخیره در پس‌زمینه انجام می‌شود.`)}
   catch(e){alertMsg('ساخت PDF ناموفق بود: '+(e&&e.message||e))}
   finally{busy=false;t.disabled=false;t.textContent=old}}
-async function doConfirm(){if(busy||!lastPDF)return;busy=true;
+async function doConfirm(){if(busy||!lastPDF)return;if(F.brand==='ref'){alertMsg('اول برند بیمار را انتخاب کنید.');return}busy=true;
   try{const wasConfirmed=F.status==='confirmed'||F.status==='modified';
     F.status='confirmed';F.jalali=lastPDF.jalali.slash;F.pdfName=lastPDF.name;if(wasConfirmed)F.edits=(F.edits||0)+1;
     const d=toDoc(F);d.updatedAt=new Date().toISOString();
@@ -1137,7 +1137,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.dataset.resend){if(!t.dataset.armed){t.dataset.armed='1';t.textContent='ارسال به '+(SET.recipient||'؟')+'؟ دوباره بزنید';setTimeout(()=>{if(t.dataset.armed){delete t.dataset.armed;t.textContent='ارسال دوباره'}},4000);return}
     delete t.dataset.armed;if(!validEmail(SET.recipient)){alertMsg('ایمیل گیرنده تعیین نشده.');return}
     t.disabled=true;t.textContent='در حال ارسال…';
-    try{const r=await fetchRecord(t.dataset.resend);const j=await api('resend',{id:r.id,mail:mailFor(r)});t.textContent=j.emailStatus==='sent'?'ارسال شد':'ارسال نشد'}
+    try{const r=await fetchRecord(t.dataset.resend);const j=await api('resend',{id:r.id,mail:mailFor(r)});t.textContent=j.emailStatus==='sent'?'ارسال شد':'ارسال نشد';if(CF_ON)await api('setFile',{id:r.id,emailStatus:j.emailStatus||'',emailError:j.emailError||''},{prio:'bg'}).catch(()=>{})}
     catch(err){t.textContent='ارسال نشد';alertMsg(err.message)}finally{t.disabled=false;loadList()}return}
   if(t.dataset.sid&&t.dataset.k){if(t.disabled)return;const s=AS()[t.dataset.sid],k=t.dataset.k,on=!s.sel[k];
     if(t.dataset.single){Object.keys(s.sel).forEach(o=>{if(!isTooth(o)&&o.split(':')[0]===t.dataset.g)s.sel[o]=false});document.querySelectorAll(`.chip[data-sid="${t.dataset.sid}"][data-g="${t.dataset.g}"]`).forEach(c=>c.setAttribute('aria-pressed','false'))}
