@@ -55,7 +55,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px soli
 .mid{width:2px;align-self:stretch;background:var(--ink);opacity:.5;border-radius:2px;margin-inline:2px}
 .t{width:32px;height:36px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer;padding:0;font-variant-numeric:tabular-nums;flex:none}
 .t[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.t:disabled{opacity:.25;cursor:not-allowed}
+.t:disabled,.chip:disabled{opacity:.25;cursor:not-allowed}
 .jcnt{direction:rtl;display:flex;flex-direction:column;align-items:stretch;width:58px;flex:none;margin-left:4px;padding-left:6px;border-left:1px dashed var(--line)}
 .jcnt small{font-size:.66rem;color:var(--muted);line-height:1.1;text-align:center}
 .jcnt select{font:inherit;font-size:.82rem;padding:2px 2px;height:26px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
@@ -71,6 +71,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px soli
 .calc{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .calc b{color:var(--ink)}
 .brands,.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tot.ref{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
 @media (max-width:520px){.brands,.totals{grid-template-columns:repeat(2,1fr)}}
 .tot{border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:2px;cursor:pointer;background:var(--bg);font:inherit;color:var(--ink);text-align:right}
 .tot[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
@@ -355,7 +356,7 @@ textarea{resize:vertical}
 /* ---------- model ---------- */
 const BRANDS=[{k:'ir',n:'ایرانی'},{k:'ko',n:'کره‌ای'},{k:'it',n:'ایتالیایی'},{k:'sw',n:'سوئیسی'}];
 const bz=f=>Object.fromEntries(BRANDS.map(b=>[b.k,f?f(b.k):0]));
-/* kinds: teeth (Palmer chart; optional cnt:'jaws' per-jaw total-count select ADDED to the selected teeth, cnt:'jaw' per-jaw Full EXT count that REPLACES and locks manual selection in that jaw; optional groups = extra chips)
+/* kinds: teeth (Palmer chart; optional cnt:'jaws' (تعداد کل) / cnt:'jaw' (Full EXT): per-jaw count that REPLACES and locks manual tooth selection in that jaw; optional groups = extra chips)
           chips · items (sub-items each with its own price: chips per side, or a count select) · none
    price: unit (qty × price) · flat · brandUnit (qty × brand price) · implantBrand (implants × implant brand price) · items */
 const SECTIONS=[
@@ -365,14 +366,14 @@ const SECTIONS=[
  {id:'aox',t:'All on X',kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'implantBrand',prosJaw:true,def:'19000000'},
  {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14,pros:true},
  {id:'gbr',t:'جراحی GBR',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
- {id:'vip',t:'جراحی VIP / GBR',kind:'items',n:7,price:'items',items:[{k:'cgf',l:'CGF',type:'count',max:28,pk:'vip_cgf'},{k:'mem',l:'ممبران و تگ',type:'count',max:28,pk:'vip_mem'}]},
+ {id:'vip',t:'جراحی VIP / GBR',kind:'items',n:7,price:'items',base:true,def:'5000000',cnt:'jaws',jmax:14,items:[{k:'cgf',l:'CGF',type:'count',max:28,pk:'vip_cgf'},{k:'mem',l:'ممبران و تگ',type:'count',max:28,pk:'vip_mem'}]},
  {id:'crw',t:'فقط روکش',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14,pros:true},
- {id:'sin',t:'سینوس لیفت',kind:'items',price:'items',two:true,items:[{k:'o',l:'سینوس باز',type:'chips',o:['راست','چپ'],pk:'sin_o'},{k:'c',l:'سینوس بسته',type:'chips',o:['راست','چپ'],pk:'sin_c'}]},
+ {id:'sin',t:'سینوس لیفت',kind:'items',price:'items',two:true,items:[{k:'o',l:'سینوس باز',type:'chips',o:['راست','چپ'],pk:'sin_o'},{k:'c',l:'سینوس بسته',type:'chips',o:['راست','چپ'],pk:'sin_c'}],excl:{'o:راست':'c:راست','c:راست':'o:راست','o:چپ':'c:چپ','c:چپ':'o:چپ'}},
  {id:'alv',t:'آلوئولوپلاستی',kind:'quad',price:'unit',ul:'هر Q'},
- {id:'ram',t:'پیوند استخوان بلاک راموس',kind:'teeth',n:7,price:'unit'},
+ {id:'ram',t:'پیوند استخوان بلاک راموس',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
  {id:'ovd',t:'اوردنچر',kind:'chips',groups:[{l:'فک بالا، تعداد پایه',o:['2','3','4','5'],single:true},{l:'فک پایین، تعداد پایه',o:['2','3','4','5'],single:true}],price:'implantBrand'},
  {id:'fgg',t:'FGG و وستیبولوپلاستی',kind:'chips',groups:[{l:'فک بالا',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']},{l:'فک پایین',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']}],text:'زمان',price:'unit'},
- {id:'tmp',t:'روکش موقت',kind:'teeth',n:7,groups:[{l:'نوع',o:['دنچر','Essix','PMMA']}],price:'unit',pros:true},
+ {id:'tmp',t:'روکش موقت',kind:'teeth',n:7,cnt:'jaws',jmax:14,groups:[{l:'نوع',o:['دنچر','Essix','PMMA']}],price:'unit',pros:true},
  {id:'cbct',t:'عکس CBCT',kind:'quad',price:'flat'},
  {id:'cons',t:'رضایت‌نامه',kind:'chips',groups:[{o:['نزدیک به عصب','دندان سالم']}]},
  {id:'anes',t:'زمان بیهوشی',kind:'none',text:'مدت',price:'flat'}
@@ -406,7 +407,7 @@ function medHTML(m){m=medNorm(m);const yn=(k)=>`<span class="yn"><button type="b
 let RC_MED=blankMed();
 const medOf=box=>box==='rc'?RC_MED:(F.med=F.med||blankMed());
 function renderMed(box){const el=$(box==='rc'?'rcMed':'fMed');if(el)el.innerHTML=medHTML(medOf(box))}
-function blankForm(){return {id:null,med:blankMed(),h:{date:jalali(new Date()).slash,doc:''},s:blankSections(),s2:null,alt:{mode:'none',text:''},brand:'ko',pay:{opt:'1',n1:'',m2:'',n3:''},status:'new'}}
+function blankForm(){return {id:null,med:blankMed(),h:{date:jalali(new Date()).slash,doc:''},s:blankSections(),s2:null,alt:{mode:'none',text:''},brand:'ref',pay:{opt:'1',n1:'',m2:'',n3:''},status:'new'}}
 let F=blankForm();
 let CUR=1; // which plan is on screen (1 or 2)
 let ARCHIVE=[];
@@ -418,10 +419,10 @@ const AS=()=>CUR===2&&F.s2?F.s2:F.s;                              // sections of
 const isTooth=k=>/^[UL][RL]\d$/.test(k);
 const teethSel=(s,j)=>Object.keys(s.sel).filter(k=>s.sel[k]&&isTooth(k)&&(!j||k[0]===j)).length;
 const chipSel=s=>Object.keys(s.sel).filter(k=>s.sel[k]&&!isTooth(k)).length;
+const teethQty=(s,x)=>x.cnt?['U','L'].reduce((a,j)=>a+(num(s.jc[j])||teethSel(s,j)),0):teethSel(s);
 function qty(s,x){
   if(x.kind==='teeth'){
-    if(x.cnt==='jaw')return ['U','L'].reduce((a,j)=>a+(num(s.jc[j])||teethSel(s,j)),0);
-    const t=x.cnt==='jaws'?['U','L'].reduce((a,j)=>a+num(s.jc[j])+teethSel(s,j),0):teethSel(s);
+    const t=teethQty(s,x);
     return t||(x.groups&&chipSel(s)?1:0)}
   if(x.price==='implantBrand')return Object.keys(s.sel).filter(k=>s.sel[k]).reduce((a,k)=>a+num(k.split(':')[1]),0);
   return chipSel(s)}
@@ -432,7 +433,7 @@ function rowTotals(r,x){const s=r.s[x.id],q=qty(s,x),o={flat:0,brand:bz()};
   else if(x.price==='brandUnit')BRANDS.forEach(b=>o.brand[b.k]=q*num(s.bp[b.k]));
   else if(x.price==='implantBrand')BRANDS.forEach(b=>o.brand[b.k]=q*num(r.s.imp.bp[b.k]));
   if(x.prosJaw)o.pros=chipSel(s)*num(s.price);
-  else if(x.price==='items')o.flat=x.items.reduce((a,it)=>a+itemQty(s,it)*num(s.ip[it.k]),0);
+  else if(x.price==='items')o.flat=x.items.reduce((a,it)=>a+itemQty(s,it)*num(s.ip[it.k]),0)+(x.base?teethQty(s,x)*num(s.price):0);
   return o}
 function totals(r){const surg=bz();let pros=0;
   SECTIONS.forEach(x=>{const t=rowTotals(r,x);pros+=t.pros||0;if(x.pros)pros+=t.flat;else BRANDS.forEach(b=>surg[b.k]+=t.flat+t.brand[b.k])});
@@ -447,8 +448,8 @@ function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||teethSel(s)||s.text|
 
 /* ---------- form render ---------- */
 const opts=(max,v,from=1)=>`<option value="">—</option>`+Array.from({length:max-from+1},(_,i)=>i+from).map(n=>`<option value="${n}" ${String(v)===String(n)?'selected':''}>${fa(n)}</option>`).join('');
-const jawLocked=(x,j)=>x.cnt==='jaw'&&!!num(AS()[x.id].jc[j]);
-function toothBtn(sid,key,label){const lk=jawLocked(SEC[sid]||{},key[0]);return `<button type="button" class="t" data-sid="${sid}" data-k="${key}" aria-pressed="${!lk&&!!AS()[sid].sel[key]}"${lk?' disabled title="Full EXT این فک انتخاب شده"':''}>${label}</button>`}
+const jawLocked=(x,j)=>!!x.cnt&&!!num(AS()[x.id].jc[j]);
+function toothBtn(sid,key,label){const lk=jawLocked(SEC[sid]||{},key[0]);return `<button type="button" class="t" data-sid="${sid}" data-k="${key}" aria-pressed="${!lk&&!!AS()[sid].sel[key]}"${lk?' disabled title="تعداد کل این فک انتخاب شده"':''}>${label}</button>`}
 function jawCntHTML(x,j){if(x.cnt!=='jaw'&&x.cnt!=='jaws')return '';const s=AS()[x.id];
   return `<label class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small><select data-jc="${x.id}" data-j="${j}" aria-label="${x.cnt==='jaw'?'Full EXT':'تعداد کل'} فک ${j==='U'?'بالا':'پایین'}">${opts(x.jmax,s.jc[j])}</select></label>`}
 function chartHTML(x){const hc=x.cnt==='jaw'||x.cnt==='jaws';let h=`<div class="chart"><div class="chart-in${hc?' hascnt':''}">`;
@@ -458,7 +459,7 @@ function chartHTML(x){const hc=x.cnt==='jaw'||x.cnt==='jaws';let h=`<div class="
 function cntHTML(x){const s=AS()[x.id];
   if(x.cnt==='one')return `<div class="fields"><label class="f">تعداد کل (به جای انتخاب تک‌تک دندان‌ها)<select data-cnt="${x.id}">${opts(x.max,s.cnt)}</select></label></div>`;
   if(x.cnt==='jaw')return '<p class="note">با انتخاب Full EXT برای هر فک، دندان‌های همان فک قفل می‌شوند.</p>';
-  if(x.cnt==='jaws')return '<p class="note">«تعداد کل» هر فک با دندان‌های انتخاب‌شده جمع می‌شود.</p>';
+  if(x.cnt==='jaws')return '<p class="note">با انتخاب «تعداد کل» برای هر فک، دندان‌های همان فک قفل می‌شوند.</p>';
   return ''}
 function chipsHTML(x){return x.groups.map((g,gi)=>`<div class="grp">${g.l?`<span>${g.l}</span>`:''}<div class="chips">${g.o.map(o=>{const k=gi+':'+o;return `<button type="button" class="chip" data-sid="${x.id}" data-k="${esc(k)}" data-g="${gi}" ${g.single?'data-single="1"':''} aria-pressed="${!!AS()[x.id].sel[k]}">${o}</button>`}).join('')}</div></div>`).join('')}
 const IQUADS=[['UR','بالا · راست بیمار'],['UL','بالا · چپ بیمار'],['LR','پایین · راست بیمار'],['LL','پایین · چپ بیمار']];
@@ -467,7 +468,7 @@ function quadHTML(x){const s=AS()[x.id];return `<div class="quad">${QUADS.map(([
 function itemsHTML(x){const s=AS()[x.id];
   return `<div class="items${x.two?' two':''}">${x.items.map(it=>`<div class="item-box"><b>${it.l}</b>
     ${it.type==='quad'?`<div class="quad">${IQUADS.map(([q,t])=>`<button type="button" class="qd" data-isid="${x.id}" data-ik="${it.k}:${q}" title="${t}" aria-pressed="${!!s.isel[it.k+':'+q]}">${q}</button>`).join('')}</div><div class="sides quad-sides"><span>راست بیمار</span><span>چپ بیمار</span></div>`
-      :it.type==='chips'?`<div class="chips">${it.o.map(o=>`<button type="button" class="chip" data-isid="${x.id}" data-ik="${esc(it.k+':'+o)}" aria-pressed="${!!s.isel[it.k+':'+o]}">${o}</button>`).join('')}</div>`
+      :it.type==='chips'?`<div class="chips">${it.o.map(o=>`<button type="button" class="chip" data-isid="${x.id}" data-ik="${esc(it.k+':'+o)}" aria-pressed="${!!s.isel[it.k+':'+o]}"${x.excl&&s.isel[x.excl[it.k+':'+o]]?' disabled':''}>${o}</button>`).join('')}</div>`
       :`<label class="f">تعداد<select data-icnt="${x.id}" data-ik="${it.k}">${opts(it.max,s.icnt[it.k])}</select></label>`}
     <label class="f">قیمت ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}<input class="price" inputmode="numeric" data-ip="${x.id}" data-ik="${it.k}" value="${esc(s.ip[it.k])}"></label>
     <div class="calc" id="icalc_${x.id}_${it.k}"></div></div>`).join('')}</div>`}
@@ -479,7 +480,7 @@ function priceHTML(x){const s=AS()[x.id];
   return `<label class="f">${x.price==='unit'?'قیمت '+(x.ul||'هر واحد'):'قیمت'}<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label>`}
 function sectionHTML(x){const s=AS()[x.id];
   const tag=x.pros?'<span class="tag p">پروتز</span>':(x.price?'<span class="tag">جراحی</span>':'');
-  return `<section class="card"><h2>${x.t}${tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x):x.kind==='chips'?chipsHTML(x):x.kind==='items'?(x.n?chartHTML(x):'')+itemsHTML(x):x.kind==='quad'?quadHTML(x):''}
+  return `<section class="card"><h2>${x.t}${tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x):x.kind==='chips'?chipsHTML(x):x.kind==='items'?(x.n?chartHTML(x)+cntHTML(x):'')+(x.base?`<label class="f">قیمت جراحی هر واحد<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="bcalc_${x.id}"></div>`:'')+itemsHTML(x):x.kind==='quad'?quadHTML(x):''}
     ${x.text?`<label class="f">${x.text}<input id="tx_${x.id}" data-tx="${x.id}" value="${esc(s.text)}"></label>`:''}
     ${priceHTML(x)}<div class="calc" id="calc_${x.id}"></div></section>`}
 function renderForm(){
@@ -507,15 +508,16 @@ function recalc(){const pv={s:AS(),brand:F.brand,pay:F.pay};
     else if((x.price==='brandUnit'||x.price==='implantBrand')&&q){const t=rowTotals(pv,x).brand;el.innerHTML=`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'} · `+BRANDS.map(b=>`${b.n} <b>${fa(t[b.k])}</b>`).join(' · ')}
     else if(x.kind==='teeth')el.textContent=q?`${fa(q)} واحد`:'';else el.textContent='';
     if(x.prosJaw){const e3=document.getElementById('pcalc_'+x.id),j=chipSel(s);if(e3)e3.innerHTML=j?`پروتز: ${fa(j)} فک × ${fa(num(s.price))} = <b>${fa(j*num(s.price))}</b>`:''}
+    if(x.base){const e4=document.getElementById('bcalc_'+x.id),bq=teethQty(s,x);if(e4)e4.innerHTML=bq?`${fa(bq)} واحد × ${fa(num(s.price))} = <b>${fa(bq*num(s.price))}</b>`:''}
     (x.items||[]).forEach(it=>{const e2=document.getElementById(`icalc_${x.id}_${it.k}`);if(!e2)return;const iq=itemQty(s,it),u=num(s.ip[it.k]);e2.innerHTML=iq?`${fa(iq)} × ${fa(u)} = <b>${fa(iq*u)}</b>`:''})});
   if(!(CUR===2&&F.alt.mode==='text')){
-    const T=totals(pv),b=F.brand,bn=BRANDS.find(x=>x.k===b).n;
+    const T=totals(pv),b=F.brand,REF=b==='ref',bn=REF?'ارجاع به مشاور':BRANDS.find(x=>x.k===b).n,mn=Math.min(...BRANDS.map(x=>T.surg[x.k])),mx=Math.max(...BRANDS.map(x=>T.surg[x.k])),rng=(a,c)=>a===c?fa(a):fa(a)+' تا '+fa(c);
     document.getElementById('totTitle').textContent=CUR===2?'جمع کل طرح دوم':'جمع کل درمان';
-    document.getElementById('brandTotals').innerHTML=BRANDS.map(x=>`<button type="button" class="tot" data-brand="${x.k}" aria-pressed="${x.k===b}"><small>${x.n}</small><b>${fa(T.surg[x.k]+T.pros)}</b><small>نقد: ${fa(cashFor(pv,T.surg[x.k],T.pros))}</small></button>`).join('');
-    document.getElementById('t_surg').textContent=fa(T.surg[b])+' · '+bn;
+    document.getElementById('brandTotals').innerHTML=BRANDS.map(x=>`<button type="button" class="tot" data-brand="${x.k}" aria-pressed="${x.k===b}"><small>${x.n}</small><b>${fa(T.surg[x.k]+T.pros)}</b><small>نقد: ${fa(cashFor(pv,T.surg[x.k],T.pros))}</small></button>`).join('')+`<button type="button" class="tot ref" data-brand="ref" aria-pressed="${REF}"><small>انتخاب برند</small><b>ارجاع به مشاور</b><small>مشاور برند را انتخاب می‌کند</small></button>`;
+    document.getElementById('t_surg').textContent=REF?rng(mn,mx)+' · '+bn:fa(T.surg[b])+' · '+bn;
     document.getElementById('t_pros').textContent=fa(T.pros);
-    document.getElementById('t_all').textContent=fa(T.surg[b]+T.pros);
-    document.getElementById('barTotal').textContent=fa(T.surg[b]+T.pros)+' تومان';
+    document.getElementById('t_all').textContent=REF?rng(mn+T.pros,mx+T.pros):fa(T.surg[b]+T.pros);
+    document.getElementById('barTotal').textContent=(REF?rng(mn+T.pros,mx+T.pros):fa(T.surg[b]+T.pros))+' تومان';
     document.getElementById('barLbl').textContent=(CUR===2?'طرح ۲ · ':'')+'جمع کل · '+bn;
     const pt=payText(pv);document.getElementById('paySurg').textContent=pt.surg;document.getElementById('payPros').textContent=pt.pros}
   const p=F.pay;document.querySelectorAll('#payOpt .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.opt===p.opt));
@@ -525,19 +527,21 @@ const touch=()=>{dirty=true;if(F.status==='confirmed')F.status='modified'};
 
 /* ---------- serialization (db stores selections as arrays) ---------- */
 const onKeys=m=>Object.keys(m||{}).filter(k=>m[k]);
-function secDoc(S){const s={};SECTIONS.forEach(x=>{const v=S[x.id];s[x.id]={sel:onKeys(v.sel),text:v.text,price:v.price,bp:{...v.bp},cnt:v.cnt,jc:{...v.jc},ip:{...v.ip},isel:onKeys(v.isel),icnt:{...v.icnt}}});return s}
+function secDoc(S){const s={};SECTIONS.forEach(x=>{const v=S[x.id];s[x.id]={lock:1,sel:onKeys(v.sel),text:v.text,price:v.price,bp:{...v.bp},cnt:v.cnt,jc:{...v.jc},ip:{...v.ip},isel:onKeys(v.isel),icnt:{...v.icnt}}});return s}
 function secFrom(d){const S=blankSections();SECTIONS.forEach(x=>{const v=(d||{})[x.id];if(!v)return;const t=S[x.id];
   (v.sel||[]).forEach(k=>t.sel[k]=true);t.text=v.text||'';t.price=v.price||'';Object.assign(t.bp,v.bp||{});t.cnt=v.cnt||'';Object.assign(t.jc,v.jc||{});
   Object.assign(t.ip,v.ip||{});(v.isel||[]).forEach(k=>t.isel[k]=true);Object.assign(t.icnt,v.icnt||{});
   if(x.id==='alv')(v.sel||[]).forEach(k=>{const m={'½ فک راست بالا':'q1','½ فک چپ بالا':'q2','½ فک چپ پایین':'q3','½ فک راست پایین':'q4'}[k.split(':')[1]];if(m){delete t.sel[k];t.sel[m]=true}});
   if(x.id==='surg'&&!(v.isel||[]).length)(v.sel||[]).forEach(k=>{const o=k.split(':')[1];if(o)t.isel['w:'+o]=true});
   if(x.id==='surg'){const QM={'بالا راست':'UR','بالا چپ':'UL','پایین راست':'LR','پایین چپ':'LL'};Object.keys(t.isel).forEach(k=>{const [ik,o]=k.split(':');if(QM[o]){const on=t.isel[k];delete t.isel[k];if(on)t.isel[ik+':'+QM[o]]=true}})}
-  if(x.cnt==='jaws'&&num(t.cnt)&&!num(t.jc.U)&&!num(t.jc.L)){const extra=Math.max(0,num(t.cnt)-teethSel(t));t.jc.U=extra?String(Math.min(x.jmax,extra)):'';t.jc.L=extra>x.jmax?String(Math.min(x.jmax,extra-x.jmax)):''}
-  if(x.cnt==='jaws')t.cnt='';
-  if(x.cnt==='jaw')['U','L'].forEach(j=>{if(num(t.jc[j]))Object.keys(t.sel).forEach(k=>{if(isTooth(k)&&k[0]===j)delete t.sel[k]})})});return S}
+  const clrJ=j=>Object.keys(t.sel).forEach(k=>{if(isTooth(k)&&(!j||k[0]===j))delete t.sel[k]});
+  if(x.cnt==='jaws'&&num(t.cnt)&&!num(t.jc.U)&&!num(t.jc.L)){const n=num(t.cnt);t.jc.U=String(Math.min(x.jmax,n));t.jc.L=n>x.jmax?String(Math.min(x.jmax,n-x.jmax)):'';clrJ('')}
+  if(x.cnt)t.cnt='';
+  if(x.cnt)['U','L'].forEach(j=>{if(num(t.jc[j])){if(x.cnt==='jaws'&&!v.lock)t.jc[j]=String(Math.min(x.jmax,num(t.jc[j])+teethSel(t,j)));clrJ(j)}});
+  if(x.excl)Object.keys(x.excl).forEach(k=>{if(t.isel[k]&&t.isel[x.excl[k]]&&k[0]==='c')t.isel[k]=false})});return S}
 function toDoc(r){const o={h:{...r.h},med:medNorm(r.med),s:secDoc(r.s),s2:r.alt.mode==='full'&&r.s2?secDoc(r.s2):null,alt:{...r.alt},brand:r.brand,pay:{...r.pay},status:r.status==='new'?'draft':r.status};
   ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt','note'].forEach(k=>{if(r[k]!==undefined)o[k]=r[k]});return o}
-function fromDoc(id,d){const r=blankForm();r.id=id;Object.assign(r.h,d.h||{});r.med=medNorm(d.med);r.brand=d.brand||'ko';Object.assign(r.pay,d.pay||{});r.status=d.status||'draft';
+function fromDoc(id,d){const r=blankForm();r.id=id;Object.assign(r.h,d.h||{});r.med=medNorm(d.med);r.brand=d.brand||(d.s?'ko':'ref');Object.assign(r.pay,d.pay||{});r.status=d.status||'draft';
   r.s=secFrom(d.s);r.alt=Object.assign({mode:'none',text:''},d.alt||{});r.s2=r.alt.mode==='full'?secFrom(d.s2):null;if(r.alt.mode==='full'&&!d.s2)r.alt.mode='none';
   ['jalali','confirmedAt','pdfName','emailStatus','emailTo','emailError','emailedAt','edits','createdAt','note'].forEach(k=>{if(d[k]!==undefined)r[k]=d[k]});return r}
 /* local safety copy of the open patient (survives reloads, flaky internet, re-opening) */
@@ -554,7 +558,7 @@ function newestDoc(id,serverDoc){let best=serverDoc,bt=serverDoc&&serverDoc.upda
   OUTBOX.filter(o=>o.id===id&&o.payload&&o.payload.record).forEach(o=>{const d=o.payload.record.data;if(d&&(d.updatedAt||'')>bt){best=d;bt=d.updatedAt}});
   const l=ldGet(id);if(l&&(l.updatedAt||'')>bt){best=l;bt=l.updatedAt}
   return best===serverDoc?null:best}
-const planTotal=r=>{const T0=totals(PV(r,1));return T0.surg[r.brand]+T0.pros};
+const planTotal=r=>{const T0=totals(PV(r,1));return (r.brand==='ref'?Math.min(...BRANDS.map(b=>T0.surg[b.k])):T0.surg[r.brand])+T0.pros};
 async function saveRecord(r){const d=toDoc(r);d.updatedAt=new Date().toISOString();
   const j=await api('save',{record:{id:r.id,data:d,name:(r.h.name||'').trim(),nid:r.h.nid||'',status:d.status,total:planTotal(r)}});
   r.id=j.id;dirty=false;ldDel(r.id);const q=QITEMS.find(v=>v.id===r.id);if(q){if(q.status==='queued')q.status='draft';q.data=d}return j}
@@ -585,7 +589,7 @@ function drawChipLines(draws,lines,mh){lines.forEach((ln,li)=>{const yy=mh+li*36
 function priceLines(r,x){const s=r.s[x.id],q=qty(s,x),L=[];if(!x.price)return L;
   if(x.price==='unit'){const u=num(s.price);if(q&&u){L.push({t:`${fa(q)} ${x.kind==='quad'?'Q':'واحد'} × ${fa(u)}`,c:'#444',s:18});L.push({t:fa(q*u),b:1})}}
   else if(x.price==='flat'){const v=rowTotals(r,x).flat;if(v)L.push({t:fa(v),b:1})}
-  else if(x.price==='items'){let sum=0;x.items.forEach(it=>{const iq=itemQty(s,it),u=num(s.ip[it.k]);if(iq&&u){sum+=iq*u;L.push({t:`${it.l}: ${fa(iq)}×${fa(u)}`,c:'#444',s:17})}});if(sum)L.push({t:fa(sum),b:1})}
+  else if(x.price==='items'){let sum=0;if(x.base){const bq=teethQty(s,x),u=num(s.price);if(bq&&u){sum+=bq*u;L.push({t:`جراحی: ${fa(bq)}×${fa(u)}`,c:'#444',s:17})}}x.items.forEach(it=>{const iq=itemQty(s,it),u=num(s.ip[it.k]);if(iq&&u){sum+=iq*u;L.push({t:`${it.l}: ${fa(iq)}×${fa(u)}`,c:'#444',s:17})}});if(sum)L.push({t:fa(sum),b:1})}
   else{const t=rowTotals(r,x).brand;if(x.prosJaw&&chipSel(s)&&num(s.price))L.push({t:`پروتز: ${fa(chipSel(s))} فک × ${fa(num(s.price))}`,c:'#444',s:17});if(q)L.push({t:`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'}`,c:'#444',s:17});BRANDS.forEach(b=>{if(t[b.k])L.push({t:`${b.n}: ${fa(t[b.k])}`,b:b.k===r.brand,s:b.k===r.brand?19:17,c:b.k===r.brand?INK:'#555'})})}
   return L}
 
@@ -652,7 +656,7 @@ function totalsBlock(r,title){const T0=totals(r),rows=BRANDS.map(b=>({b,s:T0.sur
     rows.forEach((x,i)=>{const y=y0+rh*(i+1),on=x.b.k===r.brand;if(on)box(cx,C.L,y,C.R-C.L,rh,FAINT);
       T(cx,x.b.n+(on?'  (انتخاب بیمار)':''),cols[0]-14,y+rh/2,{s:19,w:on?800:500});[x.s,x.p,x.t,x.c].forEach((v,j)=>T(cx,fa(v),cols[j+1]-14,y+rh/2,{s:j===2?21:19,w:j===2||on?800:400}))});
     box(cx,C.L,y0,C.R-C.L,rh*(rows.length+1),null,RULE,1.2);cols.slice(1,5).forEach(xx=>{cx.fillStyle='#bbb';cx.fillRect(xx,y0,1,rh*(rows.length+1))})}}}
-function payBlock(r){const pt=payText(r),bn=BRANDS.find(b=>b.k===r.brand).n,L=[];
+function payBlock(r){const pt=payText(r),bn=(BRANDS.find(b=>b.k===r.brand)||{n:'ارجاع به مشاور'}).n,L=[];
   if(pt.surg)L.push(`پارت جراحی (${bn}): ${pt.surg}`);if(pt.pros)L.push(`پارت پروتز: ${pt.pros}`);if(!L.length)L.push('—');
   L.push(r.pay.opt==='1'?'برای سایر برندها هم پیش‌پرداخت: ۳۰٪ پارت جراحی + ۳۰٪ پارت پروتز (ستون آخر جدول).':'برای سایر برندها هم پیش‌پرداخت: ۵۰٪ پارت جراحی + ۳۰٪ پارت پروتز (ستون آخر جدول).');
   return textBlock('شرایط پرداخت',L)}
@@ -934,6 +938,7 @@ function sendToConsult(t){if(!(F.h.name||'').trim()){alertMsg('نام بیمار
   leaveForm(`طرح درمان ${name} برای مشاور فرستاده شد.`)}
 /* consultant: final approval → PDF downloads on this device now; Drive + email in the background */
 async function finalize(t){if(busy)return;if(!(F.h.name||'').trim()){alertMsg('نام بیمار را وارد کنید.');return}
+  if(F.brand==='ref'){alertMsg('برند ایمپلنت انتخاب نشده (ارجاع به مشاور). اول در «جمع کل درمان» برند بیمار را انتخاب کنید.');const bt=$('brandTotals');if(bt)bt.scrollIntoView({behavior:'smooth',block:'center'});return}
   busy=true;const old=t.textContent;t.disabled=true;t.textContent='در حال ساخت PDF…';
   try{const j=jalali(new Date()),fname=`${safeName(F.h.name)} - ${j.dash}.pdf`;
     const wasConfirmed=F.status==='confirmed'||F.status==='modified';
@@ -989,7 +994,7 @@ const unitLbl=x=>x.ul?' · '+x.ul:(x.price==='unit'||x.price==='brandUnit'?' · 
 function renderPriceSettings(){const P=SET.prices||{};const inp=(k,v,b)=>`<input class="price" inputmode="numeric" data-tp="${k}" ${b?`data-tb="${b}"`:''} value="${esc(fmtInput(v))}">`;
   $('set_prices').innerHTML=SECTIONS.filter(x=>x.price&&(x.price!=='implantBrand'||x.prosJaw)).map(x=>{const t=P[x.id]||{},bp=t.bp||{};
     if(x.prosJaw)return `<div class="grp"><span>${x.t} · پروتز هر فک</span>${inp(x.id,t.price||x.def)}</div>`;
-    if(x.price==='items')return x.items.map(it=>`<div class="grp"><span>${x.t===it.l?'':x.t+' · '}${it.l} · ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}</span>${inp(it.pk,(P[it.pk]||{}).price)}</div>`).join('');
+    if(x.price==='items')return (x.base?`<div class="grp"><span>${x.t} · قیمت جراحی هر واحد</span>${inp(x.id,t.price||x.def)}</div>`:'')+x.items.map(it=>`<div class="grp"><span>${x.t===it.l?'':x.t+' · '}${it.l} · ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}</span>${inp(it.pk,(P[it.pk]||{}).price)}</div>`).join('');
     const inner=x.price==='brandUnit'?`<div class="brands">${BRANDS.map(b=>`<label class="f">${b.n}${inp(x.id,bp[b.k],b.k)}</label>`).join('')}</div>`:inp(x.id,t.price);
     return `<div class="grp"><span>${x.t}${unitLbl(x)}${x.pros?' (پروتز)':''}</span>${inner}</div>`}).join('')+'<p class="note">اوردنچر از تعرفه‌ی «پایه ایمپلنت» هر برند حساب می‌شود.</p>'}
 function readPriceSettings(){const P={};document.querySelectorAll('#set_prices [data-tp]').forEach(i=>{const id=i.dataset.tp;P[id]=P[id]||{price:'',bp:{}};
@@ -1137,7 +1142,8 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.dataset.sid&&t.dataset.k){if(t.disabled)return;const s=AS()[t.dataset.sid],k=t.dataset.k,on=!s.sel[k];
     if(t.dataset.single){Object.keys(s.sel).forEach(o=>{if(!isTooth(o)&&o.split(':')[0]===t.dataset.g)s.sel[o]=false});document.querySelectorAll(`.chip[data-sid="${t.dataset.sid}"][data-g="${t.dataset.g}"]`).forEach(c=>c.setAttribute('aria-pressed','false'))}
     s.sel[k]=on;t.setAttribute('aria-pressed',on);touch();recalc();return}
-  if(t.dataset.isid){const s=AS()[t.dataset.isid],k=t.dataset.ik,on=!s.isel[k];s.isel[k]=on;t.setAttribute('aria-pressed',on);touch();recalc();return}
+  if(t.dataset.isid){if(t.disabled)return;const x=SEC[t.dataset.isid],s=AS()[t.dataset.isid],k=t.dataset.ik,on=!s.isel[k];s.isel[k]=on;t.setAttribute('aria-pressed',on);
+    if(x.excl&&x.excl[k]){const o=x.excl[k];if(on)s.isel[o]=false;const ob=document.querySelector(`[data-isid="${x.id}"][data-ik="${o}"]`);if(ob){ob.disabled=on;if(on)ob.setAttribute('aria-pressed','false')}}touch();recalc();return}
   if(t.dataset.plan){CUR=Number(t.dataset.plan);renderForm();window.scrollTo(0,0);return}
   if(t.id==='altAdd'){$('aSheet').hidden=false;return}
   if(t.dataset.alt){$('aSheet').hidden=true;F.alt.mode=t.dataset.alt;if(F.alt.mode==='full')F.s2=secFrom(secDoc(F.s));CUR=2;touch();renderForm();window.scrollTo(0,0);return}
@@ -1166,8 +1172,8 @@ document.addEventListener('input',e=>{const i=e.target;if(i.dataset.tp){i.value=
   if(i.id&&i.id.startsWith('p_')){F.pay[i.id.slice(2)]=i.value;touch();recalc()}});
 document.addEventListener('change',e=>{const i=e.target;if(i.tagName!=='SELECT')return;
   if(i.dataset.cnt){AS()[i.dataset.cnt].cnt=i.value}else if(i.dataset.jc){const sid=i.dataset.jc,j=i.dataset.j,sc=AS()[sid];sc.jc[j]=i.value;
-    if(SEC[sid].cnt==='jaw'){const lk=!!num(i.value);if(lk)Object.keys(sc.sel).forEach(k=>{if(isTooth(k)&&k[0]===j)delete sc.sel[k]});
-      document.querySelectorAll(`.t[data-sid="${sid}"][data-k^="${j}"]`).forEach(b=>{b.disabled=lk;if(lk){b.setAttribute('aria-pressed','false');b.title='Full EXT این فک انتخاب شده'}else b.removeAttribute('title')})}}else if(i.dataset.icnt){AS()[i.dataset.icnt].icnt[i.dataset.ik]=i.value}else return;
+    if(SEC[sid].cnt){const lk=!!num(i.value);if(lk)Object.keys(sc.sel).forEach(k=>{if(isTooth(k)&&k[0]===j)delete sc.sel[k]});
+      document.querySelectorAll(`.t[data-sid="${sid}"][data-k^="${j}"]`).forEach(b=>{b.disabled=lk;if(lk){b.setAttribute('aria-pressed','false');b.title='تعداد کل این فک انتخاب شده'}else b.removeAttribute('title')})}}else if(i.dataset.icnt){AS()[i.dataset.icnt].icnt[i.dataset.ik]=i.value}else return;
   touch();recalc()});
 window.addEventListener('beforeunload',e=>{if(dirty||OUTBOX.length){e.preventDefault();e.returnValue=''}});
 
