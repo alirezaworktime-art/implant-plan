@@ -158,6 +158,7 @@ textarea{resize:vertical}
 .yn button[aria-pressed="true"][data-mv="1"]{background:var(--warn);color:#fff;font-weight:800}
 .mrow input{flex:1 1 100%;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.msub{flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap}.msub .chip{font-size:.82rem;padding:4px 10px}
 @media (max-width:560px){.mgrid{grid-template-columns:1fr}}
 .pwshow{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;white-space:nowrap;width:max-content;font-size:.85rem;color:var(--muted);cursor:pointer;margin-top:-2px}
 .pwshow input{width:18px!important;height:18px;flex:none;margin:0;padding:0}
@@ -394,16 +395,21 @@ function blankSections(){const s={},P=(SET&&SET.prices)||{};SECTIONS.forEach(x=>
   return s}
 /* medical history (filled at reception; default = No) */
 const MED_Q=[['cur','آیا در حال حاضر مبتلا به بیماری خاصی هستید؟'],['drug','آیا تحت درمان دارویی بوده یا هستید؟'],['dent','آیا در درمان‌های دندانپزشکی دچار مشکل شده‌اید؟'],['alg','آیا به دارو یا غذایی حساسیت داشته‌اید؟'],['hosp','آیا سابقه‌ی بستری در بیمارستان دارید؟']];
-const MED_D=[['heart','بیماری قلبی'],['asthma','تنگی نفس (آسم)'],['infect','بیماری‌های عفونی'],['hep','زردی، یرقان، هپاتیت'],['thyroid','تیروئید'],['diab','بیماری قند (دیابت)'],['preg','بارداری'],['bp','فشار خون'],['addict','اعتیاد'],['blood','بیماری‌های خونی'],['gi','بیماری گوارشی'],['liver','بیماری کبدی'],['tb','سل'],['neuro','بیماری‌های عصبی (تشنج، صرع…)'],['aids','ایدز'],['joint','درد مفاصل'],['rheum','تب روماتیسمی']];
+const YR=['کمتر از یک سال','بیشتر از یک سال'];
+const MED_D=[['diab','دیابت',['قند ناشتا بالای ۱۸۰','قند ناشتا زیر ۱۸۰']],['bp','فشار خون'],['angio','سابقه جراحی آنژیوگرافی',YR],['ohs','عمل قلب باز',YR],['chemo','سابقه شیمی‌درمانی یا پرتودرمانی'],['cort','مصرف داروهای کورتون'],['resp','بیماری تنفسی'],['seiz','سابقه تشنج']];
+/* items of the previous form (kept only so older records still show what was recorded) */
+const MED_OLD=[['heart','بیماری قلبی'],['asthma','تنگی نفس (آسم)'],['infect','بیماری‌های عفونی'],['hep','زردی، یرقان، هپاتیت'],['thyroid','تیروئید'],['diab','بیماری قند (دیابت)'],['preg','بارداری'],['bp','فشار خون'],['addict','اعتیاد'],['blood','بیماری‌های خونی'],['gi','بیماری گوارشی'],['liver','بیماری کبدی'],['tb','سل'],['neuro','بیماری‌های عصبی (تشنج، صرع…)'],['aids','ایدز'],['joint','درد مفاصل'],['rheum','تب روماتیسمی']];
 const blankMed=()=>({y:{},t:{},other:''});
 function medNorm(m){m=m||{};return {y:{...(m.y||{})},t:{...(m.t||{})},other:m.other||''}}
 function medList(m){m=medNorm(m);const L=[];MED_Q.forEach(([k,l])=>{if(m.y[k])L.push(l.replace(/^آیا /,'').replace(/؟$/,'')+((m.t[k]||'').trim()?': '+m.t[k].trim():''))});
-  const d=MED_D.filter(([k])=>m.y[k]).map(([,l])=>l);if(d.length)L.push('مبتلا: '+d.join('، '));if(m.other.trim())L.push('بیماری‌های دیگر: '+m.other.trim());return L}
-function medShort(m){m=medNorm(m);const a=MED_D.filter(([k])=>m.y[k]).map(([,l])=>l);if(m.y.alg)a.push('حساسیت'+(m.t.alg?' ('+m.t.alg+')':''));MED_Q.forEach(([k,l])=>{if(k!=='alg'&&m.y[k])a.push(l.replace(/^آیا /,'').replace(/؟$/,''))});if(m.other.trim())a.push(m.other.trim());return a.join('، ')}
+  const d=medDis(m);if(d.length)L.push('مبتلا: '+d.join('، '));if(m.other.trim())L.push('توضیحات: '+m.other.trim());return L}
+const medDis=m=>MED_D.filter(([k])=>m.y[k]).map(([k,l,o])=>l+(o&&m.t[k]?' ('+m.t[k]+')':'')).concat(MED_OLD.filter(([k])=>m.y[k]&&!MED_D.some(x=>x[0]===k)).map(([,l])=>l));
+function medShort(m){m=medNorm(m);const a=medDis(m);if(m.y.alg)a.push('حساسیت'+(m.t.alg?' ('+m.t.alg+')':''));MED_Q.forEach(([k,l])=>{if(k!=='alg'&&m.y[k])a.push(l.replace(/^آیا /,'').replace(/؟$/,''))});if(m.other.trim())a.push(m.other.trim());return a.join('، ')}
 function medHTML(m){m=medNorm(m);const yn=(k)=>`<span class="yn"><button type="button" data-mk="${k}" data-mv="0" aria-pressed="${!m.y[k]}">خیر</button><button type="button" data-mk="${k}" data-mv="1" aria-pressed="${!!m.y[k]}">بله</button></span>`;
   return `<h3>وضعیت عمومی بیمار</h3>`+MED_Q.map(([k,l])=>`<div class="mrow"><span>${l}</span>${yn(k)}${m.y[k]?`<input data-mt="${k}" value="${esc(m.t[k]||'')}" placeholder="${k==='hosp'?'به چه علت؟':'توضیح'}">`:''}</div>`).join('')+
-    `<h3>آیا به هیچ‌کدام از حالات و بیماری‌های زیر مبتلا بوده یا هستید؟</h3><div class="mgrid">`+MED_D.map(([k,l])=>`<div class="mrow"><span>${l}</span>${yn(k)}</div>`).join('')+`</div>`+
-    `<label class="f full" style="margin-top:8px">بیماری‌های دیگر<textarea data-mo rows="2" placeholder="بیماری‌هایی که در لیست نیست">${esc(m.other)}</textarea></label>`}
+    `<h3>آیا به هیچ‌کدام از حالات و بیماری‌های زیر مبتلا بوده یا هستید؟</h3><div class="mgrid">`+MED_D.map(([k,l,o])=>`<div class="mrow"><span>${l}</span>${yn(k)}${o&&m.y[k]?`<span class="msub">${o.map(v=>`<button type="button" class="chip" data-ms="${k}" data-msv="${esc(v)}" aria-pressed="${m.t[k]===v}">${v}</button>`).join('')}</span>`:''}</div>`).join('')+`</div>`+
+    (MED_OLD.some(([k])=>m.y[k]&&!MED_D.some(x=>x[0]===k))?`<p class="note">ثبت‌شده در فرم قبلی: ${MED_OLD.filter(([k])=>m.y[k]&&!MED_D.some(x=>x[0]===k)).map(([,l])=>l).join('، ')}</p>`:'')+
+    `<label class="f full" style="margin-top:8px">توضیحات<textarea data-mo rows="2" placeholder="بیماری یا نکته‌ای که در لیست نیست">${esc(m.other)}</textarea></label>`}
 let RC_MED=blankMed();
 const medOf=box=>box==='rc'?RC_MED:(F.med=F.med||blankMed());
 function renderMed(box){const el=$(box==='rc'?'rcMed':'fMed');if(el)el.innerHTML=medHTML(medOf(box))}
@@ -1159,6 +1165,8 @@ $('lg_pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 renderMed('rc');
 $('lgShow').addEventListener('change',e=>{$('lg_pw').type=e.target.checked?'text':'password'});
 /* medical-history yes/no, details, other */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-ms]');if(!b)return;const bx=b.closest('[data-medbox]');if(!bx)return;const box=bx.dataset.medbox,m=medOf(box),k=b.dataset.ms,v=b.dataset.msv;
+  m.t[k]=m.t[k]===v?'':v;if(box==='f')dirty=true;bx.querySelectorAll(`[data-ms="${k}"]`).forEach(c=>c.setAttribute('aria-pressed',m.t[k]===c.dataset.msv))});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-mk]');if(!b)return;const box=b.closest('[data-medbox]').dataset.medbox,m=medOf(box),k=b.dataset.mk;
   const on=b.dataset.mv==='1';if(!!m.y[k]===on)return;if(on)m.y[k]=1;else{delete m.y[k];delete m.t[k]}if(box==='f')dirty=true;renderMed(box);if(on&&box&&MED_Q.some(q=>q[0]===k)){const i=document.querySelector(`#${box==='rc'?'rcMed':'fMed'} [data-mt="${k}"]`);if(i)i.focus()}});
 document.addEventListener('input',e=>{const t=e.target,bx=t.closest&&t.closest('[data-medbox]');if(!bx)return;const m=medOf(bx.dataset.medbox);
