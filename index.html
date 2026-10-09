@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>طرح درمان ایمپلنت</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#17624f">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="طرح درمان">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
@@ -157,6 +165,8 @@ textarea{resize:vertical}
 .yn button[aria-pressed="true"][data-mv="0"]{background:var(--line);color:var(--ink);font-weight:700}
 .yn button[aria-pressed="true"][data-mv="1"]{background:var(--warn);color:#fff;font-weight:800}
 .mrow input{flex:1 1 100%;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.appget{margin-top:14px;font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--line);padding-top:10px}
+.appget a,.appget button{color:var(--accent);font:inherit;font-weight:700;background:none;border:0;padding:0;cursor:pointer;text-align:right}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
 .msub{flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap}.msub .chip{font-size:.82rem;padding:4px 10px}
 @media (max-width:560px){.mgrid{grid-template-columns:1fr}}
@@ -205,6 +215,7 @@ textarea{resize:vertical}
     <label class="pwshow"><input type="checkbox" id="lgShow"> نمایش رمز عبور</label>
     <div class="msg" id="lgMsg"></div>
     <div class="btns"><button class="btn" id="lgGo" type="button">ورود</button></div>
+    <div class="appget" id="appGet"></div>
   </section>
 
   <!-- doctor inbox -->
@@ -969,8 +980,12 @@ async function doConfirm(){if(busy||!lastPDF)return;if(F.brand==='ref'){alertMsg
     if(ROLE==='doctor'){show('queue');renderQ()}else show('list');
     processOutbox()}
   finally{busy=false}}
-function downloadBlob(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
-function openForPrint(blob){const u=URL.createObjectURL(blob);const w=window.open(u,'_blank');if(!w)downloadBlob(blob,'plan.pdf');setTimeout(()=>URL.revokeObjectURL(u),120000)}
+/* inside the Android app the page hands files to the app (WebView cannot save blob links itself) */
+const IN_APP=!!(window.ImplantApp&&window.ImplantApp.saveFile);
+function blobB64(blob){return new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]||'');fr.onerror=no;fr.readAsDataURL(blob)})}
+function downloadBlob(blob,name){if(IN_APP){blobB64(blob).then(b=>window.ImplantApp.saveFile(b,name,blob.type||'application/pdf')).catch(()=>alertMsg('ذخیره‌ی فایل ممکن نشد.'));return}
+  const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
+function openForPrint(blob){if(IN_APP){downloadBlob(blob,'plan.pdf');return}const u=URL.createObjectURL(blob);const w=window.open(u,'_blank');if(!w)downloadBlob(blob,'plan.pdf');setTimeout(()=>URL.revokeObjectURL(u),120000)}
 
 /* ---------- archive ---------- */
 function statusPill(d){if(d.queue&&d.queue!=='done'&&QLBL[d.queue])return qPill(d);if(d.status==='queued')return '<span class="pill wait">در صف پزشک</span>';
@@ -1192,6 +1207,18 @@ if((API.url||IN_GAS||FS_ON)&&API.pw&&API.role&&(!FS_ON||API.t)){ROLE=API.role;ap
   api('ping').then(j=>{if(j.role!==ROLE){ROLE=j.role;API.role=ROLE;saveApi();applyRole();home()}applySettings(j.settings);applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender}).catch(()=>{})}
 else if((API.url||IN_GAS||FS_ON)&&API.pw){api('ping').then(j=>{ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;applyRole();home();startPoll();processOutbox()}).catch(err=>{logout();$('lgMsg').className='msg err';$('lgMsg').textContent=err.message})}
 else logout();
+
+/* ---------- install as app (Android / iPhone) ---------- */
+(function(){const el=$('appGet');if(!el)return;const ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&'ontouchend' in document),and=/Android/.test(ua);
+  const standalone=window.matchMedia&&matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if(IN_APP||standalone){el.hidden=true;return}
+  let deferred=null;const parts=[];
+  if(and)parts.push('<a href="https://github.com/alirezaworktime-art/implant-plan/releases/latest/download/implant-plan.apk">دانلود اپلیکیشن اندروید (APK)</a>');
+  if(ios)parts.push('<span>نصب روی آیفون: در Safari دکمه‌ی اشتراک‌گذاری <b>⎋</b> ← «Add to Home Screen» را بزنید.</span>');
+  el.innerHTML=parts.join('')+'<button type="button" id="pwaInstall" hidden>نصب روی همین دستگاه</button>';el.hidden=!parts.length;
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;const b=$('pwaInstall');b.hidden=false;el.hidden=false});
+  el.addEventListener('click',e=>{if(e.target.id==='pwaInstall'&&deferred){deferred.prompt();deferred.userChoice.finally(()=>{deferred=null;e.target.hidden=true})}})})();
 </script>
 </body>
 </html>
