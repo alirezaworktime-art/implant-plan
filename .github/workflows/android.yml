@@ -1,6 +1,6 @@
 # Builds the Android app (a thin WebView shell around the website) and publishes it as a GitHub release.
 # Run it from the Actions tab ("Run workflow"); the APK is then at
-# https://github.com/alirezaworktime-art/implant-plan/releases/latest/download/implant-plan.apk
+# https://alirezaworktime-art.github.io/implant-plan/implant-plan.apk (served by GitHub Pages, reachable from Iran)
 name: Android app
 on:
   workflow_dispatch:
@@ -208,4 +208,9 @@ jobs:
         run: |
           cp android/app/build/outputs/apk/release/app-release.apk implant-plan.apk
           TAG="app-v${{ inputs.version }}-${{ github.run_number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          git add implant-plan.apk
+          git commit -m "Android app ${{ inputs.version }} (build ${{ github.run_number }})" || true
+          git push
           gh release create "$TAG" implant-plan.apk --title "اپلیکیشن اندروید ${{ inputs.version }}" --notes "نسخه‌ی اندروید سایت طرح درمان ایمپلنت. فایل implant-plan.apk را دانلود و نصب کنید." --latest
