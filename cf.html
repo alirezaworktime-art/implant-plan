@@ -211,10 +211,14 @@ textarea{resize:vertical}
       <button type="button" class="role" data-lrole="consultant" aria-pressed="false"><b>ورود مشاور</b><small>شرایط پرداخت، تأیید نهایی و PDF</small></button>
     </div>
     <label class="f" id="lgUrlWrap" hidden>آدرس سرور (Apps Script)<input id="lg_url" class="ltr" placeholder="https://script.google.com/macros/s/.../exec"></label>
-    <label class="f"><span id="lgPwLbl">رمز ورود پرسنل</span><input id="lg_pw" type="password" autocomplete="current-password"></label>
+    <form id="lgForm" autocomplete="on" onsubmit="return false">
+    <input id="lg_user" name="username" autocomplete="username" value="staff" tabindex="-1" aria-hidden="true" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+    <label class="f"><span id="lgPwLbl">رمز ورود پرسنل</span><input id="lg_pw" name="password" type="password" autocomplete="current-password"></label>
     <label class="pwshow"><input type="checkbox" id="lgShow"> نمایش رمز عبور</label>
+    <label class="pwshow"><input type="checkbox" id="lgSave"> ذخیره‌ی رمز روی این دستگاه</label>
     <div class="msg" id="lgMsg"></div>
-    <div class="btns"><button class="btn" id="lgGo" type="button">ورود</button></div>
+    <div class="btns"><button class="btn" id="lgGo" type="submit">ورود</button></div>
+    </form>
     <div class="appget" id="appGet"></div>
   </section>
 
@@ -1100,29 +1104,34 @@ function show(v){$('viewLogin').hidden=v!=='login';$('nav').hidden=v==='login';$
   $('tabList').setAttribute('aria-current',v==='list');$('tabNew').setAttribute('aria-current',v==='form'&&!F.id);
   if(v==='queue'||v==='recep')renderQ();window.scrollTo(0,0)}
 function openForm(r){F=r;CUR=1;dirty=false;renderForm();show('form')}
-function logout(){API.pw='';API.t='';ROLE='';RQ.list.forEach(j=>{j.aborted=true;j.no(new Error('aborted'))});RQ.list=[];if(RQ.cur){RQ.cur.aborted=true;RQ.cur.ctrl&&RQ.cur.ctrl.abort()}QV='';QSEEN=null;QITEMS=[];stopPoll();saveApi();show('login');$('lg_pw').value='';$('lg_pw').type='password';$('lgShow').checked=false;$('lgUrlWrap').hidden=!!API_URL_DEFAULT||IN_GAS;$('lg_url').value=API.url||''}
+function logout(){API.pw='';API.t='';ROLE='';RQ.list.forEach(j=>{j.aborted=true;j.no(new Error('aborted'))});RQ.list=[];if(RQ.cur){RQ.cur.aborted=true;RQ.cur.ctrl&&RQ.cur.ctrl.abort()}QV='';QSEEN=null;QITEMS=[];stopPoll();saveApi();show('login');$('lg_pw').type='password';$('lgShow').checked=false;pwPrefill();$('lgUrlWrap').hidden=!!API_URL_DEFAULT||IN_GAS;$('lg_url').value=API.url||''}
 function applySettings(s){if(s)SET={...DEFAULT_SET,...s};SET.prices=SET.prices||{};try{localStorage.setItem('implantPlanSettings',JSON.stringify(SET))}catch(e){}
   if(F.status==='new'&&!dirty){F=blankForm();renderForm()}}
 async function sha(t){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('implant|'+t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return null}}
 const AUTHC=()=>{try{return JSON.parse(localStorage.getItem('implantAuth')||'{}')}catch(e){return {}}};
 function enter(j){ROLE=j.role;API.role=ROLE;saveApi();if(j.settings)applySettings(j.settings);if(j.queue)applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender;$('lgMsg').textContent='';applyRole();home();startPoll();beep0();processOutbox()}
+/* remembered passwords (per role, this device only) + the browser/phone password manager */
+const PWS=()=>{try{return JSON.parse(localStorage.getItem('implantPw')||'{}')}catch(e){return {}}};
+function pwPrefill(){const sv=PWS();$('lg_user').value=LROLE;$('lg_pw').value=sv[LROLE]||'';let on=true;try{on=localStorage.getItem('implantPwOn')!=='0'}catch(e){}$('lgSave').checked=on}
+function pwRemember(role,pw){const sv=PWS(),on=$('lgSave').checked;if(on&&pw)sv[role]=pw;else delete sv[role];
+  try{localStorage.setItem('implantPw',JSON.stringify(sv));localStorage.setItem('implantPwOn',on?'1':'0')}catch(e){}
+  if(on&&pw&&window.PasswordCredential&&navigator.credentials&&!IN_APP){try{navigator.credentials.store(new PasswordCredential({id:role,password:pw,name:ROLE_LBL[role]||role})).catch(()=>{})}catch(e){}}}
 async function login(){const m=$('lgMsg');m.className='msg';m.textContent='در حال ورود…';
   if(!API_URL_DEFAULT&&!IN_GAS)API.url=$('lg_url').value.trim();API.pw=$('lg_pw').value;
   // a password that worked on this device before: go straight in with the cached inbox, verify in the background
   const h=await sha(API.pw);
   if(h&&AUTHC()[LROLE]===h&&(!FS_ON||API.t)){let q=null;try{q=JSON.parse(localStorage.getItem('implantQ:'+LROLE)||'null')}catch(e){}
-    enter({role:LROLE,queue:q});
+    pwRemember(LROLE,API.pw);enter({role:LROLE,queue:q});
     api('ping').then(j=>{if(j.role!==ROLE){logout();$('lgMsg').className='msg err';$('lgMsg').textContent=`این رمز مربوط به ورود ${ROLE_LBL[j.role]||'دیگری'} است.`;return}applySettings(j.settings);applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender}).catch(()=>{});return}
   try{const j=await api('ping');
     if(j.role!==LROLE){API.pw='';m.className='msg err';m.textContent=`این رمز مربوط به ورود ${ROLE_LBL[j.role]||'دیگری'} است.`;return}
     if(h){const c=AUTHC();c[j.role]=h;try{localStorage.setItem('implantAuth',JSON.stringify(c))}catch(e){}}
-    enter(j)}
+    pwRemember(j.role,API.pw);enter(j)}
   catch(e){m.className='msg err';m.textContent=e.message}}
 function beep0(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
 
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
-  if(t.id==='lgGo'){login();return}
-  if(t.dataset.lrole){LROLE=t.dataset.lrole;document.querySelectorAll('[data-lrole]').forEach(b=>b.setAttribute('aria-pressed',b===t));$('lgPwLbl').textContent=LROLE==='doctor'?'رمز ورود پزشک':LROLE==='consultant'?'رمز ورود مشاور':'رمز ورود پرسنل';$('lg_pw').focus();return}
+  if(t.dataset.lrole){LROLE=t.dataset.lrole;document.querySelectorAll('[data-lrole]').forEach(b=>b.setAttribute('aria-pressed',b===t));$('lgPwLbl').textContent=LROLE==='doctor'?'رمز ورود پزشک':LROLE==='consultant'?'رمز ورود مشاور':'رمز ورود پرسنل';pwPrefill();$('lg_pw').focus();return}
   if(t.id==='tabOut'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای خروج دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}delete t.dataset.armed;logout();return}
   if(t.id==='tabQueue'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن به کارتابل دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}
     delete t.dataset.armed;dirty=false;show('queue');pollQ(true);return}
@@ -1176,7 +1185,9 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
 });
 ['cSheet','sSheet','aSheet'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target.id===id&&!busy)e.target.hidden=true}));
 $('q').addEventListener('input',renderList);
-$('lg_pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+$('lgForm').addEventListener('submit',e=>{e.preventDefault();login()});
+$('lgSave').addEventListener('change',e=>{try{localStorage.setItem('implantPwOn',e.target.checked?'1':'0')}catch(x){}if(!e.target.checked){const sv=PWS();delete sv[LROLE];try{localStorage.setItem('implantPw',JSON.stringify(sv))}catch(x){}}});
+pwPrefill();
 renderMed('rc');
 $('lgShow').addEventListener('change',e=>{$('lg_pw').type=e.target.checked?'text':'password'});
 /* medical-history yes/no, details, other */
@@ -1214,7 +1225,7 @@ else logout();
   if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
   if(IN_APP||standalone){el.hidden=true;return}
   let deferred=null;const parts=[];
-  if(and)parts.push('<a href="https://github.com/alirezaworktime-art/implant-plan/releases/latest/download/implant-plan.apk">دانلود اپلیکیشن اندروید (APK)</a>');
+  if(and)parts.push('<a href="implant-plan.apk" download="implant-plan.apk">دانلود اپلیکیشن اندروید (APK)</a>');
   if(ios)parts.push('<span>نصب روی آیفون: در Safari دکمه‌ی اشتراک‌گذاری <b>⎋</b> ← «Add to Home Screen» را بزنید.</span>');
   el.innerHTML=parts.join('')+'<button type="button" id="pwaInstall" hidden>نصب روی همین دستگاه</button>';el.hidden=!parts.length;
   addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;const b=$('pwaInstall');b.hidden=false;el.hidden=false});
