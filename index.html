@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>طرح درمان ایمپلنت</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#17624f">
+<meta name="theme-color" content="#075a62">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,211 +17,389 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <style>
-/* Layout: app shell with archive list + treatment-plan form; tooth charts in Palmer layout; sticky action bar */
+/* Design: titanium neutrals (the implant metal) + Yazd turquoise for surgery + lapis for prosthetics.
+   One bold element: the khatam (8-point star) tile on the login hero and the app mark. Everything else stays quiet. */
 :root{
-  --bg:#eef2f0; --surface:#ffffff; --ink:#15211e; --muted:#5f6f6a; --line:#d7e0dc;
-  --accent:#17624f; --accent-soft:#dcece6; --accent-ink:#ffffff; --warn:#a4552a; --ok:#1f7a4a; --bad:#b3362c;
+  --bg:#edf0f3; --surface:#ffffff; --sunk:#f5f7f9; --ink:#17212b; --muted:#5d6a77; --line:#d8dfe6; --line2:#c4ced8;
+  --accent:#0a7680; --accent-2:#075a62; --accent-soft:#dcefef; --accent-ink:#ffffff;
+  --lapis:#34519a; --lapis-soft:#e3e8f5;
+  --warn:#a8630a; --warn-soft:#fbf0de; --ok:#25744a; --ok-soft:#e1f1e7; --bad:#bf3328; --bad-soft:#fbe5e2;
+  --r-sm:8px; --r:12px; --r-lg:16px;
+  --sh:0 1px 2px rgba(23,33,43,.06),0 4px 14px rgba(23,33,43,.05);
+  --sh-up:0 -6px 24px rgba(23,33,43,.10);
   --font:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;
+  --tile:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.16' stroke-width='1.2'%3E%3Crect x='16' y='16' width='24' height='24'/%3E%3Crect x='16' y='16' width='24' height='24' transform='rotate(45 28 28)'/%3E%3Cpath d='M0 0l11 11M56 0L45 11M0 56l11-11M56 56L45 45'/%3E%3C/g%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f1715; --surface:#17221f; --ink:#e6eeeb; --muted:#93a59f; --line:#2a3a35;
-  --accent:#4fb596; --accent-soft:#1d3a31; --accent-ink:#06120e; --warn:#e0956a; --ok:#5ec98f; --bad:#ef7d72; color-scheme:dark}}
+  --bg:#0d1318; --surface:#151d24; --sunk:#10171d; --ink:#e3eaf0; --muted:#8f9cab; --line:#26323d; --line2:#33414e;
+  --accent:#3bbfc6; --accent-2:#5fd0d6; --accent-soft:#12343a; --accent-ink:#04191b;
+  --lapis:#93a9e6; --lapis-soft:#1c2643;
+  --warn:#e2a24c; --warn-soft:#352612; --ok:#5ec98f; --ok-soft:#12301f; --bad:#f07f74; --bad-soft:#3a1a17;
+  --sh:0 1px 2px rgba(0,0,0,.3); --sh-up:0 -6px 24px rgba(0,0,0,.4); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f1715; --surface:#17221f; --ink:#e6eeeb; --muted:#93a59f; --line:#2a3a35;
-  --accent:#4fb596; --accent-soft:#1d3a31; --accent-ink:#06120e; --warn:#e0956a; --ok:#5ec98f; --bad:#ef7d72; color-scheme:dark}
+  --bg:#0d1318; --surface:#151d24; --sunk:#10171d; --ink:#e3eaf0; --muted:#8f9cab; --line:#26323d; --line2:#33414e;
+  --accent:#3bbfc6; --accent-2:#5fd0d6; --accent-soft:#12343a; --accent-ink:#04191b;
+  --lapis:#93a9e6; --lapis-soft:#1c2643;
+  --warn:#e2a24c; --warn-soft:#352612; --ok:#5ec98f; --ok-soft:#12301f; --bad:#f07f74; --bad-soft:#3a1a17;
+  --sh:0 1px 2px rgba(0,0,0,.3); --sh-up:0 -6px 24px rgba(0,0,0,.4); color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html{padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.6;direction:rtl;padding-inline:16px;padding-block:12px 120px}
-.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.65;direction:rtl;padding:0;font-feature-settings:"ss01"}
+body>.wrap{padding:16px 16px 150px}
+.wrap{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 .wrap>*,.card>*{min-width:0}
-.wrap .wrap{margin:0;width:100%}
-.chart{max-width:100%}
-.chart-in{width:max-content;margin:0 auto;display:flex;flex-direction:column;gap:4px}
-.chart-in .jaw{padding-right:40px}
-.chart-in .sides{padding-right:40px}
-header.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-h1{font-size:1.25rem;font-weight:800;margin:0}
-nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
-.tab{font:inherit;font-size:.85rem;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:6px 12px;cursor:pointer}
-.tab[aria-current="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.banner{border:1px solid var(--warn);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:.85rem}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
-.card h2{font-size:1rem;font-weight:700;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.tag{font-size:.7rem;font-weight:500;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:0 8px;white-space:nowrap}
-.tag.p{color:var(--warn);border-color:currentColor}
-.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wrap .wrap{margin:0;width:100%;max-width:none}
+::selection{background:var(--accent-soft)}
+
+/* ---- app bar ---- */
+.appbar{position:sticky;top:0;z-index:8;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.appbar-in{max-width:780px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{width:38px;height:38px;border-radius:11px;background:var(--accent-2) var(--tile) center/28px;display:grid;place-items:center;flex:none;color:#fff}
+.mark svg{width:20px;height:20px}
+h1{font-size:1.08rem;font-weight:800;margin:0;line-height:1.25;letter-spacing:-.2px}
+.brand small{display:block;font-size:.74rem;color:var(--muted);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56vw}
+nav.tabs{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:3px}
+.tab{font:inherit;font-size:.84rem;font-weight:700;border:0;background:transparent;color:var(--muted);border-radius:9px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;min-height:36px}
+.tab svg{width:17px;height:17px;flex:none}
+.tab:hover{color:var(--ink)}
+.tab[aria-current="true"]{background:var(--surface);color:var(--accent);box-shadow:var(--sh)}
+#tabOut{color:var(--muted)}
+@media (max-width:720px){
+  .appbar-in{padding:8px 12px}
+  nav.tabs{order:3;width:100%;overflow-x:auto;scrollbar-width:none;justify-content:space-between}
+  nav.tabs::-webkit-scrollbar{display:none}
+  .tab{flex:1 0 auto;flex-direction:column;gap:1px;font-size:.7rem;padding:5px 8px;min-height:46px;justify-content:center}
+  .tab svg{width:19px;height:19px}
+}
+
+/* ---- surfaces ---- */
+.banner{border:1px solid color-mix(in srgb,var(--warn) 45%,var(--line));background:var(--warn-soft);color:var(--ink);border-radius:var(--r);padding:10px 14px;font-size:.86rem}
+.banner.info{border-color:color-mix(in srgb,var(--accent) 40%,var(--line));background:var(--accent-soft);white-space:pre-wrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh)}
+.card h2{font-size:1.02rem;font-weight:800;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px;line-height:1.4}
+.card[data-sec]{border-inline-start:4px solid var(--accent)}
+.card[data-sec][data-kind="pros"]{border-inline-start-color:var(--lapis)}
+.card[data-sec][data-kind="info"]{border-inline-start-color:var(--line2)}
+.card[data-sec].used{background:linear-gradient(var(--surface),var(--surface)) padding-box}
+.card[data-sec].used h2::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);order:-1;flex:none;margin-inline-end:-2px}
+.tag{font-size:.7rem;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:1px 10px;white-space:nowrap;margin-inline-start:auto}
+.tag.p{color:var(--lapis);background:var(--lapis-soft)}
+
+/* ---- forms ---- */
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
 .fields .full{grid-column:1/-1}
-label.f{display:flex;flex-direction:column;gap:2px;font-size:.78rem;color:var(--muted);min-width:0}
-input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
-input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+@media (max-width:340px){.fields{grid-template-columns:1fr}}
+label.f,div.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:500;color:var(--muted);min-width:0}
+input,textarea,select{font:inherit;font-size:.95rem;color:var(--ink);background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:100%;min-width:0;min-height:44px;transition:border-color .12s,background .12s}
+input:hover,textarea:hover,select:hover{border-color:var(--line2)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+textarea{resize:vertical;min-height:84px}
 .price,.ltr{direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
-.chart{direction:ltr;display:flex;flex-direction:column;gap:4px;overflow-x:auto}
+.note{font-size:.8rem;color:var(--muted);margin:0;line-height:1.7}
+.msg{font-size:.86rem;min-height:1.2em}
+.msg.err{color:var(--bad);font-weight:600}.msg.ok{color:var(--ok);font-weight:600}
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp>span{font-size:.8rem;color:var(--muted);font-weight:500}
+
+/* ---- buttons ---- */
+.btn{font:inherit;font-weight:700;font-size:.9rem;border-radius:10px;padding:10px 18px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .12s,transform .06s}
+.btn:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--surface);color:var(--accent);border-color:var(--line2)}
+.btn.ghost:hover{background:var(--accent-soft);border-color:var(--accent)}
+.btn.sm{padding:5px 12px;font-size:.8rem;min-height:34px;border-radius:9px}
+.btn.danger{background:var(--surface);color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.btn:disabled{opacity:.5;cursor:default;transform:none}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.86rem;font-weight:500;border:1px solid var(--line);background:var(--sunk);color:var(--ink);border-radius:99px;padding:6px 14px;cursor:pointer;min-height:36px}
+.chip:hover{border-color:var(--line2)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.t:disabled,.chip:disabled{opacity:.28;cursor:not-allowed}
+
+/* ---- tooth chart (Palmer) ---- */
+.chart{max-width:100%;direction:ltr;display:flex;flex-direction:column;gap:4px;overflow-x:auto;padding-bottom:2px}
+.chart-in{width:max-content;margin:0 auto;display:flex;flex-direction:column;gap:5px}
+.chart-in .jaw{padding-right:44px}
+.chart-in .sides{padding-right:44px}
 .jaw{display:flex;align-items:center;gap:6px}
-.jlabel{direction:rtl;font-size:.72rem;color:var(--muted);width:34px;flex:none;text-align:center}
+.jaw+.jaw{padding-top:5px;border-top:2px solid color-mix(in srgb,var(--ink) 45%,transparent)}
+.jlabel{direction:rtl;font-size:.72rem;color:var(--muted);width:36px;flex:none;text-align:center;font-weight:500}
 .half{display:flex;gap:3px}
-.mid{width:2px;align-self:stretch;background:var(--ink);opacity:.5;border-radius:2px;margin-inline:2px}
-.t{width:32px;height:36px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer;padding:0;font-variant-numeric:tabular-nums;flex:none}
-.t[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.t:disabled,.chip:disabled{opacity:.25;cursor:not-allowed}
-/* surgery day */
+.mid{width:2px;align-self:stretch;background:var(--ink);opacity:.45;border-radius:2px;margin-inline:3px}
+.t{width:34px;height:40px;border-radius:9px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);font:inherit;font-weight:700;font-size:1rem;cursor:pointer;padding:0;font-variant-numeric:tabular-nums;flex:none;box-shadow:inset 0 -2px 0 rgba(23,33,43,.05)}
+.t:hover:not(:disabled){border-color:var(--accent)}
+.t[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:inset 0 -2px 0 rgba(0,0,0,.18)}
+[data-kind="pros"] .t[aria-pressed="true"],[data-kind="pros"] .chip[aria-pressed="true"]{background:var(--lapis);border-color:var(--lapis);color:#fff}
+.sides{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);direction:ltr;padding-left:40px}
+.jcnt{direction:rtl;display:flex;flex-direction:column;align-items:stretch;width:66px;flex:none;margin-left:6px;padding-left:8px;border-left:1px dashed var(--line2)}
+.jcnt small{font-size:.64rem;color:var(--muted);line-height:1.2;text-align:center;margin-bottom:2px}
+.chart-in.hascnt .jaw{padding-right:0}
+.chart-in.hascnt .sides{padding-right:84px}
+.chart-in.hascnt .t{width:31px}
+/* count picker trigger: the native select stays (for value + change), the face is what people tap */
+.pick{position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;font:inherit;font-weight:800;font-size:.95rem;min-height:40px;padding:4px 10px;border:1px solid var(--line);border-radius:10px;background:var(--sunk);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;width:100%}
+.pick:hover{border-color:var(--accent)}
+.pick.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+[data-kind="pros"] .pick.on{background:var(--lapis-soft);border-color:var(--lapis);color:var(--lapis)}
+.pick select{position:absolute;inset:0;opacity:0;pointer-events:none;min-height:0}
+.pick .pv{flex:1;text-align:center}
+.pick svg{width:14px;height:14px;opacity:.6;flex:none}
+.jcnt .pick{padding:4px 6px;min-height:40px}
+.jcnt .pick svg{display:none}
+.quad{display:grid;grid-template-columns:auto auto;width:max-content;margin:4px auto 0;direction:ltr}
+.qd{font:inherit;font-weight:800;font-size:1rem;width:88px;height:46px;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:10px}
+.qd:hover{background:var(--sunk)}
+.qd:nth-child(1){border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);border-radius:10px 0 0 0}
+.qd:nth-child(2){border-bottom:3px solid var(--ink);border-radius:0 10px 0 0}
+.qd:nth-child(3){border-right:3px solid var(--ink);border-radius:0 0 0 10px}
+.qd:nth-child(4){border-radius:0 0 10px 0}
+.qd[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.quad-sides{width:176px;margin:0 auto;padding:0}
+.items{display:grid;gap:10px}
+.items.two{grid-template-columns:1fr 1fr}
+@media (max-width:460px){.items.two{grid-template-columns:1fr}}
+.item-box{border:1px solid var(--line);background:var(--sunk);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.item-box b{font-size:.92rem}
+.calc{font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.calc b{color:var(--ink)}
+.brands,.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:560px){.brands,.totals{grid-template-columns:repeat(2,1fr)}}
+.tot{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:2px;cursor:pointer;background:var(--sunk);font:inherit;color:var(--ink);text-align:right}
+.tot:hover{border-color:var(--line2)}
+.tot.ref{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+.tot[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.tot small{color:var(--muted);font-size:.74rem}
+.tot b{font-variant-numeric:tabular-nums;font-size:1rem}
+.tot small+b+small{font-size:.68rem}
+.rowline{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;font-variant-numeric:tabular-nums}
+.rowline.big{font-weight:800;font-size:1.08rem;border-top:1px solid var(--line);padding-top:8px}
+.card.plan2{border-color:var(--warn);background:var(--warn-soft)}
+
+/* ---- lists: inbox, archive ---- */
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 2px}
+.qhead h2{font-size:1.15rem;font-weight:800;margin:0}
+.live{font-size:.74rem;color:var(--ok);display:flex;align-items:center;gap:6px;font-weight:500}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 22%,transparent)}
+.live.off{color:var(--bad)}
+.search{display:flex;gap:8px;position:relative}
+.search input{padding-inline-start:40px;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%235d6a77' stroke-width='2' stroke-linecap='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat right 12px center}
+.list{display:flex;flex-direction:column;gap:10px}
+.item,.qitem{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--sh);border-inline-start:4px solid var(--line2)}
+.qitem{cursor:pointer;text-align:right;font:inherit;color:var(--ink);width:100%;transition:border-color .12s,transform .06s}
+.qitem:hover{border-color:var(--line2);border-inline-start-color:var(--accent)}
+.qitem:active{transform:translateY(1px)}
+.item:has(.pill.wait),.qitem:has(.pill.wait){border-inline-start-color:var(--warn)}
+.item:has(.pill.rev),.qitem:has(.pill.rev){border-inline-start-color:var(--accent)}
+.item:has(.pill.done),.item:has(.pill.sent),.qitem:has(.pill.done){border-inline-start-color:var(--ok)}
+.item:has(.pill.surg),.qitem:has(.pill.surg){border-inline-start-color:var(--lapis)}
+.item:has(.pill.settle),.qitem:has(.pill.settle),.item:has(.pill.fail){border-inline-start-color:var(--bad)}
+.qitem.loading{opacity:.6;cursor:progress}
+.qitem.fresh{border-color:var(--warn);box-shadow:0 0 0 4px color-mix(in srgb,var(--warn) 25%,transparent)}
+.item .row1,.qitem .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.item .nm,.qitem .nm{font-weight:800;font-size:1.04rem}
+.item .meta,.qitem .meta{font-size:.8rem;color:var(--muted);line-height:1.7}
+.qitem .nt{font-size:.86rem;background:var(--sunk);border-radius:10px;padding:8px 10px;white-space:pre-wrap}
+.qn{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:8px;background:var(--sunk);font-variant-numeric:tabular-nums;color:var(--muted);font-weight:800;font-size:.8rem;margin-inline-end:8px;vertical-align:1px}
+.pill{font-size:.72rem;font-weight:700;border-radius:99px;padding:3px 11px;white-space:nowrap;background:var(--sunk);color:var(--muted)}
+.pill.sent,.pill.done{color:var(--ok);background:var(--ok-soft)}
+.pill.fail{color:var(--bad);background:var(--bad-soft)}
+.pill.mod,.pill.wait{color:var(--warn);background:var(--warn-soft)}
+.pill.rev{color:var(--accent);background:var(--accent-soft)}
+.pill.surg{color:var(--lapis);background:var(--lapis-soft)}
+.pill.settle{color:var(--bad);background:var(--bad-soft)}
+.qwarn{font-size:.82rem;color:var(--warn);font-weight:700;background:var(--warn-soft);border-radius:8px;padding:4px 10px;width:fit-content}
+.empty{text-align:center;color:var(--muted);padding:44px 16px;font-size:.92rem;background:var(--surface);border:1px dashed var(--line2);border-radius:var(--r-lg)}
+.empty::before{content:"";display:block;width:44px;height:44px;margin:0 auto 10px;border-radius:12px;background:var(--accent-soft) var(--tile) center/22px;opacity:.9;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1l3.2 4.8L21 6l-1.6 5.6L23 16l-5.4 2.2L16 24l-4-3.6L8 24l-1.6-5.8L1 16l3.6-4.4L3 6l5.8-.2z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1l3.2 4.8L21 6l-1.6 5.6L23 16l-5.4 2.2L16 24l-4-3.6L8 24l-1.6-5.8L1 16l3.6-4.4L3 6l5.8-.2z'/%3E%3C/svg%3E") center/contain no-repeat;background:var(--accent)}
+.badge{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--bad);color:#fff;font-size:.68rem;line-height:1;font-weight:800}
+@media (max-width:720px){.tab .badge{position:absolute;margin:-30px 0 0 -22px}.tab{position:relative}}
+
+/* ---- login ---- */
+.login{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--sh);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);margin-top:12px}
+.login-hero{background:var(--accent-2) var(--tile) center/56px;color:#fff;padding:28px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:24px;min-height:100%}
+.login-hero .mark{width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.14)}
+.login-hero .mark svg{width:28px;height:28px}
+.login-hero h2{font-size:1.6rem;font-weight:800;margin:0;line-height:1.35}
+.login-hero p{margin:6px 0 0;font-size:.88rem;opacity:.85}
+.login-body{padding:24px;display:flex;flex-direction:column;gap:14px}
+.login-body h3{margin:0;font-size:1rem;font-weight:800}
+@media (max-width:680px){.login{grid-template-columns:1fr;margin-top:4px}.login-hero{padding:20px;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px}.login-hero h2{font-size:1.2rem}.login-body{padding:18px}}
+.roles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media (max-width:420px){.roles{grid-template-columns:1fr}}
+.role{font:inherit;text-align:right;border:1px solid var(--line);background:var(--sunk);color:var(--ink);border-radius:var(--r);padding:10px 12px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center}
+.role .ri{grid-row:1/3;width:34px;height:34px;border-radius:10px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)}
+.role .ri svg{width:18px;height:18px}
+.role b{font-size:.92rem}.role small{color:var(--muted);font-size:.72rem;line-height:1.4}
+.role:hover{border-color:var(--line2)}
+.role[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.role[aria-pressed="true"] .ri{background:var(--accent);border-color:var(--accent);color:#fff}
+.pwshow{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;white-space:nowrap;width:max-content;font-size:.86rem;color:var(--muted);cursor:pointer}
+.pwshow input{width:18px!important;height:18px;min-height:0;flex:none;margin:0;padding:0;accent-color:var(--accent)}
+.appget{font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--line);padding-top:12px}
+.appget:empty{display:none}
+.appget a,.appget button{color:var(--accent);font:inherit;font-weight:700;background:none;border:0;padding:0;cursor:pointer;text-align:right}
+
+/* ---- medical history ---- */
+.med{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.med h3{font-size:.95rem;margin:6px 0 4px;font-weight:800}
+.mrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.mrow>span:not(.yn){flex:1 1 140px;font-size:.9rem}
+.yn{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;flex:none;background:var(--sunk);padding:2px}
+.yn button{font:inherit;font-size:.84rem;border:0;background:transparent;color:var(--muted);padding:4px 14px;cursor:pointer;min-width:52px;border-radius:99px;min-height:30px}
+.yn button[aria-pressed="true"][data-mv="0"]{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--sh)}
+.yn button[aria-pressed="true"][data-mv="1"]{background:var(--warn);color:#fff;font-weight:800}
+.mrow input{flex:1 1 100%}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+.msub{flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap}.msub .chip{font-size:.82rem;padding:4px 12px;min-height:32px}
+@media (max-width:560px){.mgrid{grid-template-columns:1fr}}
+
+/* ---- bottom action bar, plan switcher ---- */
+.bar{position:fixed;inset-inline:0;bottom:0;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);box-shadow:var(--sh-up);padding:10px max(16px,calc((100vw - 780px)/2 + 16px)) calc(10px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:5}
+.bar .sum{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.bar .sum small{color:var(--muted);font-size:.74rem}
+.bar .sum b{font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums}
+.planSw{position:fixed;left:14px;top:40%;z-index:6;display:flex;flex-direction:column;gap:6px}
+.ps{font:inherit;font-size:.82rem;font-weight:700;border:1px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:12px;padding:8px 12px;cursor:pointer;box-shadow:var(--sh);white-space:nowrap;min-height:40px}
+.ps[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.ps.add{border-style:dashed}
+@media (max-width:900px){.planSw{top:auto;bottom:84px;flex-direction:row}}
+
+/* ---- sheets (bottom sheet on phones, dialog on wide screens) ---- */
+.sheet{position:fixed;inset:0;background:rgba(10,18,24,.48);display:flex;align-items:flex-end;justify-content:center;z-index:10}
+.sheet .in{background:var(--surface);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh-up)}
+.sheet .in::before{content:"";width:40px;height:4px;border-radius:4px;background:var(--line2);align-self:center;flex:none}
+.sheet h3{margin:2px 0 0;font-size:1.08rem;font-weight:800}
+@media (min-width:760px){.sheet{align-items:center}.sheet .in{border-radius:20px;padding-top:20px}.sheet .in::before{display:none}}
+@media (prefers-reduced-motion:no-preference){.sheet:not([hidden]) .in{animation:up .22s cubic-bezier(.2,.8,.2,1)}@keyframes up{from{transform:translateY(24px);opacity:.4}}}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.88rem}
+.kv span:nth-child(odd){color:var(--muted)}
+.kv span:nth-child(even){min-width:0;overflow-wrap:anywhere}
+.preview{display:flex;flex-direction:column;gap:8px}
+.preview img{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff}
+.steps{display:flex;flex-direction:column;gap:6px;font-size:.88rem}
+.steps .s{display:flex;gap:10px;align-items:center}
+.steps .s i{width:10px;height:10px;border-radius:50%;background:var(--line2);flex:none;font-style:normal}
+.steps .s.run i{background:var(--warn)} .steps .s.ok i{background:var(--ok)} .steps .s.err i{background:var(--bad)}
+/* number picker sheet */
+.npick{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.npick button{font:inherit;font-weight:800;font-size:1.35rem;height:64px;border-radius:14px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums}
+.npick button:hover{border-color:var(--accent)}
+.npick button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.npick.pros button[aria-pressed="true"]{background:var(--lapis);border-color:var(--lapis);color:#fff}
+.npsub{font-size:.84rem;color:var(--muted);margin:-6px 0 0}
+
+/* ---- toasts ---- */
+.obbar{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:20;background:var(--surface);border:1px solid var(--accent);color:var(--accent);border-radius:99px;padding:6px 16px;font-size:.8rem;font-weight:700;box-shadow:var(--sh)}
+.obbar.err{border-color:var(--bad);color:var(--bad)}
+.toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 18px;font-size:.88rem;font-weight:500;max-width:min(92vw,560px);box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.toast.err{background:var(--bad);color:#fff}
+
+/* ---- surgery day ---- */
 #viewSurg .calc{display:none}
 #viewSurg .t.pl{box-shadow:inset 0 0 0 2px var(--accent)}
 #viewSurg .t.pl[aria-pressed="false"]{color:var(--accent);font-weight:800}
 #viewSurg .t:not(.pl)[aria-pressed="true"]{background:var(--warn);border-color:var(--warn);color:#fff}
 #viewSurg .t.hasimp::after{content:'';display:block;width:6px;height:6px;border-radius:50%;background:currentColor;margin:1px auto 0}
-.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.75rem;color:var(--muted)}.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-left:4px;border:1px solid var(--line)}
-.plines{margin:0;padding:0 18px 0 0;font-size:.88rem;line-height:1.9}.plines li b{font-weight:700}
-.implist{display:flex;flex-direction:column;gap:6px}.implist button{font:inherit;text-align:right;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);color:var(--ink);cursor:pointer}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--muted)}.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-left:5px;border:1px solid var(--line)}
+.plines{margin:0;padding:0 18px 0 0;font-size:.9rem;line-height:1.9}.plines li b{font-weight:700}
+.implist{display:flex;flex-direction:column;gap:6px}.implist button{font:inherit;text-align:right;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--sunk);color:var(--ink);cursor:pointer;min-height:44px}
+.implist button:hover{border-color:var(--accent)}
 .implist .miss{color:var(--bad);font-weight:700}
-.diffbox{border-radius:12px;padding:12px;background:var(--accent-soft);font-size:.95rem;line-height:1.9}
-.pill.surg{background:#e8eefc;color:#2b4aa0}.pill.settle{background:#fff1e6;color:#a4552a}
-.jcnt{direction:rtl;display:flex;flex-direction:column;align-items:stretch;width:58px;flex:none;margin-left:4px;padding-left:6px;border-left:1px dashed var(--line)}
-.jcnt small{font-size:.66rem;color:var(--muted);line-height:1.1;text-align:center}
-.jcnt select{font:inherit;font-size:.82rem;padding:2px 2px;height:26px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
-.chart-in.hascnt .jaw{padding-right:0}
-.chart-in.hascnt .sides{padding-right:74px}
-.chart-in.hascnt .t{width:30px}
-.sides{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);direction:ltr;padding-left:40px}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;padding:5px 12px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.grp{display:flex;flex-direction:column;gap:4px}
-.grp>span{font-size:.78rem;color:var(--muted)}
-.calc{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
-.calc b{color:var(--ink)}
-.brands,.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.tot.ref{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
-@media (max-width:520px){.brands,.totals{grid-template-columns:repeat(2,1fr)}}
-.tot{border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:2px;cursor:pointer;background:var(--bg);font:inherit;color:var(--ink);text-align:right}
-.tot[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
-.tot small{color:var(--muted);font-size:.72rem}
-.tot b{font-variant-numeric:tabular-nums;font-size:.95rem}
-.rowline{display:flex;justify-content:space-between;gap:8px;font-size:.88rem;font-variant-numeric:tabular-nums}
-.rowline.big{font-weight:800;font-size:1rem;border-top:1px solid var(--line);padding-top:6px}
-.note{font-size:.78rem;color:var(--muted);margin:0}
-/* archive */
-.search{display:flex;gap:8px}
-.list{display:flex;flex-direction:column;gap:8px}
-.item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
-.item .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.item .nm{font-weight:700}
-.item .meta{font-size:.78rem;color:var(--muted)}
-.pill{font-size:.72rem;font-weight:700;border-radius:99px;padding:1px 10px;white-space:nowrap;border:1px solid currentColor}
-.pill.draft{color:var(--muted)} .pill.sent{color:var(--ok)} .pill.fail{color:var(--bad)} .pill.mod{color:var(--warn)}
-.acts{display:flex;gap:6px;flex-wrap:wrap}
-.btn{font:inherit;font-weight:700;font-size:.85rem;border-radius:9px;padding:8px 14px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
-.btn.ghost{background:transparent;color:var(--accent)}
-.btn.sm{padding:4px 10px;font-size:.78rem}
-.btn:disabled{opacity:.5;cursor:default}
-.empty{text-align:center;color:var(--muted);padding:28px 8px;font-size:.9rem}
-.bar{position:fixed;inset-inline:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:5}
-.bar .sum{display:flex;flex-direction:column;line-height:1.3;min-width:0}
-.bar .sum small{color:var(--muted);font-size:.72rem}
-.bar .sum b{font-size:1.02rem;font-variant-numeric:tabular-nums}
-.btns{display:flex;gap:6px;flex-wrap:wrap}
-.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:10}
-.sheet .in{background:var(--surface);width:100%;max-width:680px;max-height:90%;overflow:auto;border-radius:14px 14px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
-.sheet h3{margin:0;font-size:1rem}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.85rem}
-.kv span:nth-child(odd){color:var(--muted)}
-.kv span:nth-child(even){min-width:0;overflow-wrap:anywhere}
-.preview{display:flex;flex-direction:column;gap:8px}
-.preview img{width:100%;border:1px solid var(--line);border-radius:6px;background:#fff}
-.steps{display:flex;flex-direction:column;gap:4px;font-size:.85rem}
-.steps .s{display:flex;gap:8px;align-items:center}
-.steps .s i{width:10px;height:10px;border-radius:50%;background:var(--line);flex:none;font-style:normal}
-.steps .s.run i{background:var(--warn)} .steps .s.ok i{background:var(--ok)} .steps .s.err i{background:var(--bad)}
-.msg{font-size:.85rem;min-height:1.2em}
-.msg.err{color:var(--bad)} .msg.ok{color:var(--ok)}
-select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
-textarea{resize:vertical}
-.items{display:grid;gap:8px}
-.items.two{grid-template-columns:1fr 1fr}
-.item-box{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
-.item-box b{font-size:.9rem}
-.card.plan2{border-color:var(--warn)}
-.planSw{position:fixed;left:12px;top:40%;z-index:6;display:flex;flex-direction:column;gap:6px}
-.ps{font:inherit;font-size:.82rem;font-weight:700;border:1px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:10px;padding:8px 10px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);white-space:nowrap}
-.ps[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.ps.add{border-style:dashed}
-.tot small+b+small{font-size:.68rem}
-@media (max-width:860px){.planSw{top:auto;bottom:78px;flex-direction:row}}
-@media (max-width:420px){.items.two{grid-template-columns:1fr}}
-.roles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-@media (max-width:560px){.roles{grid-template-columns:1fr}}
-.role{font:inherit;text-align:right;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
-.role b{font-size:1rem}.role small{color:var(--muted);font-size:.75rem}
-.role[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
-.badge{display:inline-block;min-width:20px;padding:0 6px;border-radius:99px;background:var(--bad);color:#fff;font-size:.72rem;line-height:20px;text-align:center;margin-inline-start:4px}
-.qhead{display:flex;justify-content:space-between;align-items:center}
-.qhead h2{font-size:1rem;margin:0}
-.live{font-size:.72rem;color:var(--ok);display:flex;align-items:center;gap:6px}
-.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
-.live.off{color:var(--bad)}
-.qitem{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:right;font:inherit;color:var(--ink);width:100%}
-.qitem.loading{opacity:.6;cursor:progress}
-.qitem.fresh{border-color:var(--warn);box-shadow:0 0 0 3px color-mix(in srgb,var(--warn) 35%,transparent)}
-.qitem .row1{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
-.qitem .nm{font-weight:800;font-size:1.02rem}
-.qitem .meta{font-size:.8rem;color:var(--muted)}
-.qitem .nt{font-size:.85rem;border-top:1px dashed var(--line);padding-top:6px;white-space:pre-wrap}
-.qn{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;margin-inline-end:6px}
-.pill.wait{color:var(--warn)} .pill.rev{color:var(--accent)} .pill.done{color:var(--ok)}
-.med{display:flex;flex-direction:column;gap:2px;margin-top:10px}
-.med h3{font-size:.95rem;margin:6px 0 4px}
-.mrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
-.mrow>span:not(.yn){flex:1 1 140px;font-size:.9rem}
-.yn{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;flex:none}
-.yn button{font:inherit;font-size:.85rem;border:0;background:var(--bg);color:var(--muted);padding:5px 14px;cursor:pointer;min-width:52px}
-.yn button[aria-pressed="true"][data-mv="0"]{background:var(--line);color:var(--ink);font-weight:700}
-.yn button[aria-pressed="true"][data-mv="1"]{background:var(--warn);color:#fff;font-weight:800}
-.mrow input{flex:1 1 100%;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
-.appget{margin-top:14px;font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--line);padding-top:10px}
-.appget a,.appget button{color:var(--accent);font:inherit;font-weight:700;background:none;border:0;padding:0;cursor:pointer;text-align:right}
-.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
-.msub{flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap}.msub .chip{font-size:.82rem;padding:4px 10px}
-@media (max-width:560px){.mgrid{grid-template-columns:1fr}}
-.pwshow{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;white-space:nowrap;width:max-content;font-size:.85rem;color:var(--muted);cursor:pointer;margin-top:-2px}
-.pwshow input{width:18px!important;height:18px;flex:none;margin:0;padding:0}
-.qwarn{font-size:.82rem;color:var(--warn);font-weight:700}
-.banner.info{border-color:var(--accent);color:var(--ink);white-space:pre-wrap}
-.obbar{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:20;background:var(--surface);border:1px solid var(--accent);color:var(--accent);border-radius:99px;padding:6px 14px;font-size:.8rem;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.15)}
-.obbar.err{border-color:var(--bad);color:var(--bad)}
-.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);z-index:20;background:var(--ink);color:var(--bg);border-radius:10px;padding:10px 16px;font-size:.85rem;max-width:min(92vw,560px);box-shadow:0 4px 16px rgba(0,0,0,.25)}
-.toast.err{background:var(--bad);color:#fff}
-.quad{display:grid;grid-template-columns:auto auto;width:max-content;margin:4px auto 0;direction:ltr}
-.qd{font:inherit;font-weight:800;font-size:1rem;width:84px;height:44px;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:8px}
-.qd:nth-child(1){border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);border-radius:8px 0 0 0}
-.qd:nth-child(2){border-bottom:3px solid var(--ink);border-radius:0 8px 0 0}
-.qd:nth-child(3){border-right:3px solid var(--ink);border-radius:0 0 0 8px}
-.qd:nth-child(4){border-radius:0 0 8px 0}
-.qd[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.quad-sides{width:168px;margin:0 auto;padding:0}
-@media (prefers-reduced-motion:no-preference){.t,.chip,.tot{transition:background .12s,color .12s}}
+.diffbox{border-radius:var(--r);padding:14px;background:var(--accent-soft);font-size:.95rem;line-height:1.9}
+.meta{font-size:.82rem;color:var(--muted)}
+
+/* ---- inventory ---- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:620px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px;display:flex;flex-direction:column;gap:2px;box-shadow:var(--sh);font:inherit;color:var(--ink);text-align:right;cursor:default}
+button.kpi{cursor:pointer}button.kpi:hover{border-color:var(--line2)}
+.kpi b{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi span{font-size:.78rem;color:var(--muted)}
+.kpi.low b{color:var(--warn)}.kpi.out b{color:var(--bad)}
+.kpi[aria-pressed="true"]{border-color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}
+.seg{display:flex;background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.seg button{flex:1;font:inherit;font-size:.86rem;font-weight:700;border:0;background:transparent;color:var(--muted);border-radius:9px;padding:8px 10px;cursor:pointer;min-height:38px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:var(--sh)}
+.invtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.invtools .search{flex:1 1 220px}
+.sys{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh);overflow:hidden}
+.sys-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.sys-h b{font-size:1rem;font-weight:800}.sys-h small{color:var(--muted);font-size:.78rem}
+.sys-h .tot{all:unset;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mx{overflow-x:auto;padding:10px 12px 14px}
+.mx table{border-collapse:separate;border-spacing:4px;direction:ltr;margin:0 auto}
+.mx th{font-size:.72rem;color:var(--muted);font-weight:700;padding:0 2px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mx th.c{text-align:center}.mx th.r{text-align:right;padding-right:6px}
+.mx td{padding:0}
+.cell{font:inherit;width:54px;height:46px;border-radius:10px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);cursor:pointer;display:grid;place-items:center;font-weight:800;font-size:1.05rem;font-variant-numeric:tabular-nums;position:relative}
+.cell:hover{border-color:var(--accent)}
+.cell.ok{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 30%,var(--line));color:var(--ok)}
+.cell.low{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 45%,var(--line));color:var(--warn)}
+.cell.out{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 40%,var(--line));color:var(--bad)}
+.cell.none{color:var(--line2);font-weight:500}
+.cell.neg{background:var(--bad);color:#fff;border-color:var(--bad)}
+.mxlegend{display:flex;gap:12px;flex-wrap:wrap;font-size:.74rem;color:var(--muted);padding:0 16px 12px}
+.mxlegend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-left:5px}
+.irow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface);font:inherit;color:var(--ink);text-align:right;width:100%;border-inline:0;border-bottom:0;cursor:pointer}
+.irow:first-child{border-top:0}
+.irow:hover{background:var(--sunk)}
+.irow .nm{flex:1;min-width:0}.irow .nm b{display:block;font-size:.95rem}.irow .nm small{color:var(--muted);font-size:.76rem}
+.qty{font-weight:800;font-size:1.15rem;font-variant-numeric:tabular-nums;min-width:56px;text-align:center;border-radius:10px;padding:4px 8px;background:var(--ok-soft);color:var(--ok)}
+.qty.low{background:var(--warn-soft);color:var(--warn)}.qty.out{background:var(--bad-soft);color:var(--bad)}
+.qty small{font-size:.66rem;font-weight:500;display:block;line-height:1}
+.mv{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:11px 16px;border-top:1px solid var(--line)}
+.mv:first-child{border-top:0}
+.mv .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:1rem}
+.mv .ic.in{background:var(--ok-soft);color:var(--ok)}.mv .ic.use,.mv .ic.out{background:var(--lapis-soft);color:var(--lapis)}.mv .ic.adj{background:var(--warn-soft);color:var(--warn)}
+.mv b{font-size:.9rem;display:block}.mv small{color:var(--muted);font-size:.76rem;display:block;line-height:1.5}
+.mv .d{font-weight:800;font-variant-numeric:tabular-nums;direction:ltr}
+.mv .d.p{color:var(--ok)}.mv .d.m{color:var(--bad)}
+.usage{display:flex;flex-direction:column;gap:8px;padding:12px 16px 16px}
+.ubar{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr) 36px;gap:10px;align-items:center;font-size:.82rem}
+.ubar span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ubar i{display:block;height:10px;border-radius:6px;background:var(--accent);min-width:4px}
+.ubar b{font-variant-numeric:tabular-nums;text-align:left}
+.stepper{display:flex;align-items:center;gap:10px;justify-content:center}
+.stepper button{font:inherit;font-size:1.5rem;font-weight:800;width:56px;height:56px;border-radius:16px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);cursor:pointer}
+.stepper input{width:110px;text-align:center;font-size:1.6rem;font-weight:800;height:56px;font-variant-numeric:tabular-nums}
+.mvtype{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.big-num{font-size:2.2rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.ihead{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--sunk);border-radius:var(--r);padding:12px 14px}
+.fab{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:max(20px,calc((100vw - 780px)/2 + 20px));z-index:6;box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 35%,transparent);border-radius:16px;min-height:52px;padding:12px 20px}
+@media (prefers-reduced-motion:no-preference){.t,.chip,.tot,.cell,.pick{transition:background .12s,color .12s,border-color .12s}}
 </style>
 </head>
 <body>
 
+<header class="appbar"><div class="appbar-in">
+  <div class="brand"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8v3H8z"/><path d="M9 6h6l-1 13-2 2-2-2z"/><path d="M9.4 9.5h5.2M9.7 13h4.6M10 16.5h4"/></svg></span><div><h1>طرح درمان ایمپلنت</h1><small id="whoami"></small></div></div>
+  <nav class="tabs" id="nav" hidden>
+    <button class="tab" id="tabQueue" type="button" data-role="doctor consultant surgery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13h4l1.5 3h5L16 13h4"/><path d="M5 5h14l1 8v6H4v-6z"/></svg><span>کارتابل</span> <span class="badge" id="qBadge" hidden></span></button>
+    <button class="tab" id="tabRecep" type="button" data-role="staff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M19 8v6M16 11h6"/></svg><span>پذیرش</span></button>
+    <button class="tab" id="tabList" type="button" data-role="staff doctor consultant surgery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v10h14V9M10 13h4"/></svg><span>بایگانی</span></button>
+    <button class="tab" id="tabNew" type="button" data-role="doctor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M12 11v6M9 14h6"/></svg><span>فرم جدید</span></button>
+    <button class="tab" id="tabInv" type="button" data-role="inventory doctor consultant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span>انبار</span> <span class="badge" id="invBadge" hidden></span></button>
+    <button class="tab" id="tabSet" type="button" data-role="doctor consultant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>تنظیمات</span></button>
+    <button class="tab" id="tabOut" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h5v16h-5"/><path d="M9 8l-4 4 4 4M5 12h10"/></svg><span>خروج</span></button>
+  </nav>
+</div></header>
 <div class="wrap">
-  <header class="top">
-    <h1>طرح درمان ایمپلنت</h1>
-    <nav class="tabs" id="nav" hidden>
-      <button class="tab" id="tabQueue" type="button" data-role="doctor consultant surgery">کارتابل <span class="badge" id="qBadge" hidden></span></button>
-      <button class="tab" id="tabRecep" type="button" data-role="staff">پذیرش</button>
-      <button class="tab" id="tabList" type="button">بایگانی</button>
-      <button class="tab" id="tabNew" type="button" data-role="doctor">فرم جدید</button>
-      <button class="tab" id="tabSet" type="button" data-role="doctor consultant">تنظیمات</button>
-      <button class="tab" id="tabOut" type="button">خروج</button>
-    </nav>
-  </header>
-  <section class="card" id="viewLogin" hidden>
-    <h2>ورود</h2>
+  <section class="login" id="viewLogin" hidden>
+    <div class="login-hero"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8v3H8z"/><path d="M9 6h6l-1 13-2 2-2-2z"/><path d="M9.4 9.5h5.2M9.7 13h4.6M10 16.5h4"/></svg></span><div><h2>طرح درمان ایمپلنت</h2><p id="lgClinic">کلینیک دندانپزشکی · یزد</p></div></div>
+    <div class="login-body">
+    <h3>بخش خودتان را انتخاب کنید</h3>
     <div class="roles" id="lgRoles">
-      <button type="button" class="role" data-lrole="staff" aria-pressed="true"><b>ورود پرسنل</b><small>پذیرش بیمار و ارسال به کارتابل پزشک</small></button>
-      <button type="button" class="role" data-lrole="doctor" aria-pressed="false"><b>ورود پزشک</b><small>کارتابل پزشک و طرح درمان</small></button>
-      <button type="button" class="role" data-lrole="consultant" aria-pressed="false"><b>ورود مشاور</b><small>شرایط پرداخت، تأیید نهایی و PDF</small></button>
-      <button type="button" class="role" data-lrole="surgery" aria-pressed="false"><b>ورود دستیار جراحی</b><small>کارتابل روز جراحی و ثبت کارهای انجام‌شده</small></button>
+      <button type="button" class="role" data-lrole="staff" aria-pressed="true"><span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span><b>ورود پرسنل</b><small>پذیرش بیمار و ارسال به کارتابل پزشک</small></button>
+      <button type="button" class="role" data-lrole="doctor" aria-pressed="false"><span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3C4.6 3 3 5 3 7.5c0 2 1 3 1.4 5 .5 2 .6 5.5 1.6 7.5.8 1.6 2.4 1.5 2.8-.2L10 15h4l1.2 4.8c.4 1.7 2 1.8 2.8.2 1-2 1.1-5.5 1.6-7.5.4-2 1.4-3 1.4-5C21 5 19.4 3 17 3c-2 0-3 1-5 1S9 3 7 3z"/></svg></span><b>ورود پزشک</b><small>کارتابل پزشک و طرح درمان</small></button>
+      <button type="button" class="role" data-lrole="consultant" aria-pressed="false"><span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5h7"/></svg></span><b>ورود مشاور</b><small>شرایط پرداخت، تأیید نهایی و PDF</small></button>
+      <button type="button" class="role" data-lrole="surgery" aria-pressed="false"><span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8v3H8z"/><path d="M9 6h6l-1 13-2 2-2-2z"/><path d="M9.4 9.5h5.2M9.7 13h4.6M10 16.5h4"/></svg></span><b>ورود دستیار جراحی</b><small>ثبت کارهای روز جراحی و ایمپلنت‌ها</small></button>
+      <button type="button" class="role" data-lrole="inventory" aria-pressed="false"><span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span><b>ورود انباردار</b><small>موجودی، ورود و خروج مواد مصرفی</small></button>
     </div>
     <label class="f" id="lgUrlWrap" hidden>آدرس سرور (Apps Script)<input id="lg_url" class="ltr" placeholder="https://script.google.com/macros/s/.../exec"></label>
     <form id="lgForm" autocomplete="on" onsubmit="return false">
@@ -230,9 +408,10 @@ textarea{resize:vertical}
     <label class="pwshow"><input type="checkbox" id="lgShow"> نمایش رمز عبور</label>
     <label class="pwshow"><input type="checkbox" id="lgSave"> ذخیره‌ی رمز روی این دستگاه</label>
     <div class="msg" id="lgMsg"></div>
-    <div class="btns"><button class="btn" id="lgGo" type="submit">ورود</button></div>
+    <div class="btns"><button class="btn" id="lgGo" type="submit" style="flex:1">ورود</button></div>
     </form>
     <div class="appget" id="appGet"></div>
+    </div>
   </section>
 
   <!-- doctor inbox -->
@@ -288,6 +467,15 @@ textarea{resize:vertical}
       <div class="btns"><button class="btn" id="sgSave" type="button">ثبت جلسه</button><button class="btn ghost" id="sgBack" type="button">بازگشت به کارتابل</button></div></section>
   </section>
 
+  <!-- inventory -->
+  <section id="viewInv" class="wrap" style="padding:0" hidden>
+    <div class="qhead"><div style="display:flex;align-items:center;gap:12px"><h2>انبار</h2><span class="live" id="iLive">زنده</span></div><button class="btn" id="invAdd" type="button" hidden>+ ورود کالا</button></div>
+    <div class="kpis" id="invKpis"></div>
+    <div class="seg" role="group" aria-label="بخش انبار"><button type="button" data-iseg="fix" aria-pressed="true">فیکسچرها</button><button type="button" data-iseg="acc" aria-pressed="false">هیلینگ، کاور و مواد</button><button type="button" data-iseg="log" aria-pressed="false">گردش انبار</button></div>
+    <div class="invtools" id="invTools"><div class="search"><input id="invQ" placeholder="جستجوی برند، سیستم یا نام قلم"></div><button type="button" class="chip" id="invLow" aria-pressed="false">فقط کم یا تمام‌شده</button></div>
+    <div id="invBody" class="wrap" style="padding:0"><div class="empty">در حال بارگذاری انبار…</div></div>
+  </section>
+
   <section id="viewForm" class="wrap" style="padding:0" hidden>
     <div class="banner" id="editNote" hidden></div>
     <section class="card">
@@ -335,6 +523,40 @@ textarea{resize:vertical}
 </div>
 
 <div class="planSw" id="planSw"></div>
+<!-- inventory: one item -->
+<div class="sheet" id="invSheet" hidden>
+  <div class="in">
+    <h3 id="ivTitle"></h3>
+    <div class="ihead"><div><div class="big-num" id="ivQty">۰</div><small class="note" id="ivUnit">عدد</small></div><span class="note" id="ivState"></span></div>
+    <div id="ivEdit">
+      <div class="seg" style="margin-bottom:10px"><button type="button" data-ivt="in" aria-pressed="true">ورود</button><button type="button" data-ivt="out" aria-pressed="false">خروج</button><button type="button" data-ivt="adj" aria-pressed="false">شمارش</button></div>
+      <div class="grp"><span id="ivNLbl">تعداد ورودی</span><div class="stepper"><button type="button" data-ivs="-1" aria-label="یکی کمتر">−</button><input id="ivN" inputmode="numeric" value="1" aria-label="تعداد"><button type="button" data-ivs="1" aria-label="یکی بیشتر">+</button></div></div>
+      <div class="fields" style="margin-top:10px"><label class="f">توضیح (اختیاری)<input id="ivNote" placeholder="مثلاً: فاکتور شماره ۱۲۳، تاریخ انقضا…"></label><label class="f">ثبت‌کننده<input id="ivBy"></label></div>
+      <div class="msg" id="ivMsg"></div>
+      <div class="btns"><button class="btn" id="ivSave" type="button" style="flex:1">ثبت</button></div>
+      <div class="fields" id="ivMinW" style="margin-top:6px;align-items:end"><label class="f">حداقل موجودی (برای هشدار رو به اتمام)<input id="ivMin" inputmode="numeric" placeholder="مثلاً ۳"></label><button class="btn ghost" id="ivMinSave" type="button">ذخیره‌ی حداقل</button></div>
+    </div>
+    <h3 style="font-size:.95rem">سابقه‌ی این قلم</h3>
+    <div id="ivHist" class="sys" style="box-shadow:none"></div>
+    <div class="btns"><button class="btn ghost" id="ivClose" type="button">بستن</button></div>
+  </div>
+</div>
+<!-- inventory: new stock -->
+<div class="sheet" id="invMvSheet" hidden>
+  <div class="in">
+    <h3>ورود کالا به انبار</h3>
+    <div class="chips"><button type="button" class="chip" data-ikind="fix">فیکسچر</button><button type="button" class="chip" data-ikind="heal">هیلینگ</button><button type="button" class="chip" data-ikind="cover">کاور</button><button type="button" class="chip" data-ikind="other">مواد مصرفی</button></div>
+    <label class="f" id="in_catW">برند و سیستم<select id="in_cat"></select></label>
+    <div class="fields" id="in_manW"><label class="f">برند<input id="in_b"></label><label class="f">سیستم<input id="in_sys"></label></div>
+    <div class="fields" id="in_fixW"><label class="f">قطر فیکسچر (mm)<select id="in_dS"></select><input id="in_d" class="ltr" inputmode="decimal"></label><label class="f">طول فیکسچر (mm)<select id="in_lS"></select><input id="in_l" class="ltr" inputmode="decimal"></label></div>
+    <label class="f" id="in_hsW">سایز<select id="in_hS"></select><input id="in_hs" class="ltr" placeholder="مثلاً 4.5×4"></label>
+    <div id="in_othW" class="grp"><div class="fields"><label class="f">نام قلم<input id="in_name"></label><label class="f">واحد<input id="in_unit" value="عدد" placeholder="عدد، بسته، ویال…"></label></div><div class="chips" id="in_sug"></div></div>
+    <div class="grp"><span>تعداد</span><div class="stepper"><button type="button" data-ins="-1" aria-label="یکی کمتر">−</button><input id="in_n" inputmode="numeric" value="1" aria-label="تعداد"><button type="button" data-ins="1" aria-label="یکی بیشتر">+</button></div></div>
+    <div class="fields"><label class="f">توضیح (اختیاری)<input id="in_note" placeholder="مثلاً: فاکتور شماره ۱۲۳"></label><label class="f">ثبت‌کننده<input id="in_by"></label></div>
+    <div class="msg" id="inMsg"></div>
+    <div class="btns"><button class="btn" id="inSave" type="button" style="flex:1">ثبت ورود</button><button class="btn ghost" id="inClose" type="button">بستن</button></div>
+  </div>
+</div>
 <div class="obbar" id="obBar" hidden></div>
 <div class="toast" id="toast" hidden></div>
 <div class="sheet" id="aSheet" hidden>
@@ -353,6 +575,16 @@ textarea{resize:vertical}
   <div class="btns">
     <button class="btn ghost" id="saveBtn" type="button">ذخیره پیش‌نویس</button>
     <button class="btn" id="confirmBtn" type="button">ثبت نهایی</button>
+  </div>
+</div>
+
+<!-- big number picker -->
+<div class="sheet" id="npSheet" hidden>
+  <div class="in">
+    <h3 id="npTitle">تعداد کل</h3>
+    <p class="npsub" id="npSub"></p>
+    <div class="npick" id="npGrid"></div>
+    <div class="btns"><button class="btn ghost" id="npClear" type="button">پاک کردن تعداد</button><button class="btn ghost" id="npClose" type="button">بستن</button></div>
   </div>
 </div>
 
@@ -391,6 +623,7 @@ textarea{resize:vertical}
       <label class="f">طول فیکسچر (mm)<select id="imp_lS"></select><input id="imp_l" inputmode="decimal" class="ltr"></label></div>
     <div class="grp"><span>کاور / هیلینگ</span><div class="chips"><button type="button" class="chip" data-ht="cover" aria-pressed="false">کاور اسکرو</button><button type="button" class="chip" data-ht="heal" aria-pressed="false">هیلینگ اباتمنت</button></div></div>
     <label class="f">سایز کاور / هیلینگ<select id="imp_hS"></select><input id="imp_hs" class="ltr" placeholder="مثلاً 4.5×4"></label>
+    <p class="note" id="impStock" hidden></p>
     <div class="msg" id="impMsg"></div>
     <div class="btns"><button class="btn" id="impOk" type="button">ثبت</button><button class="btn ghost" id="impDel" type="button">ایمپلنت گذاشته نشد</button><button class="btn ghost" id="impClose" type="button">بستن</button></div>
   </div>
@@ -421,7 +654,10 @@ textarea{resize:vertical}
     <h3 style="margin-top:6px">روز جراحی</h3>
     <label class="f">رمز ورود دستیار جراحی<input id="set_surgpw" type="password" autocomplete="new-password"></label>
     <p class="note" id="set_surgpwN"></p>
-    <label class="f">برندها و سایزهای ایمپلنت (هر سطر یک سیستم)<textarea id="set_cat" rows="6" class="ltr" style="direction:rtl" placeholder="کره‌ای | Dentium | SuperLine | 3.6, 4.0, 4.5, 5.0 | 8, 10, 12, 14 | 4.5×3, 4.5×4"></textarea></label>
+    <h3 style="margin-top:6px">انبار</h3>
+    <label class="f">رمز ورود انباردار<input id="set_invpw" type="password" autocomplete="new-password"></label>
+    <p class="note" id="set_invpwN"></p>
+    <label class="f">برندها و سایزهای ایمپلنت (هر سطر یک سیستم؛ برای روز جراحی و جدول انبار)<textarea id="set_cat" rows="6" class="ltr" style="direction:rtl" placeholder="کره‌ای | Dentium | SuperLine | 3.6, 4.0, 4.5, 5.0 | 8, 10, 12, 14 | 4.5×3, 4.5×4"></textarea></label>
     <p class="note">ترتیب هر سطر: گروه قیمتی (ایرانی / کره‌ای / ایتالیایی / سوئیسی) | برند | سیستم | قطرها | طول‌ها | سایزهای کاور و هیلینگ (اختیاری). عددها را با کاما جدا کنید.</p>
     <p class="note">ایمیل‌ها از Gmailی فرستاده می‌شوند که سرور Apps Script با آن ساخته شده است.</p>
     <div class="msg" id="sMsg"></div>
@@ -530,17 +766,18 @@ function payText(r,brand){const T=totals(r),b=brand||r.brand,S=T.surg[b],p=r.pay
 function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||teethSel(s)||(x.cnt&&(num(s.jc.U)||num(s.jc.L)))||s.text||(x.items&&x.items.some(it=>itemQty(s,it))))}
 
 /* ---------- form render ---------- */
+const pickHTML=(attrs,max,v,lbl)=>`<span class="pick${num(v)?' on':''}" role="button" tabindex="0" data-pick="${esc(lbl||'')}"><span class="pv">${num(v)?fa(num(v)):'—'}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg><select ${attrs} tabindex="-1">${opts(max,v)}</select></span>`;
 const opts=(max,v,from=1)=>`<option value="">—</option>`+Array.from({length:max-from+1},(_,i)=>i+from).map(n=>`<option value="${n}" ${String(v)===String(n)?'selected':''}>${fa(n)}</option>`).join('');
 const jawLocked=(x,j)=>!!x.cnt&&!!num(AS()[x.id].jc[j]);
 function toothBtn(sid,key,label){const lk=jawLocked(SEC[sid]||{},key[0]);const pl=SURG&&SURG.plan[sid]&&SURG.plan[sid].sel[key],hi=SURG&&sid==='imp'&&SURG.imp[key];return `<button type="button" class="t${pl?' pl':''}${hi?' hasimp':''}" data-sid="${sid}" data-k="${key}" aria-pressed="${!lk&&!!AS()[sid].sel[key]}"${lk?' disabled title="تعداد کل این فک انتخاب شده"':''}>${label}</button>`}
 function jawCntHTML(x,j){if(x.cnt!=='jaw'&&x.cnt!=='jaws')return '';if(SURG&&x.id==='imp')return '';const s=AS()[x.id];
-  return `<label class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small><select data-jc="${x.id}" data-j="${j}" aria-label="${x.cnt==='jaw'?'Full EXT':'تعداد کل'} فک ${j==='U'?'بالا':'پایین'}">${opts(x.jmax,s.jc[j])}</select></label>`}
+  const L=(x.cnt==='jaw'?'Full EXT':'تعداد کل')+' فک '+(j==='U'?'بالا':'پایین');return `<div class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small>${pickHTML(`data-jc="${x.id}" data-j="${j}" aria-label="${L}"`,x.jmax,s.jc[j],x.t+'، '+L)}</div>`}
 function chartHTML(x){const hc=(x.cnt==='jaw'||x.cnt==='jaws')&&!(SURG&&x.id==='imp');let h=`<div class="chart"><div class="chart-in${hc?' hascnt':''}">`;
   [['U','بالا'],['L','پایین']].forEach(([j,l])=>{let r='',lf='';for(let i=x.n;i>=1;i--)r+=toothBtn(x.id,j+'R'+i,i);for(let i=1;i<=x.n;i++)lf+=toothBtn(x.id,j+'L'+i,i);
     h+=`<div class="jaw"><span class="jlabel">${l}</span><div class="half">${r}</div><span class="mid"></span><div class="half">${lf}</div>${jawCntHTML(x,j)}</div>`});
   return h+'<div class="sides"><span>راست بیمار</span><span>چپ بیمار</span></div></div></div>'}
 function cntHTML(x){const s=AS()[x.id];if(SURG&&x.id==='imp')return '<p class="note">روی شماره‌ی دندان بزنید و برند و سایز فیکسچر را انتخاب کنید.</p>';
-  if(x.cnt==='one')return `<div class="fields"><label class="f">تعداد کل (به جای انتخاب تک‌تک دندان‌ها)<select data-cnt="${x.id}">${opts(x.max,s.cnt)}</select></label></div>`;
+  if(x.cnt==='one')return `<div class="fields"><div class="f"><span>تعداد کل (به جای انتخاب تک‌تک دندان‌ها)</span>${pickHTML(`data-cnt="${x.id}"`,x.max,s.cnt,x.t+'، تعداد کل')}</div></div>`;
   if(x.cnt==='jaw')return '<p class="note">با انتخاب Full EXT برای هر فک، دندان‌های همان فک قفل می‌شوند.</p>';
   if(x.cnt==='jaws')return '<p class="note">با انتخاب «تعداد کل» برای هر فک، دندان‌های همان فک قفل می‌شوند.</p>';
   return ''}
@@ -552,7 +789,7 @@ function itemsHTML(x){const s=AS()[x.id];
   return `<div class="items${x.two?' two':''}">${x.items.map(it=>`<div class="item-box"><b>${it.l}</b>
     ${it.type==='quad'?`<div class="quad">${IQUADS.map(([q,t])=>`<button type="button" class="qd" data-isid="${x.id}" data-ik="${it.k}:${q}" title="${t}" aria-pressed="${!!s.isel[it.k+':'+q]}">${q}</button>`).join('')}</div><div class="sides quad-sides"><span>راست بیمار</span><span>چپ بیمار</span></div>`
       :it.type==='chips'?`<div class="chips">${it.o.map(o=>`<button type="button" class="chip" data-isid="${x.id}" data-ik="${esc(it.k+':'+o)}" aria-pressed="${!!s.isel[it.k+':'+o]}"${x.excl&&s.isel[x.excl[it.k+':'+o]]?' disabled':''}>${o}</button>`).join('')}</div>`
-      :`<label class="f">تعداد<select data-icnt="${x.id}" data-ik="${it.k}">${opts(it.max,s.icnt[it.k])}</select></label>`}
+      :`<div class="f"><span>تعداد</span>${pickHTML(`data-icnt="${x.id}" data-ik="${it.k}"`,it.max,s.icnt[it.k],x.t+'، '+it.l)}</div>`}
     ${SURG?'':`<label class="f">قیمت ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}<input class="price" inputmode="numeric" data-ip="${x.id}" data-ik="${it.k}" value="${esc(s.ip[it.k])}"></label>`}
     <div class="calc" id="icalc_${x.id}_${it.k}"></div></div>`).join('')}</div>`}
 function priceHTML(x){const s=AS()[x.id];if(SURG)return '';
@@ -563,7 +800,7 @@ function priceHTML(x){const s=AS()[x.id];if(SURG)return '';
   return `<label class="f">${x.price==='unit'?'قیمت '+(x.ul||'هر واحد'):'قیمت'}<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label>`}
 function sectionHTML(x){const s=AS()[x.id];
   const tag=x.pros?'<span class="tag p">پروتز</span>':(x.price?'<span class="tag">جراحی</span>':'');
-  return `<section class="card" data-sec="${x.id}"><h2>${x.t}${SURG?'':tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x):x.kind==='chips'?chipsHTML(x):x.kind==='items'?(x.n?chartHTML(x)+cntHTML(x):'')+(x.base&&!SURG?`<label class="f">قیمت جراحی هر واحد<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="bcalc_${x.id}"></div>`:'')+itemsHTML(x):x.kind==='quad'?quadHTML(x):''}
+  return `<section class="card" data-sec="${x.id}" data-kind="${x.pros?'pros':x.price?'surg':'info'}"><h2>${x.t}${SURG?'':tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x):x.kind==='chips'?chipsHTML(x):x.kind==='items'?(x.n?chartHTML(x)+cntHTML(x):'')+(x.base&&!SURG?`<label class="f">قیمت جراحی هر واحد<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="bcalc_${x.id}"></div>`:'')+itemsHTML(x):x.kind==='quad'?quadHTML(x):''}
     ${x.text?`<label class="f">${x.text}<input id="tx_${x.id}" data-tx="${x.id}" value="${esc(s.text)}"></label>`:''}
     ${priceHTML(x)}<div class="calc" id="calc_${x.id}"></div></section>`}
 function renderForm(){
@@ -586,7 +823,7 @@ function renderPlanSw(){const m=F.alt.mode;
   document.getElementById('planSw').innerHTML=`<button type="button" class="ps" data-plan="1" aria-pressed="${CUR===1}">طرح ۱</button>`+
     (m==='none'?`<button type="button" class="ps add" id="altAdd">+ طرح دوم</button>`:`<button type="button" class="ps" data-plan="2" aria-pressed="${CUR===2}">طرح ۲${m==='text'?' (توضیحات)':''}</button>`)}
 function recalc(){const pv={s:AS(),brand:F.brand,pay:F.pay};
-  SECTIONS.forEach(x=>{const el=document.getElementById('calc_'+x.id);if(!el)return;const s=pv.s[x.id],q=qty(s,x);
+  SECTIONS.forEach(x=>{const el=document.getElementById('calc_'+x.id);if(!el)return;const s=pv.s[x.id],q=qty(s,x);try{el.closest('.card').classList.toggle('used',!!rowUsed({s:pv.s,brand:'ko',pay:{}},x))}catch(e){}
     if(x.price==='unit'&&q)el.innerHTML=`${fa(q)} ${x.kind==='quad'?'Q':'واحد'} × ${fa(num(s.price))} = <b>${fa(q*num(s.price))}</b>`;
     else if((x.price==='brandUnit'||x.price==='implantBrand')&&q){const t=rowTotals(pv,x).brand;el.innerHTML=`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'} · `+BRANDS.map(b=>`${b.n} <b>${fa(t[b.k])}</b>`).join(' · ')}
     else if(x.kind==='teeth')el.textContent=q?`${fa(q)} واحد`:'';else el.textContent='';
@@ -1093,16 +1330,16 @@ function readPriceSettings(){const P={};document.querySelectorAll('#set_prices [
 /* ---------- roles, live queue, reception ---------- */
 let ROLE='',LROLE='staff',QV='',QITEMS=[],QSEEN=null,QTIMER=null,QBUSY=false,RC_EDIT=null,BACK_TO_Q=false;
 const QPOLL=CF_ON?3000:5000;
-const ROLE_LBL={staff:'پرسنل',doctor:'پزشک',consultant:'مشاور',surgery:'دستیار جراحی'};
-function applyRole(){document.querySelectorAll('#nav [data-role]').forEach(b=>b.hidden=!b.dataset.role.split(' ').includes(ROLE));$('qTitle').textContent=ROLE==='consultant'?'کارتابل مشاور':ROLE==='surgery'?'کارتابل جراحی':'بیماران در صف انتظار'}
-function home(){if(ROLE==='staff'){show('recep');rcReset()}else show('queue');renderQ();pollQ(false)}
+const ROLE_LBL={staff:'پرسنل',doctor:'پزشک',consultant:'مشاور',surgery:'دستیار جراحی',inventory:'انباردار'};
+function applyRole(){document.querySelectorAll('#nav [data-role]').forEach(b=>b.hidden=!b.dataset.role.split(' ').includes(ROLE)||(b.id==='tabInv'&&!CF_ON));$('whoami').textContent=ROLE?(ROLE_LBL[ROLE]||'')+(SET.clinic?' · '+SET.clinic:''):'';$('qTitle').textContent=ROLE==='consultant'?'کارتابل مشاور':ROLE==='surgery'?'کارتابل جراحی':'بیماران در صف انتظار'}
+function home(){if(ROLE==='inventory'){show('inv');renderInv();pollInv(true);return}if(ROLE==='staff'){show('recep');rcReset()}else show('queue');renderQ();pollQ(false);if(CF_ON&&(ROLE==='doctor'||ROLE==='consultant'))pollInv(true)}
 let AC=null;function beep(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;[0,0.18].forEach((d,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=i?1046:784;g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(0.25,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.16);o.connect(g).connect(AC.destination);o.start(t+d);o.stop(t+d+0.17)})}catch(e){}}
 function startPoll(){stopPoll();if(FS_ON){fsListen();return}QTIMER=setInterval(()=>pollQ(false),QPOLL)}
 function stopPoll(){if(QTIMER)clearInterval(QTIMER);QTIMER=null;if(FS_ON)fsStopListen()}
 let LAST_ACT=Date.now(),LAST_POLL=0;['pointerdown','keydown','touchstart','wheel'].forEach(e=>addEventListener(e,()=>{const idle=Date.now()-LAST_ACT>QIDLE;LAST_ACT=Date.now();if(idle)pollQ(false)},{passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ROLE)pollQ(false)});
 const QIDLE=15*60*1000;
-async function pollQ(force){if(!ROLE||QBUSY)return;if(!force){if(document.hidden)return;if(Date.now()-LAST_ACT>QIDLE&&Date.now()-LAST_POLL<30000)return}LAST_POLL=Date.now();if(FS_ON&&FS_UNSUB.length){fsRebuild(ROLE);return}QBUSY=true;
+async function pollQ(force){if(ROLE==='inventory')return;if(!ROLE||QBUSY)return;if(!force){if(document.hidden)return;if(Date.now()-LAST_ACT>QIDLE&&Date.now()-LAST_POLL<30000)return}LAST_POLL=Date.now();if(FS_ON&&FS_UNSUB.length){fsRebuild(ROLE);return}QBUSY=true;
   try{const j=await api('queue',{ver:force?'':QV},{prio:'poll'});setLive(true);applyQueue(j)}
   catch(e){if(e.message!=='aborted')setLive(false)}finally{QBUSY=false}}
 const NEWQ={doctor:'waiting',consultant:'consult',surgery:'surgery'};
@@ -1167,13 +1404,13 @@ function alert0(t){const el=$('qList');el.insertAdjacentHTML('afterbegin',`<div 
 
 /* ---------- views ---------- */
 function show(v){$('viewLogin').hidden=v!=='login';$('nav').hidden=v==='login';$('viewList').hidden=v!=='list';$('viewForm').hidden=v!=='form';$('formBar').hidden=v!=='form';$('planSw').hidden=v!=='form';
-  $('viewQueue').hidden=v!=='queue';$('viewRecep').hidden=v!=='recep';$('viewSurg').hidden=v!=='surg';if(v!=='surg'){SURG=null;$('surgSecs').innerHTML=''}
+  $('viewQueue').hidden=v!=='queue';$('viewRecep').hidden=v!=='recep';$('viewSurg').hidden=v!=='surg';$('viewInv').hidden=v!=='inv';$('invAdd').hidden=v!=='inv'||ROLE!=='inventory';$('tabInv').setAttribute('aria-current',v==='inv');if(v!=='surg'){SURG=null;$('surgSecs').innerHTML=''}
   $('tabQueue').setAttribute('aria-current',v==='queue');$('tabRecep').setAttribute('aria-current',v==='recep');
   $('tabList').setAttribute('aria-current',v==='list');$('tabNew').setAttribute('aria-current',v==='form'&&!F.id);
   if(v==='queue'||v==='recep')renderQ();window.scrollTo(0,0)}
 function openForm(r){F=r;CUR=1;dirty=false;renderForm();show('form')}
 function logout(){API.pw='';API.t='';ROLE='';RQ.list.forEach(j=>{j.aborted=true;j.no(new Error('aborted'))});RQ.list=[];if(RQ.cur){RQ.cur.aborted=true;RQ.cur.ctrl&&RQ.cur.ctrl.abort()}QV='';QSEEN=null;QITEMS=[];stopPoll();saveApi();show('login');$('lg_pw').type='password';$('lgShow').checked=false;pwPrefill();$('lgUrlWrap').hidden=!!API_URL_DEFAULT||IN_GAS;$('lg_url').value=API.url||''}
-function applySettings(s){if(s)SET={...DEFAULT_SET,...s};SET.prices=SET.prices||{};try{localStorage.setItem('implantPlanSettings',JSON.stringify(SET))}catch(e){}
+function applySettings(s){if(s)SET={...DEFAULT_SET,...s};SET.prices=SET.prices||{};try{$('lgClinic').textContent=SET.clinic||'';if(ROLE)$('whoami').textContent=(ROLE_LBL[ROLE]||'')+(SET.clinic?' · '+SET.clinic:'')}catch(e){}try{localStorage.setItem('implantPlanSettings',JSON.stringify(SET))}catch(e){}
   if(F.status==='new'&&!dirty){F=blankForm();renderForm()}}
 async function sha(t){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('implant|'+t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return null}}
 const AUTHC=()=>{try{return JSON.parse(localStorage.getItem('implantAuth')||'{}')}catch(e){return {}}};
@@ -1199,7 +1436,7 @@ async function login(){const m=$('lgMsg');m.className='msg';m.textContent='در 
 function beep0(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
 
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
-  if(t.dataset.lrole){LROLE=t.dataset.lrole;document.querySelectorAll('[data-lrole]').forEach(b=>b.setAttribute('aria-pressed',b===t));$('lgPwLbl').textContent=LROLE==='doctor'?'رمز ورود پزشک':LROLE==='consultant'?'رمز ورود مشاور':LROLE==='surgery'?'رمز ورود دستیار جراحی':'رمز ورود پرسنل';pwPrefill();$('lg_pw').focus();return}
+  if(t.dataset.lrole){LROLE=t.dataset.lrole;document.querySelectorAll('[data-lrole]').forEach(b=>b.setAttribute('aria-pressed',b===t));$('lgPwLbl').textContent=LROLE==='doctor'?'رمز ورود پزشک':LROLE==='consultant'?'رمز ورود مشاور':LROLE==='surgery'?'رمز ورود دستیار جراحی':LROLE==='inventory'?'رمز ورود انباردار':'رمز ورود پرسنل';pwPrefill();$('lg_pw').focus();return}
   if(t.id==='tabOut'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای خروج دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}delete t.dataset.armed;logout();return}
   if(t.id==='tabQueue'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن به کارتابل دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}
     delete t.dataset.armed;dirty=false;show('queue');pollQ(true);return}
@@ -1213,14 +1450,14 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.id==='tabList'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن به بایگانی دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}
     delete t.dataset.armed;show('list');loadList();return}
   if(t.id==='tabNew'){openForm(blankForm());return}
-  if(t.id==='tabSet'){$('set_surgpw').value='';$('set_surgpwN').textContent=SET.surgPwSet?'رمز دستیار جراحی تعیین شده است. برای عوض کردنش رمز تازه را بنویسید؛ خالی بماند عوض نمی‌شود.':'هنوز رمزی برای دستیار جراحی تعیین نشده. یک رمز (حداقل ۴ حرف، متفاوت با رمزهای دیگر) بنویسید و ذخیره کنید.';$('set_cat').value=catToText(SET.catalog||[]);$('set_to').value=SET.recipient||'';$('set_clinic').value=SET.clinic||'';$('set_doctor').value=SET.doctor||'';$('set_phone').value=SET.phone||'';renderPriceSettings();$('sMsg').textContent='';$('sSheet').hidden=false;return}
+  if(t.id==='tabSet'){$('set_invpw').value='';$('set_invpwN').textContent=SET.invPwSet?'رمز انباردار تعیین شده است. برای عوض کردنش رمز تازه را بنویسید؛ خالی بماند عوض نمی‌شود.':'هنوز رمزی برای انباردار تعیین نشده. یک رمز (حداقل ۴ حرف، متفاوت با رمزهای دیگر) بنویسید و ذخیره کنید.';$('set_surgpw').value='';$('set_surgpwN').textContent=SET.surgPwSet?'رمز دستیار جراحی تعیین شده است. برای عوض کردنش رمز تازه را بنویسید؛ خالی بماند عوض نمی‌شود.':'هنوز رمزی برای دستیار جراحی تعیین نشده. یک رمز (حداقل ۴ حرف، متفاوت با رمزهای دیگر) بنویسید و ذخیره کنید.';$('set_cat').value=catToText(SET.catalog||[]);$('set_to').value=SET.recipient||'';$('set_clinic').value=SET.clinic||'';$('set_doctor').value=SET.doctor||'';$('set_phone').value=SET.phone||'';renderPriceSettings();$('sMsg').textContent='';$('sSheet').hidden=false;return}
   if(t.id==='sClose'){$('sSheet').hidden=true;return}
   if(t.id==='sOut'){$('sSheet').hidden=true;logout();return}
   if(t.id==='sSave'){const to=$('set_to').value.trim(),m=$('sMsg');
     if(to&&!validEmail(to)){m.className='msg err';m.textContent='ایمیل گیرنده درست نیست.';return}
     const s={recipient:to,clinic:$('set_clinic').value.trim(),doctor:$('set_doctor').value.trim(),phone:$('set_phone').value.trim(),prices:readPriceSettings()};
-    const cat=catFromText($('set_cat').value);if(cat.err){m.className='msg err';m.textContent=cat.err;return}const s2=Object.assign({},s,{catalog:cat.list});const spw=$('set_surgpw').value;if(spw)s2.surgPw=spw;
-    t.disabled=true;try{const j=await api('settings',{settings:CF_ON?s2:s});applySettings(j.settings||s);$('set_surgpw').value='';if(FS_ON||CF_ON)api('gasSettings',{settings:s},{prio:'bg'}).catch(()=>{});m.className='msg ok';m.textContent='ذخیره شد. روی هر دو لپ‌تاپ اعمال می‌شود.'}
+    const cat=catFromText($('set_cat').value);if(cat.err){m.className='msg err';m.textContent=cat.err;return}const s2=Object.assign({},s,{catalog:cat.list});const spw=$('set_surgpw').value;if(spw)s2.surgPw=spw;const ipw=$('set_invpw').value;if(ipw)s2.invPw=ipw;
+    t.disabled=true;try{const j=await api('settings',{settings:CF_ON?s2:s});applySettings(j.settings||s);$('set_surgpw').value='';$('set_invpw').value='';if(FS_ON||CF_ON)api('gasSettings',{settings:s},{prio:'bg'}).catch(()=>{});m.className='msg ok';m.textContent='ذخیره شد. روی هر دو لپ‌تاپ اعمال می‌شود.'}
     catch(err){m.className='msg err';m.textContent='ذخیره نشد: '+err.message}finally{t.disabled=false}return}
   if(t.id==='saveBtn'){if(!(F.h.name||'').trim()){alertMsg('برای ذخیره، نام بیمار را وارد کنید.');return}
     t.disabled=true;try{if(F.status==='new')F.status='draft';await saveRecord(F);t.textContent='ذخیره شد';setTimeout(()=>t.textContent='ذخیره پیش‌نویس',1600)}catch(err){alertMsg('ذخیره نشد: '+err.message)}finally{t.disabled=false}return}
@@ -1267,22 +1504,37 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-mk]');if(!
   const on=b.dataset.mv==='1';if(!!m.y[k]===on)return;if(on)m.y[k]=1;else{delete m.y[k];delete m.t[k]}if(box==='f')dirty=true;renderMed(box);if(on&&box&&MED_Q.some(q=>q[0]===k)){const i=document.querySelector(`#${box==='rc'?'rcMed':'fMed'} [data-mt="${k}"]`);if(i)i.focus()}});
 document.addEventListener('input',e=>{const t=e.target,bx=t.closest&&t.closest('[data-medbox]');if(!bx)return;const m=medOf(bx.dataset.medbox);
   if(t.dataset.mt)m.t[t.dataset.mt]=t.value;else if(t.hasAttribute('data-mo'))m.other=t.value;else return;if(bx.dataset.medbox==='f')dirty=true;e.stopPropagation()},true);
-document.addEventListener('input',e=>{const i=e.target;if(i.dataset.tp){i.value=fmtInput(i.value);return}if(i.closest('#sSheet')||i.closest('#viewLogin')||i.closest('#viewRecep')||i.id==='q')return;
+document.addEventListener('input',e=>{const i=e.target;if(i.dataset.tp){i.value=fmtInput(i.value);return}if(i.closest('#sSheet')||i.closest('#viewLogin')||i.closest('#viewRecep')||i.closest('#viewInv')||i.closest('#invSheet')||i.closest('#invMvSheet')||i.id==='q')return;
   if(i.dataset.h){F.h[i.dataset.h]=i.value;touch();recalc();return}
   if(i.id==='altText'){F.alt.text=i.value;touch();return}
   if(i.dataset.tx){AS()[i.dataset.tx].text=i.value;touch();recalc();return}
   if(i.dataset.ip){i.value=fmtInput(i.value);AS()[i.dataset.ip].ip[i.dataset.ik]=i.value;touch();recalc();return}
   if(i.dataset.pr||i.dataset.bp){i.value=fmtInput(i.value);if(i.dataset.pr)AS()[i.dataset.pr].price=i.value;else AS()[i.dataset.bp].bp[i.dataset.b]=i.value;touch();recalc();return}
   if(i.id&&i.id.startsWith('p_')){F.pay[i.id.slice(2)]=i.value;touch();recalc()}});
-document.addEventListener('change',e=>{const i=e.target;if(i.tagName!=='SELECT')return;
+document.addEventListener('change',e=>{const i=e.target;if(i.tagName!=='SELECT')return;{const pk=i.closest('.pick');if(pk){pk.querySelector('.pv').textContent=num(i.value)?fa(num(i.value)):'—';pk.classList.toggle('on',!!num(i.value))}}
   if(i.dataset.cnt){AS()[i.dataset.cnt].cnt=i.value}else if(i.dataset.jc){const sid=i.dataset.jc,j=i.dataset.j,sc=AS()[sid];sc.jc[j]=i.value;
     if(SEC[sid].cnt){const lk=!!num(i.value);if(lk)Object.keys(sc.sel).forEach(k=>{if(isTooth(k)&&k[0]===j)delete sc.sel[k]});
       document.querySelectorAll(`.t[data-sid="${sid}"][data-k^="${j}"]`).forEach(b=>{b.disabled=lk;if(lk){b.setAttribute('aria-pressed','false');b.title='تعداد کل این فک انتخاب شده'}else b.removeAttribute('title')})}}else if(i.dataset.icnt){AS()[i.dataset.icnt].icnt[i.dataset.ik]=i.value}else return;
   touch();recalc()});
+/* big number picker for «تعداد کل» */
+let NP=null;
+function openPick(pk){const sel=pk.querySelector('select');if(!sel||sel.disabled)return;NP=sel;
+  const vals=[...sel.options].map(o=>o.value).filter(Boolean),cur=sel.value;const sec=pk.closest('[data-kind]');
+  $('npTitle').textContent=pk.dataset.pick||'تعداد';$('npSub').textContent=sel.dataset.jc?'با انتخاب تعداد کل، دندان‌های همین فک قفل می‌شوند.':'';
+  $('npGrid').className='npick'+(sec&&sec.dataset.kind==='pros'?' pros':'');
+  $('npGrid').innerHTML=vals.map(v=>`<button type="button" data-npv="${v}" aria-pressed="${v===cur}">${fa(v)}</button>`).join('');
+  $('npClear').hidden=!cur;$('npSheet').hidden=false;const b=$('npGrid').querySelector('[aria-pressed="true"]')||$('npGrid').firstChild;b&&b.focus({preventScroll:true})}
+function setPick(v){if(!NP)return;NP.value=v;NP.dispatchEvent(new Event('change',{bubbles:true}));NP=null;$('npSheet').hidden=true}
+document.addEventListener('click',e=>{const pk=e.target.closest('[data-pick]');if(pk){e.preventDefault();openPick(pk);return}
+  const nb=e.target.closest('[data-npv]');if(nb){setPick(nb.dataset.npv);return}
+  if(e.target.id==='npClear'){setPick('');return}if(e.target.id==='npClose'||e.target.id==='npSheet'){NP=null;$('npSheet').hidden=true}});
+document.addEventListener('keydown',e=>{const pk=e.target.closest&&e.target.closest('[data-pick]');if(pk&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openPick(pk)}
+  if(e.key==='Escape'){document.querySelectorAll('.sheet:not([hidden])').forEach(x=>{if(x.id==='npSheet'||x.id==='impSheet'||x.id==='invSheet'||x.id==='invMvSheet'){x.hidden=true}})}});
 window.addEventListener('beforeunload',e=>{if(dirty||OUTBOX.length){e.preventDefault();e.returnValue=''}});
 
 /* ---------- boot ---------- */
 try{const s=JSON.parse(localStorage.getItem('implantPlanSettings')||'null');if(s)SET={...DEFAULT_SET,...s}}catch(e){}
+try{$('lgClinic').textContent=SET.clinic||''}catch(e){}
 renderForm();
 if((API.url||IN_GAS||FS_ON)&&API.pw&&API.role&&(!FS_ON||API.t)){ROLE=API.role;applyRole();home();startPoll();processOutbox();
   api('ping').then(j=>{if(j.role!==ROLE){ROLE=j.role;API.role=ROLE;saveApi();applyRole();home()}applySettings(j.settings);applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender}).catch(()=>{})}
@@ -1345,7 +1597,7 @@ function openSurg(x){const d=x.data||{};const rec=fromDoc(x.id,d);if(!rec.h.name
       return `<p class="note"><b>جلسه ${fa(ss.n||0)} · ${esc(ss.jalali||'')}</b>${ss.by?' · '+esc(ss.by):''}<br>${ll.map(l=>esc(l.t+': '+l.d)).join('<br>')}${Object.keys(ss.imp||{}).length?'<br>ایمپلنت‌ها: '+Object.keys(ss.imp).map(k=>esc(toothTxt([k])+' '+impTxt(ss.imp[k]))).join('؛ '):''}</p>`}).join(''):'');
   $('sgTitle').textContent=`جلسه‌ی ${fa(prev.length+1)} جراحی · ${jalali(new Date()).slash}`;
   $('sg_note').value='';$('sg_fin').checked=false;$('sgMsg').textContent='';try{$('sg_by').value=localStorage.getItem('implantSurgBy')||''}catch(e){}
-  $('sections').innerHTML='';renderSurg();show('surg');SURG&&(SURG.open=true)}
+  $('sections').innerHTML='';renderSurg();show('surg');if(CF_ON)pollInv(true);SURG&&(SURG.open=true)}
 function renderSurg(){$('surgSecs').innerHTML=SECTIONS.filter(x=>x.price||x.kind!=='none').map(sectionHTML).join('');renderImps()}
 function renderImps(){if(!SURG)return;const s=SURG.s.imp,keys=Object.keys(s.sel).filter(k=>s.sel[k]&&isTooth(k)).sort();
   $('sgImps').innerHTML=keys.length?keys.map(k=>{const m=SURG.imp[k];return `<button type="button" data-impedit="${k}">${esc(toothTxt([k]))} — ${m&&m.b&&m.d&&m.l?esc(impTxt(m)):'<span class="miss">برند و سایز ثبت نشده؛ بزنید</span>'}</button>`}).join(''):'<p class="note">ایمپلنتی برای این جلسه علامت نخورده. در بخش «پایه ایمپلنت» روی شماره‌ی دندان بزنید.</p>';
@@ -1354,7 +1606,10 @@ let IMPK=null,IMPH='';
 function catOpts(){return (SET.catalog||[]).map((c,i)=>`<option value="${i}">${esc(c.b+(c.sys?' · '+c.sys:''))}${GRPN[c.g]?' ('+GRPN[c.g]+')':''}</option>`).join('')}
 function impSync(){const ci=$('imp_cat').value,c=(SET.catalog||[])[ci];const man=!c;$('impManW').hidden=!man;
   const sel=(S,I,vals,v)=>{const has=c&&vals&&vals.length;S.hidden=!has;I.hidden=!!has;if(has){S.innerHTML='<option value="">—</option>'+vals.map(x=>`<option ${String(v)===String(x)?'selected':''}>${esc(x)}</option>`).join('')+'<option value="__">سایر…</option>';if(v&&!vals.includes(v)){S.value='__';I.hidden=false}}};
-  sel($('imp_dS'),$('imp_d'),c&&c.d,$('imp_d').value);sel($('imp_lS'),$('imp_l'),c&&c.l,$('imp_l').value);sel($('imp_hS'),$('imp_hs'),c&&c.h,$('imp_hs').value)}
+  sel($('imp_dS'),$('imp_d'),c&&c.d,$('imp_d').value);sel($('imp_lS'),$('imp_l'),c&&c.l,$('imp_l').value);sel($('imp_hS'),$('imp_hs'),c&&c.h,$('imp_hs').value);impStock()}
+function impStock(){const el=$('impStock');if(!el)return;const ci=$('imp_cat').value,c=(SET.catalog||[])[ci];const b=c?c.b:$('imp_b').value,sys=c?c.sys:$('imp_sys').value,d=impVal($('imp_dS'),$('imp_d')),l=impVal($('imp_lS'),$('imp_l'));
+  if(!INV.loaded||!b||!d||!l){el.hidden=true;return}const i=INV.items.find(x=>x.kind==='fix'&&sysKey(x.b,x.sys)===sysKey(b,sys)&&nk(x.d)===nk(d)&&nk(x.l)===nk(l));const q=i?Number(i.qty)||0:0;
+  el.hidden=false;el.style.color=q>0?'':'var(--bad)';el.textContent=q>0?`موجودی انبار برای این سایز: ${fa(q)} عدد (با ثبت جلسه یکی کم می‌شود)`:'این سایز در انبار موجود نیست؛ با ثبت جلسه موجودی منفی می‌شود و انباردار باخبر می‌شود.'}
 function openImp(k){IMPK=k;const m=SURG.imp[k]||{};const cat=SET.catalog||[];
   $('impTitle').textContent='ایمپلنت · '+toothTxt([k]);$('impMsg').textContent='';
   $('imp_cat').innerHTML=(cat.length?'<option value="">— انتخاب کنید —</option>'+catOpts():'')+'<option value="m">سایر (نوشتن دستی)</option>';
@@ -1440,8 +1695,126 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.dataset.tosurg){t.disabled=true;try{await api('toSurgery',{id:t.dataset.tosurg});toast('به کارتابل جراحی فرستاده شد.');loadList();pollQ(true)}catch(err){alertMsg(err.message)}finally{t.disabled=false}return}
   if(t.dataset.srep||t.dataset.scard||t.dataset.settle){const id=t.dataset.srep||t.dataset.scard||t.dataset.settle;t.disabled=true;
     try{const o=await surgRecord(id);if(t.dataset.settle)openDone(o.r,o.sg,true);else await surgDownload(t.dataset.scard?'card':'rep',o.r,o.sg)}catch(err){alertMsg(err.message)}finally{t.disabled=false}return}});
-document.addEventListener('change',e=>{if(e.target.id==='imp_cat'){impSync();return}
+document.addEventListener('change',e=>{if(['imp_dS','imp_lS'].includes(e.target.id))impStock();if(e.target.id==='imp_cat'){impSync();return}
   if(['imp_dS','imp_lS','imp_hS'].includes(e.target.id)){const I=$(e.target.id.replace('S','').replace('imp_h','imp_hs'));if(e.target.value==='__'){I.hidden=false;I.value='';I.focus()}else{I.hidden=true;I.value=e.target.value}}});
+
+/* ---------- inventory (انبار) ---------- */
+const INV={ver:'',items:[],moves:[],usage:[],loaded:false,seg:'fix',low:false,busy:false,cur:null,kind:'fix',mvType:'in'};
+const INV_SUG=['پودر استخوان','ممبران','نخ بخیه','تگ','کیت CGF','کارپول بی‌حسی','تیغ بیستوری','سرنگ','گاز استریل','اباتمنت'];
+const KLBL={fix:'فیکسچر',heal:'هیلینگ',cover:'کاور',other:'مواد مصرفی'};
+const invCanEdit=()=>ROLE==='inventory';
+const invNote=t=>esc(t||'').replace(/دندان (UR|UL|LR|LL)(\d)/g,(m,q,n)=>'دندان '+toothTxt([q+n]));
+const nk=v=>{const t=toEn(v).trim().replace(/[\/٫,]/g,'.');const f=parseFloat(t);return isFinite(f)&&/^[\d.]+$/.test(t)?String(f):t.toLowerCase().replace(/[×*]/g,'x').replace(/\s/g,'')};
+const sysKey=(b,s)=>String(b||'').trim().toLowerCase()+'|'+String(s||'').trim().toLowerCase();
+function invState(i){const q=Number(i.qty)||0,mn=Number(i.min)||0;return q<0?'neg':q===0?'out':(mn&&q<=mn)?'low':'ok'}
+function invLbl(i){if(!i)return '';if(i.kind==='other')return i.name;const bs=[i.b,i.sys].filter(Boolean).join(' ');
+  return i.kind==='fix'?`${bs}، Ø${i.d} × ${i.l}`:`${KLBL[i.kind]} ${bs}، ${i.d}`}
+function invUsage(){const m={};(INV.usage||[]).forEach(u=>m[u.item]=Number(u.n)||0);return m}
+async function pollInv(force){if(!ROLE||INV.busy||!CF_ON)return;if(!force&&document.hidden)return;INV.busy=true;
+  try{const j=await api('invGet',{ver:force?'':INV.ver},{prio:'poll'});setInvLive(true);if(j&&!j.same&&j.items){Object.assign(INV,{ver:j.ver,items:j.items,moves:j.moves||[],usage:j.usage||[],loaded:true});renderInv();if(INV.cur)refreshInvSheet()}}
+  catch(e){if(e.message!=='aborted')setInvLive(false)}finally{INV.busy=false}}
+function setInvLive(ok){const el=$('iLive');if(!el)return;el.classList.toggle('off',!ok);el.textContent=ok?'زنده':'اتصال قطع است؛ دوباره تلاش می‌شود…'}
+function invBadge(){const n=INV.items.filter(i=>{const s=invState(i);return s==='low'||s==='out'||s==='neg'}).filter(i=>Number(i.min)||Number(i.qty)<0).length;const b=$('invBadge');b.hidden=!n||ROLE!=='inventory';b.textContent=fa(n)}
+function invSystems(){const map=new Map();const add=(M,v)=>{const k=nk(v);if(k&&!M.has(k))M.set(k,toEn(v).trim())};
+  (SET.catalog||[]).forEach(c=>{const k=sysKey(c.b,c.sys);if(!map.has(k))map.set(k,{b:c.b,sys:c.sys,d:new Map(),l:new Map(),items:{}});const s=map.get(k);(c.d||[]).forEach(v=>add(s.d,v));(c.l||[]).forEach(v=>add(s.l,v))});
+  INV.items.filter(i=>i.kind==='fix').forEach(i=>{const k=sysKey(i.b,i.sys);if(!map.has(k))map.set(k,{b:i.b,sys:i.sys,d:new Map(),l:new Map(),items:{}});const s=map.get(k);add(s.d,i.d);add(s.l,i.l);s.items[nk(i.d)+'x'+nk(i.l)]=i});
+  const srt=M=>[...M.values()].sort((x,y)=>parseFloat(x)-parseFloat(y)||String(x).localeCompare(y));
+  return [...map.values()].map(s=>({...s,d:srt(s.d),l:srt(s.l)}))}
+function renderInv(){if($('viewInv').hidden&&ROLE!=='inventory'){invBadge();return}invBadge();
+  const U=invUsage(),it=INV.items;
+  const fixQ=it.filter(i=>i.kind==='fix').reduce((a,i)=>a+Math.max(0,Number(i.qty)||0),0);
+  const low=it.filter(i=>invState(i)==='low').length,out=it.filter(i=>(invState(i)==='out'&&Number(i.min))||invState(i)==='neg').length;
+  const used=Object.values(U).reduce((a,n)=>a+n,0);
+  $('invKpis').innerHTML=`<div class="kpi"><b>${fa(fixQ)}</b><span>فیکسچر در انبار</span></div>
+    <button type="button" class="kpi low" data-ikpi="low" aria-pressed="${INV.low}"><b>${fa(low)}</b><span>رو به اتمام</span></button>
+    <button type="button" class="kpi out" data-ikpi="low" aria-pressed="${INV.low}"><b>${fa(out)}</b><span>تمام‌شده</span></button>
+    <div class="kpi"><b>${fa(used)}</b><span>مصرف ۳۰ روز اخیر</span></div>`;
+  document.querySelectorAll('[data-iseg]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.iseg===INV.seg));$('invLow').setAttribute('aria-pressed',INV.low);
+  $('invTools').hidden=INV.seg==='log';$('invAdd').hidden=!invCanEdit()||$('viewInv').hidden;
+  const q=toEn($('invQ').value.trim()).toLowerCase(),match=s=>!q||toEn(s).toLowerCase().includes(q);
+  const B=$('invBody');
+  if(!INV.loaded){B.innerHTML='<div class="empty">در حال بارگذاری انبار…</div>';return}
+  if(INV.seg==='fix'){const sys=invSystems().filter(s=>match(s.b+' '+s.sys));
+    if(!sys.length){B.innerHTML=`<div class="empty">${q?'نتیجه‌ای پیدا نشد.':'هنوز فیکسچری ثبت نشده.'+(invCanEdit()?' با «ورود کالا» اولین فیکسچرها را وارد کنید.':'')}${!(SET.catalog||[]).length?'<br>برای دیدن جدول کامل سایزها، برندها و سایزها را در «تنظیمات» وارد کنید.':''}</div>`;return}
+    const top=it.filter(i=>U[i.id]).sort((a,b)=>U[b.id]-U[a.id]).slice(0,8),mx=top.length?U[top[0].id]:1;
+    B.innerHTML=sys.map(s=>{const tot=Object.values(s.items).reduce((a,i)=>a+(Number(i.qty)||0),0);
+      let rows=s.d.map(d=>{const cells=s.l.map(l=>{const i=s.items[nk(d)+'x'+nk(l)];if(INV.low&&!(i&&['low','out','neg'].includes(invState(i))))return `<td><span class="cell none" aria-hidden="true"></span></td>`;
+        const st=i?invState(i):'none';return `<td><button type="button" class="cell ${st}" data-icell="${esc(s.b)}|${esc(s.sys)}|${esc(d)}|${esc(l)}" title="Ø${esc(d)} × ${esc(l)}">${i?fa(Number(i.qty)||0):'·'}</button></td>`}).join('');
+        return `<tr><th class="r">Ø${esc(d)}</th>${cells}</tr>`}).join('');
+      return `<section class="sys"><div class="sys-h"><div><b>${esc(s.b)}</b> <small>${esc(s.sys||'')}</small></div><span class="tot">${fa(tot)} عدد</span></div>
+        <div class="mx"><table><thead><tr><th title="قطر / طول">Ø \\ L</th>${s.l.map(l=>`<th class="c">${esc(l)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></section>`}).join('')+
+      `<div class="mxlegend"><span><i style="background:var(--ok-soft);border:1px solid var(--ok)"></i>موجود</span><span><i style="background:var(--warn-soft);border:1px solid var(--warn)"></i>رو به اتمام (کمتر از حداقل)</span><span><i style="background:var(--bad-soft);border:1px solid var(--bad)"></i>تمام شده</span><span>ردیف‌ها قطر و ستون‌ها طول فیکسچر (mm)</span></div>`+
+      (top.length?`<section class="sys"><div class="sys-h"><b>پرمصرف‌ترین‌ها در ۳۰ روز اخیر</b></div><div class="usage">${top.map(i=>`<div class="ubar"><span>${esc(invLbl(i))}</span><i style="width:${Math.max(4,U[i.id]/mx*100)}%"></i><b>${fa(U[i.id])}</b></div>`).join('')}</div></section>`:'');
+    return}
+  if(INV.seg==='acc'){const list=it.filter(i=>i.kind!=='fix'&&match(invLbl(i))&&(!INV.low||['low','out','neg'].includes(invState(i))));
+    const grp=[['heal','هیلینگ و کاور',x=>x.kind==='heal'||x.kind==='cover'],['other','مواد مصرفی',x=>x.kind==='other']];
+    const html=grp.map(([k,t,f])=>{const g=list.filter(f).sort((a,b)=>invLbl(a).localeCompare(invLbl(b),'fa'));if(!g.length)return '';
+      return `<section class="sys"><div class="sys-h"><b>${t}</b><span class="tot">${fa(g.length)} قلم</span></div>${g.map(i=>{const st=invState(i);
+        return `<button type="button" class="irow" data-iitem="${esc(i.id)}"><span class="nm"><b>${esc(invLbl(i))}</b><small>${Number(i.min)?'حداقل موجودی '+fa(i.min):'حداقل موجودی تعیین نشده'}${U[i.id]?'، مصرف ۳۰ روز: '+fa(U[i.id]):''}</small></span><span class="qty ${st==='neg'?'out':st}">${fa(Number(i.qty)||0)}<small>${esc(i.unit||'عدد')}</small></span></button>`}).join('')}</section>`}).join('');
+    B.innerHTML=html||`<div class="empty">${q||INV.low?'موردی پیدا نشد.':'هنوز قلمی ثبت نشده.'+(invCanEdit()?' با «ورود کالا» هیلینگ، کاور یا مواد مصرفی را اضافه کنید.':'')}</div>`;return}
+  const byId=Object.fromEntries(it.map(i=>[i.id,i]));
+  B.innerHTML=INV.moves.length?`<section class="sys">${INV.moves.slice(0,200).map(m=>{const i=byId[m.item],d=Number(m.delta)||0;
+    const ic=m.type==='in'?['in','+']:m.type==='adj'?['adj','≈']:m.type==='use'?['use','−']:['out','−'];
+    const what=m.type==='in'?'ورود':m.type==='adj'?'شمارش و اصلاح موجودی':m.type==='use'?'مصرف در جراحی':'خروج';
+    return `<div class="mv"><span class="ic ${ic[0]}">${ic[1]}</span><div><b>${esc(invLbl(i)||'قلم حذف‌شده')}</b><small>${what}${m.refName?'، '+esc(m.refName):''}${m.note?'، '+invNote(m.note):''}${m.by?'، '+esc(m.by):''}</small><small>${esc(invTime(m.at))}، موجودی بعد: ${fa(Number(m.qty)||0)}</small></div><span class="d ${d>0?'p':'m'}">${d>0?'+':'−'}${fa(Math.abs(d))}</span></div>`}).join('')}</section>`
+    :'<div class="empty">هنوز ورود یا خروجی ثبت نشده.</div>'}
+function invTime(iso){try{const d=new Date(iso);return d.toLocaleDateString('fa-IR-u-ca-persian',{month:'long',day:'numeric'})+' ساعت '+d.toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
+/* item sheet: one existing item (or an empty fixture size from the catalog) */
+function openInvItem(item,spec){INV.cur=item?{id:item.id}:{spec};try{$('ivBy').value=localStorage.getItem('implantInvBy')||''}catch(e){}INV.mvType='in';$('ivN').value='1';$('ivNote').value='';$('ivMsg').textContent='';refreshInvSheet();$('invSheet').hidden=false}
+function refreshInvSheet(){const c=INV.cur;if(!c)return;const i=c.id?INV.items.find(x=>x.id===c.id):INV.items.find(x=>x.kind==='fix'&&c.spec&&sysKey(x.b,x.sys)===sysKey(c.spec.b,c.spec.sys)&&nk(x.d)===nk(c.spec.d)&&nk(x.l)===nk(c.spec.l));
+  if(i){c.id=i.id}const lbl=i?invLbl(i):invLbl(Object.assign({kind:'fix'},c.spec));const q=i?Number(i.qty)||0:0,st=i?invState(i):'out';
+  $('ivTitle').textContent=lbl;$('ivQty').textContent=fa(q);$('ivQty').style.color=st==='ok'?'var(--ok)':st==='low'?'var(--warn)':'var(--bad)';
+  $('ivUnit').textContent=(i&&i.unit)||'عدد';$('ivState').textContent=st==='ok'?'موجود':st==='low'?'رو به اتمام':q<0?'کسری (بیشتر از موجودی مصرف شده)':'تمام شده';
+  const ed=invCanEdit();$('ivEdit').hidden=!ed;$('ivMinW').hidden=!ed||!i;if(i)$('ivMin').value=Number(i.min)||'';
+  document.querySelectorAll('[data-ivt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ivt===INV.mvType));
+  $('ivNLbl').textContent=INV.mvType==='adj'?'تعداد شمارش‌شده در قفسه':INV.mvType==='in'?'تعداد ورودی':'تعداد خروجی';
+  const U=invUsage();const mv=i?INV.moves.filter(m=>m.item===i.id).slice(0,12):[];
+  $('ivHist').innerHTML=(i&&U[i.id]?`<p class="note">مصرف ۳۰ روز اخیر: ${fa(U[i.id])}</p>`:'')+(mv.length?mv.map(m=>{const d=Number(m.delta)||0;return `<div class="mv"><span class="ic ${m.type==='in'?'in':m.type==='adj'?'adj':'use'}">${m.type==='in'?'+':m.type==='adj'?'≈':'−'}</span><div><b>${m.type==='in'?'ورود':m.type==='adj'?'شمارش':m.type==='use'?'مصرف در جراحی':'خروج'}${m.refName?'، '+esc(m.refName):''}</b><small>${esc(invTime(m.at))}${m.note?'، '+invNote(m.note):''}${m.by?'، '+esc(m.by):''}</small></div><span class="d ${d>0?'p':'m'}">${d>0?'+':'−'}${fa(Math.abs(d))}</span></div>`}).join(''):'<p class="note">هنوز ورود یا خروجی برای این قلم ثبت نشده.</p>')}
+async function invSaveMove(t){const c=INV.cur;if(!c)return;const m=$('ivMsg');const n=parseInt(toEn($('ivN').value),10);
+  if(!(n>=0)||(INV.mvType!=='adj'&&!n)){m.className='msg err';m.textContent='تعداد را وارد کنید.';return}
+  const by=invBy();t.disabled=true;m.className='msg';m.textContent='در حال ثبت…';
+  try{const p={type:INV.mvType,n,note:$('ivNote').value.trim(),by,sendId:uuid()};if(c.id)p.item=c.id;else p.spec=Object.assign({kind:'fix'},c.spec);
+    const j=await api('invMove',p,{timeout:10000,tries:2});c.id=j.id;
+    const mn=$('ivMin').value.trim();const it=INV.items.find(x=>x.id===j.id);if(!$('ivMinW').hidden&&it&&String(num(mn))!==String(Number(it.min)||0))await api('invItem',{id:j.id,min:num(mn)});
+    toast(INV.mvType==='in'?`${fa(n)} عدد وارد انبار شد.`:INV.mvType==='out'?`${fa(n)} عدد از انبار خارج شد.`:'موجودی اصلاح شد.');INV.mvType='in';$('ivN').value='1';$('ivNote').value='';m.textContent='';await pollInv(true);refreshInvSheet()}
+  catch(e){m.className='msg err';m.textContent=e.message}finally{t.disabled=false}}
+async function invSaveMin(t){const c=INV.cur;if(!c||!c.id)return;t.disabled=true;try{await api('invItem',{id:c.id,min:num($('ivMin').value)});toast('حداقل موجودی ذخیره شد.');await pollInv(true)}catch(e){$('ivMsg').className='msg err';$('ivMsg').textContent=e.message}finally{t.disabled=false}}
+function invBy(){const v=$('ivBy')?$('ivBy').value.trim():'';try{if(v)localStorage.setItem('implantInvBy',v)}catch(e){}return v||(()=>{try{return localStorage.getItem('implantInvBy')||''}catch(e){return ''}})()}
+/* new stock sheet */
+function openInvNew(){INV.kind='fix';$('inMsg').textContent='';$('in_n').value='1';$('in_note').value='';['in_b','in_sys','in_d','in_l','in_hs','in_name'].forEach(id=>$(id).value='');$('in_unit').value='عدد';
+  $('in_cat').innerHTML=((SET.catalog||[]).length?'<option value="">— انتخاب کنید —</option>'+(SET.catalog||[]).map((c,i)=>`<option value="${i}">${esc(c.b+(c.sys?' '+c.sys:''))}</option>`).join(''):'')+'<option value="m">سایر (نوشتن دستی)</option>';
+  $('in_cat').value=(SET.catalog||[]).length?'':'m';$('in_sug').innerHTML=INV_SUG.map(s=>`<button type="button" class="chip" data-isug="${esc(s)}">${esc(s)}</button>`).join('');
+  try{$('in_by').value=localStorage.getItem('implantInvBy')||''}catch(e){}invNewSync();$('invMvSheet').hidden=false}
+function invNewSync(){const k=INV.kind,c=(SET.catalog||[])[$('in_cat').value];document.querySelectorAll('[data-ikind]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ikind===k));
+  $('in_catW').hidden=k==='other';$('in_manW').hidden=k==='other'||!!c;$('in_fixW').hidden=k!=='fix';$('in_hsW').hidden=k==='fix'||k==='other';$('in_othW').hidden=k!=='other';
+  const fill=(S,I,vals)=>{const has=c&&vals&&vals.length;S.hidden=!has;I.hidden=!!has;if(has){const v=S.value;S.innerHTML='<option value="">—</option>'+vals.map(x=>`<option${v===x?' selected':''}>${esc(x)}</option>`).join('')}};
+  fill($('in_dS'),$('in_d'),c&&c.d);fill($('in_lS'),$('in_l'),c&&c.l);fill($('in_hS'),$('in_hs'),c&&c.h)}
+async function invSaveNew(t){const m=$('inMsg'),k=INV.kind,c=(SET.catalog||[])[$('in_cat').value];const pv=(S,I)=>S.hidden?toEn(I.value).trim():S.value;
+  const spec={kind:k,b:c?c.b:$('in_b').value.trim(),sys:c?c.sys:$('in_sys').value.trim(),d:k==='fix'?pv($('in_dS'),$('in_d')):pv($('in_hS'),$('in_hs')),l:pv($('in_lS'),$('in_l')),name:$('in_name').value.trim(),unit:$('in_unit').value.trim()};
+  const n=parseInt(toEn($('in_n').value),10);
+  const err=k==='other'?(!spec.name&&'نام قلم را بنویسید.'):(!spec.b?'برند را انتخاب کنید.':k==='fix'&&(!spec.d||!spec.l)?'قطر و طول فیکسچر را انتخاب کنید.':k!=='fix'&&!spec.d?'سایز را وارد کنید.':'');
+  if(err){m.className='msg err';m.textContent=err;return}if(!(n>0)){m.className='msg err';m.textContent='تعداد را وارد کنید.';return}
+  const by=$('in_by').value.trim();try{localStorage.setItem('implantInvBy',by)}catch(e){}
+  t.disabled=true;m.className='msg';m.textContent='در حال ثبت…';
+  try{await api('invMove',{type:'in',n,spec,note:$('in_note').value.trim(),by,sendId:uuid()},{timeout:10000,tries:2});
+    toast(`${fa(n)} عدد ${invLbl(Object.assign({},spec))} وارد انبار شد.`);$('invMvSheet').hidden=true;INV.seg=k==='fix'?'fix':'acc';await pollInv(true)}
+  catch(e){m.className='msg err';m.textContent=e.message}finally{t.disabled=false}}
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+  if(t.id==='tabInv'){if(dirty&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن به انبار دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}delete t.dataset.armed;show('inv');renderInv();pollInv(true);return}
+  if(t.dataset.iseg){INV.seg=t.dataset.iseg;renderInv();return}
+  if(t.id==='invLow'||t.dataset.ikpi){INV.low=!INV.low;if(INV.low&&INV.seg==='log')INV.seg='fix';renderInv();return}
+  if(t.dataset.icell){const [b,sys,d,l]=t.dataset.icell.split('|');const s=invSystems().find(x=>sysKey(x.b,x.sys)===sysKey(b,sys));const i=s&&s.items[nk(d)+'x'+nk(l)];openInvItem(i||null,i?null:{b,sys,d,l});return}
+  if(t.dataset.iitem){openInvItem(INV.items.find(x=>x.id===t.dataset.iitem),null);return}
+  if(t.dataset.ivt){INV.mvType=t.dataset.ivt;if(INV.mvType==='adj'){const i=INV.items.find(x=>INV.cur&&x.id===INV.cur.id);$('ivN').value=i?Math.max(0,Number(i.qty)||0):0}else $('ivN').value='1';refreshInvSheet();return}
+  if(t.dataset.ivs){const v=(parseInt(toEn($('ivN').value),10)||0)+Number(t.dataset.ivs);$('ivN').value=Math.max(0,v);return}
+  if(t.dataset.ins){const v=(parseInt(toEn($('in_n').value),10)||0)+Number(t.dataset.ins);$('in_n').value=Math.max(1,v);return}
+  if(t.id==='ivSave'){invSaveMove(t);return}if(t.id==='ivMinSave'){invSaveMin(t);return}if(t.id==='ivClose'){INV.cur=null;$('invSheet').hidden=true;return}
+  if(t.id==='invAdd'){openInvNew();return}if(t.id==='inClose'){$('invMvSheet').hidden=true;return}if(t.id==='inSave'){invSaveNew(t);return}
+  if(t.dataset.ikind){INV.kind=t.dataset.ikind;invNewSync();return}
+  if(t.dataset.isug){$('in_name').value=t.dataset.isug;return}});
+document.addEventListener('change',e=>{if(e.target.id==='in_cat')invNewSync()});
+document.addEventListener('input',e=>{if(e.target.id==='invQ')renderInv()});
+setInterval(()=>{if(ROLE&&CF_ON&&(!$('viewInv').hidden||ROLE==='inventory'))pollInv(false)},4000);
 
 /* ---------- install as app (Android / iPhone) ---------- */
 (function(){const el=$('appGet');if(!el)return;const ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&'ontouchend' in document),and=/Android/.test(ua);
