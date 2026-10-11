@@ -1550,15 +1550,6 @@ document.addEventListener('keydown',e=>{const pk=e.target.closest&&e.target.clos
   if(e.key==='Escape'){document.querySelectorAll('.sheet:not([hidden])').forEach(x=>{if(x.id==='npSheet'||x.id==='impSheet'||x.id==='invSheet'||x.id==='invMvSheet'){x.hidden=true}})}});
 window.addEventListener('beforeunload',e=>{if(dirty||OUTBOX.length){e.preventDefault();e.returnValue=''}});
 
-/* ---------- boot ---------- */
-try{const s=JSON.parse(localStorage.getItem('implantPlanSettings')||'null');if(s)SET={...DEFAULT_SET,...s}}catch(e){}
-try{$('lgClinic').textContent=SET.clinic||''}catch(e){}
-renderForm();
-if((API.url||IN_GAS||FS_ON)&&API.pw&&API.role&&(!FS_ON||API.t)){ROLE=API.role;applyRole();home();startPoll();processOutbox();
-  api('ping').then(j=>{if(j.role!==ROLE){ROLE=j.role;API.role=ROLE;saveApi();applyRole();home()}applySettings(j.settings);applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender}).catch(()=>{})}
-else if((API.url||IN_GAS||FS_ON)&&API.pw){api('ping').then(j=>{ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;applyRole();home();startPoll();processOutbox()}).catch(err=>{logout();$('lgMsg').className='msg err';$('lgMsg').textContent=err.message})}
-else logout();
-
 /* ---------- surgery day ---------- */
 const QNAME={UR:'بالا راست',UL:'بالا چپ',LR:'پایین راست',LL:'پایین چپ'};
 const QDN={q1:'بالا راست',q2:'بالا چپ',q3:'پایین چپ',q4:'پایین راست'};
@@ -1845,6 +1836,15 @@ setInterval(()=>{if(ROLE&&CF_ON&&(!$('viewInv').hidden||ROLE==='inventory'))poll
   el.innerHTML=parts.join('')+'<button type="button" id="pwaInstall" hidden>نصب روی همین دستگاه</button>';el.hidden=!parts.length;
   addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;const b=$('pwaInstall');b.hidden=false;el.hidden=false});
   el.addEventListener('click',e=>{if(e.target.id==='pwaInstall'&&deferred){deferred.prompt();deferred.userChoice.finally(()=>{deferred=null;e.target.hidden=true})}})})();
+/* ---------- boot ---------- */
+try{const s=JSON.parse(localStorage.getItem('implantPlanSettings')||'null');if(s)SET={...DEFAULT_SET,...s}}catch(e){}
+try{$('lgClinic').textContent=SET.clinic||''}catch(e){}
+renderForm();
+if((API.url||IN_GAS||FS_ON)&&API.pw&&API.role&&(!FS_ON||API.t)){ROLE=API.role;applyRole();home();startPoll();processOutbox();
+  api('ping').then(j=>{if(j.role!==ROLE){ROLE=j.role;API.role=ROLE;saveApi();applyRole();home()}applySettings(j.settings);applyQueue(j.queue);if(j.sender)$('cFrom').textContent=j.sender}).catch(()=>{})}
+else if((API.url||IN_GAS||FS_ON)&&API.pw){api('ping').then(j=>{ROLE=j.role;API.role=ROLE;saveApi();applySettings(j.settings);if(j.sender)$('cFrom').textContent=j.sender;applyRole();home();startPoll();processOutbox()}).catch(err=>{logout();$('lgMsg').className='msg err';$('lgMsg').textContent=err.message})}
+else logout();
+
 </script>
 </body>
 </html>
