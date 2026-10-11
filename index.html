@@ -374,7 +374,9 @@ button.kpi{cursor:pointer}button.kpi:hover{border-color:var(--line2)}
 .fab{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:max(20px,calc((100vw - 780px)/2 + 20px));z-index:6;box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 35%,transparent);border-radius:16px;min-height:52px;padding:12px 20px}
 @media (prefers-reduced-motion:no-preference){.t,.chip,.tot,.cell,.pick{transition:background .12s,color .12s,border-color .12s}}
 /* ---- compact plan layout ---- */
-#sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;grid-auto-flow:row dense;align-items:start}
+#sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;grid-auto-flow:row dense;align-items:stretch}
+#sections>.card>.calc:last-child:empty{display:none}
+#sections>.card{margin:0}
 #sections>.card{padding:14px;gap:10px}
 #sections>.card[data-wide],#sections>.card.plan2{grid-column:1/-1}
 @media (max-width:820px){#sections{grid-template-columns:1fr}}
@@ -712,7 +714,7 @@ const SECTIONS=[
    xp:[{k:'cb',pk:'aox_cb',l:'All on X کلاسیک · هر پایه (ایتالیایی)'},{k:'lb',pk:'aox_lb',l:'All on X لانگ · هر پایه (ایتالیایی)'},{k:'lp',pk:'aox_lp',l:'All on X لانگ · پروتز هر فک',def:'19000000'}]},
  {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14,pros:true},
  {id:'gbr',t:'جراحی GBR',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
- {id:'vip',t:'جراحی VIP / GBR',kind:'items',price:'items',three:true,items:[{k:'v',l:'جراحی VIP / GBR',type:'quad',pk:'vip',def:'5000000',ul:'هر ناحیه'},{k:'cgf',l:'CGF',type:'quad',pk:'vip_cgf',ul:'هر ناحیه'},{k:'mem',l:'ممبران و تگ',type:'quad',pk:'vip_mem',ul:'هر ناحیه'}]},
+ {id:'vip',t:'جراحی VIP / GBR',kind:'items',price:'items',two:true,items:[{k:'cgf',l:'CGF',type:'quad',pk:'vip_cgf',ul:'هر ناحیه'},{k:'mem',l:'ممبران و تگ',type:'quad',pk:'vip_mem',ul:'هر ناحیه'}]},
  {id:'crw',t:'فقط روکش',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14,pros:true},
  {id:'sin',t:'سینوس لیفت',kind:'items',price:'items',two:true,items:[{k:'o',l:'سینوس باز',type:'chips',o:['راست','چپ'],pk:'sin_o'},{k:'c',l:'سینوس بسته',type:'chips',o:['راست','چپ'],pk:'sin_c'}],excl:{'o:راست':'c:راست','c:راست':'o:راست','o:چپ':'c:چپ','c:چپ':'o:چپ'}},
  {id:'alv',t:'آلوئولوپلاستی',kind:'quad',price:'unit',ul:'هر Q'},
@@ -904,8 +906,8 @@ function secFrom(d){const S=blankSections();SECTIONS.forEach(x=>{let v=(d||{})[x
   (v.sel||[]).forEach(k=>t.sel[k]=true);t.text=v.text||'';t.price=v.price||(x.base&&!v.lock?t.price:'');Object.assign(t.bp,v.bp||{});t.cnt=v.cnt||'';Object.assign(t.jc,v.jc||{});
   Object.assign(t.ip,v.ip||{});(v.isel||[]).forEach(k=>t.isel[k]=true);Object.assign(t.icnt,v.icnt||{});t.sp=Array.isArray(v.sp)?v.sp.map(r=>({k:r.k||'',b:r.b||'',d:r.d||'',l:r.l||''})):[];
   if(x.id==='vip'&&!v.lock2){const qs=new Set();(v.sel||[]).forEach(k=>{if(isTooth(k))qs.add(k.slice(0,2))});['U','L'].forEach(j=>{if(num((v.jc||{})[j]))[j+'R',j+'L'].forEach(q=>qs.add(q))});
-    if(qs.size){qs.forEach(q=>t.isel['v:'+q]=true);if(num((v.icnt||{}).cgf))qs.forEach(q=>t.isel['cgf:'+q]=true);if(num((v.icnt||{}).mem))qs.forEach(q=>t.isel['mem:'+q]=true)}
-    if(v.price&&!(v.ip||{}).v)t.ip.v=v.price;t.sel={};t.jc={U:'',L:''};t.icnt={}}
+    if(qs.size){if(num((v.icnt||{}).cgf))qs.forEach(q=>t.isel['cgf:'+q]=true);if(num((v.icnt||{}).mem))qs.forEach(q=>t.isel['mem:'+q]=true)}
+    t.sel={};t.jc={U:'',L:''};t.icnt={}}
   if(x.id==='alv')(v.sel||[]).forEach(k=>{const m={'½ فک راست بالا':'q1','½ فک چپ بالا':'q2','½ فک چپ پایین':'q3','½ فک راست پایین':'q4'}[k.split(':')[1]];if(m){delete t.sel[k];t.sel[m]=true}});
   if(x.id==='surg'&&!(v.isel||[]).length)(v.sel||[]).forEach(k=>{const o=k.split(':')[1];if(o)t.isel['w:'+o]=true});
   if(x.id==='surg'){t.sel={};const QM={'بالا راست':'UR','بالا چپ':'UL','پایین راست':'LR','پایین چپ':'LL'};Object.keys(t.isel).forEach(k=>{const [ik,o]=k.split(':');if(QM[o]){const on=t.isel[k];delete t.isel[k];if(on)t.isel[ik+':'+QM[o]]=true}})}
