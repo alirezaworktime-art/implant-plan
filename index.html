@@ -396,6 +396,9 @@ button.kpi{cursor:pointer}button.kpi:hover{border-color:var(--line2)}
 /* doctor works without prices; the consultant sees them */
 body[data-role="doctor"] #viewForm .pz,body[data-role="doctor"] #viewForm label.f:has(> input.price),body[data-role="doctor"] #viewForm .grp:has(.brands),
 body[data-role="doctor"] #viewForm .calc,body[data-role="doctor"] #totalsCard,body[data-role="doctor"] #formBar .sum,body[data-role="doctor"] #viewForm p.note:has(+ .calc){display:none!important}
+/* exception: the doctor prices impacted canine / wisdom surgery himself */
+body[data-role="doctor"] #viewForm [data-sec="surg"] label.f.pz,body[data-role="doctor"] #viewForm [data-sec="surg"] label.f:has(> input.price){display:flex!important}
+body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!important}
 
 </style>
 </head>
