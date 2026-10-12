@@ -414,6 +414,15 @@ body[data-role="doctor"] #viewForm .calc,body[data-role="doctor"] #totalsCard,bo
 .mc i.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:800}.pv-card[data-kind="pros"] .mc i.on{background:var(--lapis);border-color:var(--lapis)}
 .mc b{width:2px;align-self:stretch;background:var(--ink);opacity:.45;margin:0 3px}
 .sgpick{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.sgpick .note{width:100%}
+/* surgery day: floating treatment list on the right, planned items first */
+#viewSurg .sgpick{position:fixed;right:max(8px,calc((100vw - 1040px)/2 - 182px));top:84px;z-index:6;width:170px;max-height:calc(100vh - 100px);overflow:auto;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--sh)}
+#viewSurg .sgpick .chip{text-align:right;border-radius:10px;font-size:.82rem;padding:6px 10px;min-height:38px}
+#viewSurg .sgpick .sgh{font-size:.74rem;color:var(--muted);font-weight:700;padding:2px 4px}
+@media (max-width:1420px){#viewSurg{padding-right:182px!important}}
+@media (max-width:720px){#viewSurg .sgpick{width:98px;top:122px;right:4px;padding:5px;gap:4px}#viewSurg .sgpick .chip{font-size:.7rem;padding:4px 6px;min-height:34px;line-height:1.35}#viewSurg{padding-right:102px!important}#viewSurg .pview{grid-template-columns:1fr}#viewSurg .mc{overflow-x:auto;max-width:100%}#viewSurg .mc i{width:15px}#viewSurg .card{padding:12px}}
+#impSheet .in{max-width:440px;gap:9px}
+.need{font-size:.84rem;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;margin:0}.need.ok{color:var(--ok);background:var(--ok-soft)}
+.rvl{margin:0;padding:0 18px 0 0;font-size:.88rem;line-height:1.9}.rvbad{color:var(--bad);font-weight:700}
 .sgc.inplan{border-color:var(--accent);color:var(--accent);font-weight:700}.sgc.marked{background:var(--accent-soft)}.sgc[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .fu{display:flex;flex-direction:column;gap:6px}.fu .pwshow{white-space:normal;width:auto}
 .task.late{border-inline-start-color:var(--bad)}.task.done{opacity:.6}
@@ -650,18 +659,17 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
     <section class="card sgpat"><img id="sgPhoto" class="sgphoto" alt="عکس بیمار" hidden><div><h2 id="sgName">روز جراحی</h2><div class="meta" id="sgMeta"></div><div class="qwarn" id="sgMed" hidden></div><div class="note" id="sgStaff" hidden></div></div></section>
     <section class="card"><h2>طرح درمان تأییدشده</h2><div class="pview" id="sgPlan"></div><div id="sgPrev"></div></section>
     <section class="card"><h2 id="sgTitle">جلسه‌ی جراحی امروز</h2>
-      <p class="note">کارهایی که امروز انجام شد را علامت بزنید؛ موارد طرح از قبل علامت خورده‌اند. اگر کاری انجام نشد علامتش را بردارید و اگر کار اضافه‌ای شد اضافه کنید. برای ایمپلنت روی شماره‌ی دندان بزنید تا برند و سایز را ثبت کنید.</p>
-      <div class="legend"><span><i style="box-shadow:inset 0 0 0 2px var(--accent)"></i>در طرح، انجام نشده</span><span><i style="background:var(--accent)"></i>انجام شد</span><span><i style="background:var(--warn)"></i>خارج از طرح</span></div>
-      <div class="sgpick" id="sgPick"></div></section>
+      <p class="note">از فهرست سمت راست، درمان را بزنید تا جدولش باز شود و کار انجام‌شده را علامت بزنید. درمان‌های طرح بالای فهرست‌اند. برای ایمپلنت، All on X و اوردنچر روی شماره‌ی دندان بزنید تا برند و سایز را ثبت کنید.</p>
+      <div class="legend"><span><i style="box-shadow:inset 0 0 0 2px var(--accent)"></i>در طرح، انجام نشده</span><span><i style="background:var(--accent)"></i>انجام شد</span><span><i style="background:var(--warn)"></i>خارج از طرح</span></div></section>
+    <div class="sgpick" id="sgPick"></div>
     <div id="surgSecs" class="wrap" style="padding:0"></div>
     <section class="card"><h2>ایمپلنت‌های این جلسه</h2><div class="implist" id="sgImps"></div></section>
     <section class="card"><h2>ثبت جلسه</h2>
-      <label class="f">توضیحات جراحی<textarea id="sg_note" rows="3" placeholder="نکات حین جراحی، داروها، توصیه‌ها…"></textarea></label>
-      <label class="f">نام دستیار<input id="sg_by"></label>
-      <div class="grp"><span>پیگیری بعد از جراحی (در کارتابل پذیرش می‌آید)</span><div class="fu">
-        <label class="pwshow"><input type="checkbox" data-fu="numb" checked> چک بی‌حسی فوری یک‌روزه (فردا بپرسند هنوز بی‌حس است یا نه)</label>
-        <label class="pwshow"><input type="checkbox" data-fu="week" checked> چک عادی اول هفته (یک هفته بعد حال بیمار را بپرسند)</label>
-        <label class="pwshow"><input type="checkbox" data-fu="suture" checked> نوبت کشیدن بخیه (دو هفته بعد)</label></div></div>
+      <label class="f">نام جراح *<input id="sg_by" list="dlSgDoc" autocomplete="off"><datalist id="dlSgDoc"></datalist></label>
+      <div class="grp"><span>پیگیری‌ها</span><div class="fu">
+        <label class="pwshow"><input type="checkbox" data-fu="numb" checked> فردا: چک بی‌حسی</label>
+        <label class="pwshow"><input type="checkbox" data-fu="week" checked> یک هفته بعد: چکاپ</label>
+        <label class="pwshow"><input type="checkbox" data-fu="suture" checked> دو هفته بعد: کشیدن بخیه</label></div></div>
       <label class="pwshow"><input type="checkbox" id="sg_fin"> این آخرین جلسه است (پایان درمان جراحی)</label>
       <div class="msg" id="sgMsg"></div>
       <div class="btns"><button class="btn" id="sgSave" type="button">ثبت جلسه</button><button class="btn ghost" id="sgBack" type="button">بازگشت به کارتابل</button></div></section>
@@ -881,15 +889,24 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
 </div>
 
 <!-- implant details (surgery day) -->
+<!-- surgery session review before saving -->
+<div class="sheet" id="sgRev" hidden>
+  <div class="in">
+    <h3>مرور جلسه قبل از ثبت</h3>
+    <div id="srBody"></div>
+    <div class="msg" id="srMsg"></div>
+    <div class="btns"><button class="btn" id="srOk" type="button" style="flex:1">تأیید و ثبت جلسه</button><button class="btn ghost" id="srBack" type="button">برگشت و اصلاح</button></div>
+  </div>
+</div>
 <div class="sheet" id="impSheet" hidden>
   <div class="in">
     <h3 id="impTitle">ایمپلنت</h3>
-    <label class="f" id="impCatW">برند و سیستم<select id="imp_cat"></select></label>
-    <div class="fields" id="impManW"><label class="f">برند<input id="imp_b"></label><label class="f">سیستم<input id="imp_sys"></label></div>
+    <label class="f" id="impCatW">برند<select id="imp_cat"></select></label>
+    <div class="fields" id="impManW"><label class="f">برند<input id="imp_b"></label><input id="imp_sys" type="hidden"></div>
     <div class="fields"><label class="f">قطر فیکسچر (mm)<select id="imp_dS"></select><input id="imp_d" inputmode="decimal" class="ltr"></label>
       <label class="f">طول فیکسچر (mm)<select id="imp_lS"></select><input id="imp_l" inputmode="decimal" class="ltr"></label></div>
     <div class="grp"><span>کاور / هیلینگ</span><div class="chips"><button type="button" class="chip" data-ht="cover" aria-pressed="false">کاور اسکرو</button><button type="button" class="chip" data-ht="heal" aria-pressed="false">هیلینگ اباتمنت</button></div></div>
-    <label class="f">سایز کاور / هیلینگ<select id="imp_hS"></select><input id="imp_hs" class="ltr" placeholder="مثلاً 4.5×4"></label>
+    <label class="f" hidden>سایز کاور / هیلینگ<select id="imp_hS"></select><input id="imp_hs" class="ltr"></label>
     <p class="note" id="impStock" hidden></p>
     <div class="msg" id="impMsg"></div>
     <div class="btns"><button class="btn" id="impOk" type="button">ثبت</button><button class="btn ghost" id="impDel" type="button">ایمپلنت گذاشته نشد</button><button class="btn ghost" id="impClose" type="button">بستن</button></div>
@@ -957,7 +974,7 @@ const SECTIONS=[
  {id:'surg',t:'جراحی دندان نهفته',kind:'items',price:'items',two:true,items:[{k:'c',l:'جراحی نیش نهفته',type:'quad',pk:'surg_c',ul:'هر دندان'},{k:'w',l:'جراحی عقل نهفته',type:'quad',pk:'surg_w',ul:'هر دندان'}]},
  {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',cnt:'jaws',jmax:14,text:'توضیحات'},
  {id:'sub',t:'ایمپلنت ساب‌پریوستئال',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
- {id:'aox',t:'All on X',kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'aox',prosJaw:true,def:'19000000',
+ {id:'aox',t:'All on X',sgt:7,kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'aox',prosJaw:true,def:'19000000',
    xp:[{k:'cb',pk:'aox_cb',l:'All on X کلاسیک · هر پایه (ایتالیایی)'}]},
  {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14,pros:true},
  {id:'gbr',t:'جراحی GBR',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
@@ -966,10 +983,10 @@ const SECTIONS=[
  {id:'sin',t:'سینوس لیفت',kind:'items',price:'items',two:true,items:[{k:'o',l:'سینوس باز',type:'chips',o:['راست','چپ'],pk:'sin_o'},{k:'c',l:'سینوس بسته',type:'chips',o:['راست','چپ'],pk:'sin_c'}],excl:{'o:راست':'c:راست','c:راست':'o:راست','o:چپ':'c:چپ','c:چپ':'o:چپ'}},
  {id:'alv',t:'آلوئولوپلاستی',kind:'quad',price:'unit',ul:'هر Q'},
  {id:'ram',t:'پیوند استخوان بلاک راموس',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
- {id:'ovd',t:'اوردنچر',kind:'chips',groups:[{l:'فک بالا، تعداد پایه',o:['2','3','4','5'],single:true},{l:'فک پایین، تعداد پایه',o:['2','3','4','5'],single:true}],price:'implantBrand'},
+ {id:'ovd',t:'اوردنچر',sgt:7,kind:'chips',groups:[{l:'فک بالا، تعداد پایه',o:['2','3','4','5'],single:true},{l:'فک پایین، تعداد پایه',o:['2','3','4','5'],single:true}],price:'implantBrand'},
  {id:'fgg',t:'FGG و وستیبولوپلاستی',kind:'chips',groups:[{l:'فک بالا',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']},{l:'فک پایین',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']}],text:'زمان',price:'unit'},
  {id:'tmp',t:'روکش موقت',kind:'teeth',n:7,cnt:'jaws',jmax:14,groups:[{l:'نوع',o:['دنچر','Essix','PMMA']}],price:'unit',pros:true},
- {id:'cbct',t:'CT scan',kind:'quad',items:[{k:'z',l:'CBCT زایگوما، تریگوئید و نازال',type:'toggle'}]},
+ {id:'cbct',t:'CT scan',kind:'quad',items:[{k:'z',l:'CBCT زایگوما، تریگوئید و نازال',type:'toggle'},{k:'zs',l:'CBCT ساب‌پریوستئال',type:'toggle'}]},
  {id:'cons',t:'رضایت‌نامه',kind:'chips',groups:[{o:['نزدیک به عصب','دندان سالم']}]},
  {id:'anes',t:'زمان بیهوشی',kind:'none',text:'مدت',price:'flat'}
 ];
@@ -1059,17 +1076,37 @@ function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||teethSel(s)||(x.cnt&
 const pickHTML=(attrs,max,v,lbl)=>`<span class="pick${num(v)?' on':''}" role="button" tabindex="0" data-pick="${esc(lbl||'')}"><span class="pv">${num(v)?fa(num(v)):'—'}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg><select ${attrs} tabindex="-1">${opts(max,v)}</select></span>`;
 const opts=(max,v,from=1)=>`<option value="">—</option>`+Array.from({length:max-from+1},(_,i)=>i+from).map(n=>`<option value="${n}" ${String(v)===String(n)?'selected':''}>${fa(n)}</option>`).join('');
 const jawLocked=(x,j)=>!!x.cnt&&!!num(AS()[x.id].jc[j]);
-function toothBtn(sid,key,label){const lk=jawLocked(SEC[sid]||{},key[0]);const pl=SURG&&SURG.plan[sid]&&SURG.plan[sid].sel[key],hi=SURG&&sid==='imp'&&SURG.imp[key];return `<button type="button" class="t${pl?' pl':''}${hi?' hasimp':''}" data-sid="${sid}" data-k="${key}" aria-pressed="${!lk&&!!AS()[sid].sel[key]}"${lk?' disabled title="تعداد کل این فک انتخاب شده"':''}>${label}</button>`}
-function jawCntHTML(x,j){if(x.cnt!=='jaw'&&x.cnt!=='jaws')return '';if(SURG&&x.id==='imp')return '';const s=AS()[x.id];
+const EXG=['imp','aox','ovd'],IMPSECS=EXG;
+/* is this jaw (U/L) used by section id in sections S? implant: teeth or total count; All on X / overdenture: the jaw's chip (or, on surgery day, its teeth) */
+function jawUseOne(S,id,j){const s=S&&S[id];if(!s)return false;if(id==='imp')return !!(teethSel(s,j)||num((s.jc||{})[j]));const gi=j==='U'?'0':'1';
+  return Object.keys(s.sel||{}).some(k=>s.sel[k]&&(isTooth(k)?k[0]===j:k.split(':')[0]===gi))}
+const jawChip=(s,j)=>Object.keys(s.sel).some(k=>s.sel[k]&&!isTooth(k)&&k.split(':')[0]===(j==='U'?'0':'1'));
+/* name of the other treatment that already holds this jaw (plan and surgery day), or '' */
+function jawBlocked(id,j){if(!EXG.includes(id))return '';const Ss=SURG?[SURG.s,SURG.plan]:[AS()];if(Ss.some(S=>jawUseOne(S,id,j)))return '';for(const o of EXG){if(o!==id&&Ss.some(S=>jawUseOne(S,o,j)))return SEC[o].t}return ''}
+function exRefresh(sid){if(EXG.includes(sid))EXG.forEach(o=>{if(o!==sid)reSec(o)})}
+function toothBtn(sid,key,label){const bl=jawBlocked(sid,key[0]),nc=SURG&&(sid==='aox'||sid==='ovd')&&!jawChip(AS()[sid],key[0]);if(bl||nc)return `<button type="button" class="t" data-sid="${sid}" data-k="${key}" aria-pressed="false" disabled title="${bl?'در این فک '+esc(bl)+' انتخاب شده':'اول تعداد پایه‌ی این فک را بزنید'}">${label}</button>`;const lk=jawLocked(SEC[sid]||{},key[0]);const pl=SURG&&SURG.plan[sid]&&SURG.plan[sid].sel[key],hi=SURG&&sid==='imp'&&SURG.imp[key];return `<button type="button" class="t${pl?' pl':''}${hi?' hasimp':''}" data-sid="${sid}" data-k="${key}" aria-pressed="${!lk&&!!AS()[sid].sel[key]}"${lk?' disabled title="تعداد کل این فک انتخاب شده"':''}>${label}</button>`}
+function jawCntHTML(x,j){if(x.cnt!=='jaw'&&x.cnt!=='jaws')return '';if(SURG)return '';const s=AS()[x.id];
+  if(jawBlocked(x.id,j))return `<div class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small><span class="pick" style="opacity:.35;cursor:not-allowed">—</span></div>`;
   const L=(x.cnt==='jaw'?'Full EXT':'تعداد کل')+' فک '+(j==='U'?'بالا':'پایین');return `<div class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small>${pickHTML(`data-jc="${x.id}" data-j="${j}" aria-label="${L}"`,x.jmax,s.jc[j],x.t+'، '+L)}</div>`}
-function chartHTML(x){const hc=(x.cnt==='jaw'||x.cnt==='jaws')&&!(SURG&&x.id==='imp');let h=`<div class="chart"><div class="chart-in${hc?' hascnt':''}">`;
+function chartHTML(x){const hc=(x.cnt==='jaw'||x.cnt==='jaws')&&!SURG;let h=`<div class="chart"><div class="chart-in${hc?' hascnt':''}">`;
   [['U','بالا'],['L','پایین']].forEach(([j,l])=>{let r='',lf='';for(let i=x.n;i>=1;i--)r+=toothBtn(x.id,j+'R'+i,i);for(let i=1;i<=x.n;i++)lf+=toothBtn(x.id,j+'L'+i,i);
     h+=`<div class="jaw"><span class="jlabel">${l}</span><div class="half">${r}</div><span class="mid"></span><div class="half">${lf}</div>${jawCntHTML(x,j)}</div>`});
   return h+'<div class="sides"><span>راست بیمار</span><span>چپ بیمار</span></div></div></div>'}
 function cntHTML(x){const s=AS()[x.id];if(SURG&&x.id==='imp')return '<p class="note">روی شماره‌ی دندان بزنید و برند و سایز فیکسچر را انتخاب کنید.</p>';
   if(x.cnt==='one')return `<div class="fields"><div class="f"><span>تعداد کل (به جای انتخاب تک‌تک دندان‌ها)</span>${pickHTML(`data-cnt="${x.id}"`,x.max,s.cnt,x.t+'، تعداد کل')}</div></div>`;
   return ''}
-function chipsHTML(x){return x.groups.map((g,gi)=>`<div class="grp">${g.l?`<span>${g.l}</span>`:''}<div class="chips">${g.o.map(o=>{const k=gi+':'+o;return `<button type="button" class="chip" data-sid="${x.id}" data-k="${esc(k)}" data-g="${gi}" ${g.single?'data-single="1"':''} aria-pressed="${!!AS()[x.id].sel[k]}">${o}</button>`}).join('')}</div></div>`).join('')}
+function chipsHTML(x){return x.groups.map((g,gi)=>{const bl=EXG.includes(x.id)&&g.single?jawBlocked(x.id,gi===0?'U':'L'):'';
+  return `<div class="grp">${g.l?`<span>${g.l}${bl?` <small style="color:var(--warn)">(در این فک «${esc(bl)}» انتخاب شده)</small>`:''}</span>`:''}<div class="chips">${g.o.map(o=>{const k=gi+':'+o;return `<button type="button" class="chip" data-sid="${x.id}" data-k="${esc(k)}" data-g="${gi}" ${g.single?'data-single="1"':''} aria-pressed="${!bl&&!!AS()[x.id].sel[k]}"${bl?' disabled':''}>${o}</button>`}).join('')}</div></div>`}).join('')}
+/* surgery day: where the All on X / overdenture fixtures went */
+function sgChartHTML(x){return `<p class="note">شماره‌ی دندانِ محل هر پایه را بزنید و برند و سایز را ثبت کنید.</p>`+chartHTML(Object.assign({},x,{n:x.sgt,cnt:''}))+`<p class="need" data-need="${x.id}"></p>`}
+/* surgery day: plan used «total count»; the teeth have to be picked now */
+function needHTML(x){return SURG&&SURG.need&&SURG.need[x.id]?`<p class="need" data-need="${x.id}"></p>`:''}
+function needUpd(){if(!SURG)return;document.querySelectorAll('[data-need]').forEach(el=>{const id=el.dataset.need,x=SEC[id],s=SURG.s[id];const parts=[];let ok=true;
+  ['U','L'].forEach(j=>{const want=sgWant(id,j);if(!want)return;const got=teethSel(s,j);if(got!==want)ok=false;parts.push(`فک ${j==='U'?'بالا':'پایین'}: ${fa(want)} عدد — زده‌شده ${fa(got)}`)});
+  el.hidden=!parts.length;el.classList.toggle('ok',ok);el.textContent=parts.length?(x.sgt?'تعداد پایه‌ها ':'در طرح «تعداد کل» آمده؛ شماره‌ی دندان‌ها را بزنید. ')+parts.join(' · '):''})}
+/* how many teeth must be picked on surgery day in jaw j: total count from the plan, or the All on X / overdenture fixture count */
+function sgWant(id,j){const x=SEC[id];if(x.sgt){const s=SURG.s[id];return Object.keys(s.sel).filter(k=>s.sel[k]&&!isTooth(k)&&k.split(':')[0]===(j==='U'?'0':'1')).reduce((a,k)=>a+num(k.split(':')[1]),0)}
+  return num(((SURG.need||{})[id]||{})[j])}
 const IQUADS=[['UR','بالا · راست بیمار'],['UL','بالا · چپ بیمار'],['LR','پایین · راست بیمار'],['LL','پایین · چپ بیمار']];
 const QUADS=[['q1','بالا · راست بیمار'],['q2','بالا · چپ بیمار'],['q4','پایین · راست بیمار'],['q3','پایین · چپ بیمار']];
 function quadHTML(x){const s=AS()[x.id];return `<div class="quad">${QUADS.map(([k,t])=>`<button type="button" class="qd" data-sid="${x.id}" data-k="${k}" title="${t}" aria-pressed="${!!s.sel[k]}">Q</button>`).join('')}</div><div class="sides quad-sides"><span>راست بیمار</span><span>چپ بیمار</span></div>`}
@@ -1088,10 +1125,10 @@ function aoxHTML(x){const s=AS()[x.id],L=!!s.isel['t:long'];
   return `<p class="note">فقط برند ایتالیایی.</p>`+(SURG?'':`<div class="fields pz"><label class="f">قیمت هر پایه (کلاسیک)<input class="price" inputmode="numeric" data-ip="aox" data-ik="cb" value="${esc(s.ip.cb)}"></label>
       <label class="f">پروتز هر فک (کلاسیک)<input id="pr_aox" class="price" inputmode="numeric" data-pr="aox" value="${esc(s.price)}"></label></div><div class="calc" id="pcalc_aox"></div>`)}
 const CTTXT='سی‌تی اسکن صورت و سینوس دو جهت بدون کنتراست';
-function cbctHTML(x){const s=AS()[x.id],ct=!!s.isel['m:ct'],sp=!!(s.isel['zx:1']||s.isel['z:1']);
+function cbctHTML(x){const s=AS()[x.id],ct=!!s.isel['m:ct'],sp=!!(s.isel['zx:1']||s.isel['z:1']||s.isel['zs:1']);
   return `<div class="chips"><button type="button" class="chip" data-cmode="" aria-pressed="${!ct}">CBCT</button><button type="button" class="chip" data-cmode="ct" aria-pressed="${ct}">CT scan</button>
     <label class="pwshow" style="margin-inline-start:auto"><input type="checkbox" data-cspec ${sp?'checked':''}> خاص</label></div>`+(ct?`<p class="ctx">${CTTXT}</p>`:'')+
-    (sp?`<div class="item-box"><div class="chips"><button type="button" class="chip" data-isid="cbct" data-ik="z:1" aria-pressed="${!!s.isel['z:1']}">CBCT زایگوما، تریگوئید و نازال</button></div></div>`:'')}
+    (sp?`<div class="item-box"><div class="chips"><button type="button" class="chip" data-isid="cbct" data-ik="zs:1" aria-pressed="${!!s.isel['zs:1']}">CBCT ساب‌پریوستئال</button><button type="button" class="chip" data-isid="cbct" data-ik="z:1" aria-pressed="${!!s.isel['z:1']}">CBCT زایگوما، تریگوئید و نازال</button></div></div>`:'')}
 function spHTML(x){const s=AS()[x.id],rows=s.sp||[];if(SURG&&!rows.length)return '';const cat=SET.catalog||[];
   const teeth=[];['UR','UL','LR','LL'].forEach(q=>{for(let i=1;i<=7;i++)teeth.push(q+i)});const selT=teeth.filter(k=>s.sel[k]);
   const opt=v=>`<option value="">ناحیه / دندان</option>`+(selT.length?`<optgroup label="دندان‌های انتخاب‌شده">${selT.map(k=>`<option value="${k}" ${v===k?'selected':''}>${esc(toothTxt([k]))}</option>`).join('')}</optgroup>`:'')+
@@ -1108,7 +1145,7 @@ function priceHTML(x){const s=AS()[x.id];if(SURG)return '';if(x.price==='aox')re
   return `<label class="f">${x.price==='unit'?'قیمت '+(x.ul||'هر واحد'):'قیمت'}<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label>`}
 function sectionHTML(x){const s=AS()[x.id];
   const tag=x.pros?'<span class="tag p">پروتز</span>':(x.price?'<span class="tag">جراحی</span>':'');const wide=x.kind==='teeth'||(x.kind==='items'&&x.n);
-  return `<section class="card" data-sec="${x.id}" data-kind="${x.pros?'pros':x.price?'surg':'info'}"${wide?' data-wide':''}><h2><span class="h2t">${x.t}${x.price==='aox'?aoxTypeHTML(x):''}</span>${SURG?'':tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x):x.kind==='chips'?chipsHTML(x)+(x.price==='aox'?aoxHTML(x):''):x.kind==='items'?(x.n?chartHTML(x)+cntHTML(x):'')+(x.base&&!SURG?`<label class="f">قیمت جراحی هر واحد<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="bcalc_${x.id}"></div>`:'')+itemsHTML(x):x.kind==='quad'?quadHTML(x)+(x.id==='cbct'?cbctHTML(x):''):''}${x.id==='imp'?spHTML(x):''}
+  return `<section class="card" data-sec="${x.id}" data-kind="${x.pros?'pros':x.price?'surg':'info'}"${wide?' data-wide':''}><h2><span class="h2t">${x.t}${x.price==='aox'?aoxTypeHTML(x):''}</span>${SURG?'':tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x)+needHTML(x):x.kind==='chips'?chipsHTML(x)+(x.price==='aox'?aoxHTML(x):'')+(SURG&&x.sgt?sgChartHTML(x):''):x.kind==='items'?(x.n?chartHTML(x)+cntHTML(x):'')+(x.base&&!SURG?`<label class="f">قیمت جراحی هر واحد<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="bcalc_${x.id}"></div>`:'')+itemsHTML(x):x.kind==='quad'?quadHTML(x)+(x.id==='cbct'?cbctHTML(x):''):''}${x.id==='imp'?spHTML(x):''}
     ${x.text?`<label class="f">${x.text}<input id="tx_${x.id}" data-tx="${x.id}" value="${esc(s.text)}"></label>`:''}
     ${priceHTML(x)}<div class="calc" id="calc_${x.id}"></div></section>`}
 function renderForm(){
@@ -1130,7 +1167,7 @@ function renderForm(){
 function renderPlanSw(){const m=F.alt.mode;
   document.getElementById('planSw').innerHTML=`<button type="button" class="ps" data-plan="1" aria-pressed="${CUR===1}">طرح ۱</button>`+
     (m==='none'?`<button type="button" class="ps add" id="altAdd">+ طرح دوم</button>`:`<button type="button" class="ps" data-plan="2" aria-pressed="${CUR===2}">طرح ۲${m==='text'?' (توضیحات)':''}</button>`)}
-function recalc(){const pv={s:AS(),brand:F.brand,pay:F.pay};
+function recalc(){if(SURG)setTimeout(needUpd,0);const pv={s:AS(),brand:F.brand,pay:F.pay};
   SECTIONS.forEach(x=>{const el=document.getElementById('calc_'+x.id);if(!el)return;const s=pv.s[x.id],q=qty(s,x);try{el.closest('.card').classList.toggle('used',!!rowUsed({s:pv.s,brand:'ko',pay:{}},x))}catch(e){}
     if(x.price==='unit'&&q)el.innerHTML=`${fa(q)} ${x.kind==='quad'?'Q':'واحد'} × ${fa(num(s.price))} = <b>${fa(q*num(s.price))}</b>`;
     else if(x.price==='aox'){}
@@ -1252,7 +1289,7 @@ function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];le
     if(x.cnt==='jaw')[['U','فک بالا'],['L','فک پایین']].forEach(([j,l])=>{if(num(s.jc[j]))notes.push(`Full EXT ${l}: ${fa(num(s.jc[j]))} عدد`)});
     if(notes.length){const yy=mh;draws.push((cx,top)=>T(cx,notes.join('   ·   '),C.midR-pad,top+pad+yy+14,{s:19,w:800}));mh+=32}}
   if(x.id==='cbct'){const it=[{label:'نوع:',w:Wd(c,'نوع:',{w:700,s:19})+16},...['CBCT','CT scan'].map(o=>{const on=(o==='CT scan')===!!s.isel['m:ct'];return {text:o,on,w:28+Wd(c,o,{w:on?800:400,s:20})+26}})];
-    if(s.isel['z:1']){const o='CBCT زایگوما، تریگوئید و نازال';it.push({text:o,on:true,w:28+Wd(c,o,{w:800,s:20})+26})}mh+=drawChipLines(draws,chipLine(c,it,maxW),mh);
+    [['z:1','CBCT زایگوما، تریگوئید و نازال'],['zs:1','CBCT ساب‌پریوستئال']].forEach(([zk,o])=>{if(s.isel[zk])it.push({text:o,on:true,w:28+Wd(c,o,{w:800,s:20})+26})});mh+=drawChipLines(draws,chipLine(c,it,maxW),mh);
     if(s.isel['m:ct']){const yy=mh;draws.push((cx,top)=>T(cx,CTTXT,C.midR-pad,top+pad+yy+15,{s:19,w:700}));mh+=30}}
   if(x.kind==='quad'){const cxm=(C.midL+C.midR)/2,bw=70,bh=34,yy=mh;
     draws.push((cx,top)=>{const y0=top+pad+yy,yc=y0+bh+4;cx.fillStyle=INK;cx.fillRect(cxm-1.5,y0,3,2*bh+8);cx.fillRect(cxm-2*bw,yc-1.5,4*bw,3);
@@ -1262,7 +1299,8 @@ function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];le
     mh+=2*bh+18}
   else if(x.kind==='chips'){mh+=drawChipLines(draws,[].concat(...chipItems(c,x.groups,(gi,o)=>!!sel[gi+':'+o]).map(g=>chipLine(c,g,maxW))),mh);
     if(x.price==='aox'){mh+=drawChipLines(draws,chipLine(c,chipItems(c,[{l:'نوع (ایتالیایی)',o:['کلاسیک','لانگ']}],(gi,o)=>(o==='لانگ')===!!s.isel['t:long'])[0],maxW),mh);
-      if(s.isel['t:long']&&(s.ip.ln||'').trim())wrap(c,'توضیحات: '+s.ip.ln.trim(),maxW,{s:19}).forEach(ln=>{const yy=mh;draws.push((cx,top)=>T(cx,ln,C.midR-pad,top+pad+yy+15,{s:19}));mh+=30})}}
+      if(s.isel['t:long']&&(s.ip.ln||'').trim())wrap(c,'توضیحات: '+s.ip.ln.trim(),maxW,{s:19}).forEach(ln=>{const yy=mh;draws.push((cx,top)=>T(cx,ln,C.midR-pad,top+pad+yy+15,{s:19}));mh+=30})}
+    if(x.sgt){const th=Object.keys(sel).filter(k=>sel[k]&&isTooth(k));if(th.length)wrap(c,'محل پایه‌ها: '+toothTxt(th),maxW,{s:19,w:700}).forEach(ln=>{const yy=mh;draws.push((cx,top)=>T(cx,ln,C.midR-pad,top+pad+yy+15,{s:19,w:700}));mh+=30})}}
   else if(x.kind==='items'&&x.items.every(it=>it.type==='quad')){const bw=46,bh=30,yy=mh,n=x.items.length;
     x.items.forEach((it,ii)=>{const cxm=C.midR-(C.midW/n)*(ii+.5);draws.push((cx,top)=>{const y0=top+pad+yy;
       T(cx,it.l,cxm,y0+14,{s:19,w:800,a:'center'});const yt=y0+34,yc=yt+bh+4;cx.fillStyle=INK;cx.fillRect(cxm-1.5,yt,3,2*bh+8);cx.fillRect(cxm-2*bw,yc-1.5,4*bw,3);
@@ -1855,16 +1893,19 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
     t.disabled=true;t.textContent='در حال ارسال…';
     try{const r=await fetchRecord(t.dataset.resend);const j=await api('resend',{id:r.id,mail:mailFor(r)});t.textContent=j.emailStatus==='sent'?'ارسال شد':'ارسال نشد';if(CF_ON)await api('setFile',{id:r.id,emailStatus:j.emailStatus||'',emailError:j.emailError||''},{prio:'bg'}).catch(()=>{})}
     catch(err){t.textContent='ارسال نشد';alertMsg(err.message)}finally{t.disabled=false;loadList()}return}
-  if(SURG&&t.dataset.sid==='imp'&&isTooth(t.dataset.k||'')){if(!t.disabled)openImp(t.dataset.k);return}
+  if(SURG&&IMPSECS.includes(t.dataset.sid)&&isTooth(t.dataset.k||'')){if(!t.disabled)openImp(t.dataset.k,t.dataset.sid);return}
   if(t.classList.contains('t')&&Date.now()-DRAGCLICK<700)return;
   if(t.dataset.sid&&t.dataset.k){if(t.disabled)return;const s=AS()[t.dataset.sid],k=t.dataset.k,on=!s.sel[k];
     if(t.dataset.single){Object.keys(s.sel).forEach(o=>{if(!isTooth(o)&&o.split(':')[0]===t.dataset.g)s.sel[o]=false});document.querySelectorAll(`.chip[data-sid="${t.dataset.sid}"][data-g="${t.dataset.g}"]`).forEach(c=>c.setAttribute('aria-pressed','false'))}
-    s.sel[k]=on;t.setAttribute('aria-pressed',on);touch();recalc();return}
+    s.sel[k]=on;t.setAttribute('aria-pressed',on);
+    if(SURG&&SEC[t.dataset.sid].sgt&&!isTooth(k)){const j=t.dataset.g==='0'?'U':'L';if(!jawChip(s,j))Object.keys(s.sel).forEach(o=>{if(isTooth(o)&&o[0]===j){delete s.sel[o];delete SURG.imp[o]}});reSec(t.dataset.sid);renderImps()}
+    touch();recalc();exRefresh(t.dataset.sid);return}
   if(t.dataset.aot!==undefined){const sx=AS().aox;if(t.dataset.aot)sx.isel['t:long']=true;else delete sx.isel['t:long'];reSec('aox');touch();recalc();return}
   if(t.dataset.cmode!==undefined){const sx=AS().cbct;if(t.dataset.cmode){sx.isel['m:ct']=true;['q1','q2','q3','q4'].forEach(q=>sx.sel[q]=true)}else if(sx.isel['m:ct']){delete sx.isel['m:ct'];['q1','q2','q3','q4'].forEach(q=>sx.sel[q]=false)}reSec('cbct');touch();recalc();return}
   if(t.hasAttribute('data-spadd')){const sx=AS().imp;sx.sp=sx.sp||[];sx.sp.push({k:'',b:'',d:'',l:''});reSec('imp');touch();const r=document.querySelectorAll('[data-sec="imp"] .sp-row');if(r.length)r[r.length-1].querySelector('select').focus();return}
   if(t.dataset.spdel){AS().imp.sp.splice(Number(t.dataset.spdel),1);reSec('imp');touch();return}
   if(t.dataset.isid){if(t.disabled)return;const x=SEC[t.dataset.isid],s=AS()[t.dataset.isid],k=t.dataset.ik,on=!s.isel[k];s.isel[k]=on;t.setAttribute('aria-pressed',on);
+    if(x.id==='cbct'&&on&&(k==='z:1'||k==='zs:1')){const o=k==='z:1'?'zs:1':'z:1';delete s.isel[o];const ob=document.querySelector(`[data-isid="cbct"][data-ik="${o}"]`);if(ob)ob.setAttribute('aria-pressed','false')}
     const qi=(x.items||[]).find(it=>it.qn&&k.startsWith(it.k+':'));if(qi){if(on&&!num(s.icnt[k]))s.icnt[k]='1';if(!on)delete s.icnt[k];reSec(x.id);touch();return}
     if(x.excl&&x.excl[k]){const o=x.excl[k];if(on)s.isel[o]=false;const ob=document.querySelector(`[data-isid="${x.id}"][data-ik="${o}"]`);if(ob){ob.disabled=on;if(on)ob.setAttribute('aria-pressed','false')}}touch();recalc();return}
   if(t.dataset.plan){CUR=Number(t.dataset.plan);renderForm();window.scrollTo(0,0);return}
@@ -1907,19 +1948,19 @@ document.addEventListener('input',e=>{const i=e.target;if(i.hasAttribute&&i.hasA
 /* drag across tooth numbers to select (or clear) a run of teeth */
 let DRAG=null,DRAGCLICK=0;
 function dragApply(b){const k=b.dataset.k;if(!DRAG||DRAG.done.has(k)||b.disabled||b.dataset.sid!==DRAG.sid)return;DRAG.done.add(k);const s=AS()[DRAG.sid];s.sel[k]=DRAG.on;b.setAttribute('aria-pressed',DRAG.on);touch();recalc()}
-document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.chart .t[data-sid]');if(!b||b.disabled||e.button>0)return;if(SURG&&b.dataset.sid==='imp')return;
+document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.chart .t[data-sid]');if(!b||b.disabled||e.button>0)return;if(SURG&&IMPSECS.includes(b.dataset.sid))return;
   DRAG={sid:b.dataset.sid,on:b.getAttribute('aria-pressed')!=='true',done:new Set()};dragApply(b);DRAGCLICK=Date.now()});
 document.addEventListener('pointermove',e=>{if(!DRAG)return;const el=document.elementFromPoint(e.clientX,e.clientY),b=el&&el.closest&&el.closest('.chart .t[data-sid]');if(b)dragApply(b)});
-['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,()=>{if(DRAG){DRAGCLICK=Date.now();DRAG=null}}));
+['pointerup','pointercancel'].forEach(ev=>document.addEventListener(ev,()=>{if(DRAG){DRAGCLICK=Date.now();const sid=DRAG.sid;DRAG=null;exRefresh(sid)}}));
 function reSec(id){const el=document.querySelector(`[data-sec="${id}"]`);if(el)el.outerHTML=sectionHTML(SEC[id]);recalc()}
-document.addEventListener('change',e=>{const i=e.target;if(i.hasAttribute&&i.hasAttribute('data-cspec')){const sx=AS().cbct;if(i.checked)sx.isel['zx:1']=true;else{delete sx.isel['zx:1'];delete sx.isel['z:1']}reSec('cbct');touch();return}
+document.addEventListener('change',e=>{const i=e.target;if(i.hasAttribute&&i.hasAttribute('data-cspec')){const sx=AS().cbct;if(i.checked)sx.isel['zx:1']=true;else{delete sx.isel['zx:1'];delete sx.isel['z:1'];delete sx.isel['zs:1']}reSec('cbct');touch();return}
   if(i.dataset&&i.dataset.sp!==undefined&&i.tagName==='SELECT'){const r=AS().imp.sp[Number(i.dataset.sp)];if(r){r[i.dataset.spf]=i.value;touch()}return}});
 document.addEventListener('input',e=>{const i=e.target;if(i.dataset&&i.dataset.sp!==undefined&&i.tagName==='INPUT'){const r=AS().imp.sp[Number(i.dataset.sp)];if(r){r[i.dataset.spf]=i.dataset.spf==='b'?i.value:toEn(i.value);touch()}e.stopPropagation()}},true);
 document.addEventListener('change',e=>{const i=e.target;if(i.tagName!=='SELECT')return;if(i.dataset.sp!==undefined)return;{const pk=i.closest('.pick');if(pk){pk.querySelector('.pv').textContent=num(i.value)?fa(num(i.value)):'—';pk.classList.toggle('on',!!num(i.value))}}
   if(i.dataset.cnt){AS()[i.dataset.cnt].cnt=i.value}else if(i.dataset.jc){const sid=i.dataset.jc,j=i.dataset.j,sc=AS()[sid];sc.jc[j]=i.value;
     if(SEC[sid].cnt){const lk=!!num(i.value);if(lk)Object.keys(sc.sel).forEach(k=>{if(isTooth(k)&&k[0]===j)delete sc.sel[k]});
       document.querySelectorAll(`.t[data-sid="${sid}"][data-k^="${j}"]`).forEach(b=>{b.disabled=lk;if(lk){b.setAttribute('aria-pressed','false');b.title='تعداد کل این فک انتخاب شده'}else b.removeAttribute('title')})}}else if(i.dataset.icnt){AS()[i.dataset.icnt].icnt[i.dataset.ik]=i.value}else return;
-  touch();recalc()});
+  touch();recalc();if(i.dataset.jc)exRefresh(i.dataset.jc)});
 /* big number picker for «تعداد کل» */
 let NP=null;
 function openPick(pk){const sel=pk.querySelector('select');if(!sel||sel.disabled)return;NP=sel;
@@ -1970,7 +2011,9 @@ function remainingS(planS,sessions){const R=secFrom(secDoc(planS));const done=(s
       if((d.text||'').trim())r.text=''});
     if(done.length&&x.kind==='none')r.text=''});
   return R}
-function sessionStart(planS,sessions){const R=remainingS(planS,sessions);R.imp.jc={U:'',L:''};R.imp.cnt='';return R}
+function sessionStart(planS,sessions){const R=remainingS(planS,sessions),need={};
+  SECTIONS.forEach(x=>{if(!x.cnt)return;const r=R[x.id];['U','L'].forEach(j=>{const n=num(r.jc[j]);if(n){(need[x.id]=need[x.id]||{})[j]=n}});r.jc={U:'',L:''};r.cnt=''});
+  return {R,need}}
 /* actual cost of the recorded sessions: plan tariffs and the patient's brand; each implant priced by its own brand's group */
 function surgActual(rec,sessions){const b=effBrand(rec),P=rec.s;let tot=0;
   (sessions||[]).forEach(ss=>{const S=secFrom(ss.s||{});SECTIONS.forEach(x=>{S[x.id].price=P[x.id].price;S[x.id].bp={...P[x.id].bp};S[x.id].ip={...P[x.id].ip}});
@@ -1984,36 +2027,39 @@ function surgPlanned(rec){const T0=totals(PV(rec,1));return (rec.brand==='ref'?M
 
 function openSurg(x){const d=x.data||{};const rec=fromDoc(x.id,d);if(!rec.h.name)Object.assign(rec.h,{name:x.name,nid:x.nid,phone:x.phone,age:x.age});
   const sg=x.surg||{sessions:[]},prev=sg.sessions||[];
-  F=blankForm();SURG={id:x.id,rec,prev,plan:rec.s,s:sessionStart(rec.s,prev),imp:{},sid:uuid()};
+  F=blankForm();const st0=sessionStart(rec.s,prev);SURG={id:x.id,rec,prev,plan:rec.s,s:st0.R,need:st0.need,imp:{},sid:uuid()};
   $('sgName').textContent='روز جراحی · '+(rec.h.name||'');
   $('sgMeta').textContent=[rec.h.nid?'کد ملی '+faD(rec.h.nid):'',rec.h.age?'سن '+faD(rec.h.age):'',rec.h.phone?faD(rec.h.phone):'',rec.brand&&rec.brand!=='ref'?'برند طرح: '+BRANDS.find(b=>b.k===rec.brand).n:'',rec.jalali?'تأیید طرح '+rec.jalali:''].filter(Boolean).join(' · ');
   const ms=medShort(rec.med);$('sgMed').hidden=!ms;$('sgMed').textContent=ms?'⚠ '+ms:'';
   $('sgPlan').innerHTML=planViewHTML(rec.s);
   const ph=$('sgPhoto');ph.hidden=true;ph.removeAttribute('src');if(x.photo){ph.src=x.photo;ph.hidden=false}else if(CF_ON)api('get',{id:x.id},{prio:'bg'}).then(j=>{if(j.photo&&SURG&&SURG.id===x.id){ph.src=j.photo;ph.hidden=false}}).catch(()=>{});
   document.querySelectorAll('[data-fu]').forEach(c=>c.checked=true);
-  const pc=['U','L'].filter(j=>num(rec.s.imp.jc[j]));
-  $('sgPrev').innerHTML=(pc.length?`<p class="note">ایمپلنت در طرح با «تعداد کل» آمده (${pc.map(j=>(j==='U'?'فک بالا ':'فک پایین ')+fa(num(rec.s.imp.jc[j]))).join('، ')})؛ امروز شماره‌ی دندان هر ایمپلنت را بزنید.</p>`:'')+
+  const nd=Object.keys(SURG.need);
+  $('sgPrev').innerHTML=(nd.length?`<p class="note">این موارد در طرح با «تعداد کل» آمده‌اند؛ امروز شماره‌ی دندان‌ها را بزنید: ${nd.map(id=>esc(SEC[id].t)+' ('+['U','L'].filter(j=>SURG.need[id][j]).map(j=>(j==='U'?'بالا ':'پایین ')+fa(SURG.need[id][j])).join('، ')+')').join('؛ ')}</p>`:'')+
     (prev.length?`<h3 style="margin:10px 0 4px;font-size:.95rem">جلسه‌های قبلی</h3>`+prev.map(ss=>{const S=secFrom(ss.s||{});const ll=secLines(S);
       return `<p class="note"><b>جلسه ${fa(ss.n||0)} · ${esc(ss.jalali||'')}</b>${ss.by?' · '+esc(ss.by):''}<br>${ll.map(l=>esc(l.t+': '+l.d)).join('<br>')}${Object.keys(ss.imp||{}).length?'<br>ایمپلنت‌ها: '+Object.keys(ss.imp).map(k=>esc(toothTxt([k])+' '+impTxt(ss.imp[k]))).join('؛ '):''}</p>`}).join(''):'');
   $('sgTitle').textContent=`جلسه‌ی ${fa(prev.length+1)} جراحی · ${jalali(new Date()).slash}`;
-  $('sg_note').value='';$('sg_fin').checked=false;$('sgMsg').textContent='';try{$('sg_by').value=localStorage.getItem('implantSurgBy')||''}catch(e){}
+  $('dlSgDoc').innerHTML=(SET.docs||[]).map(d=>`<option value="${esc(d)}">`).join('');$('sg_fin').checked=false;$('sgMsg').textContent='';try{$('sg_by').value=localStorage.getItem('implantSurgBy')||''}catch(e){}
   $('sections').innerHTML='';renderSurg();show('surg');if(CF_ON)pollInv(true);SURG&&(SURG.open=true)}
 const SURG_SECS=()=>SECTIONS.filter(x=>(x.price||x.kind!=='none')&&x.id!=='cons');
 function renderSurg(){if(!SURG)return;SURG.openSecs=SURG.openSecs||new Set();renderPick();
   $('surgSecs').innerHTML=SURG_SECS().filter(x=>SURG.openSecs.has(x.id)).map(sectionHTML).join('');renderImps()}
 /* small treatment picker: open only the tables you need */
 function renderPick(){if(!SURG)return;const P=SURG.plan,S=SURG.s,pv={brand:'ko',pay:{}};
-  $('sgPick').innerHTML='<span class="note">درمان‌ها (بزنید تا جدولش باز شود):</span>'+SURG_SECS().map(x=>{const inPlan=rowUsed(Object.assign({s:P},pv),x),on=rowUsed(Object.assign({s:S},pv),x);
+  const L=SURG_SECS().filter(x=>!(EXG.includes(x.id)&&jawBlocked(x.id,'U')&&jawBlocked(x.id,'L'))).map(x=>({x,p:rowUsed(Object.assign({s:P},pv),x)}));
+  $('sgPick').innerHTML='<span class="sgh">درمان‌ها</span>'+L.filter(o=>o.p).concat(L.filter(o=>!o.p)).map(({x})=>{const inPlan=rowUsed(Object.assign({s:P},pv),x),on=rowUsed(Object.assign({s:S},pv),x);
     return `<button type="button" class="chip sgc${inPlan?' inplan':''}${on?' marked':''}" data-sgsec="${x.id}" aria-pressed="${SURG.openSecs.has(x.id)}">${x.t}${on?' ✓':''}</button>`}).join('')}
 function planViewHTML(S){const pv={s:S,brand:'ko',pay:{}};const used=SECTIONS.filter(x=>rowUsed(pv,x));if(!used.length)return '<p class="note">طرحی ثبت نشده.</p>';
   return used.map(x=>{const st=S[x.id];let mc='';
     if(x.kind==='teeth'||x.n){const row=j=>{let r='';for(let i=x.n;i>=1;i--)r+=`<i class="${st.sel[j+'R'+i]?'on':''}">${i}</i>`;r+='<b></b>';for(let i=1;i<=x.n;i++)r+=`<i class="${st.sel[j+'L'+i]?'on':''}">${i}</i>`;return `<div class="mr">${r}</div>`};
       if(Object.keys(st.sel).some(k=>st.sel[k]&&isTooth(k)))mc=`<div class="mc">${row('U')}${row('L')}</div>`}
     return `<div class="pv-card" data-kind="${x.pros?'pros':'surg'}"><h3>${x.t}</h3>${mc}<p>${esc(secDesc(S,x)||'—')}</p></div>`}).join('')}
-function renderImps(){if(!SURG)return;try{renderPick()}catch(e){}const s=SURG.s.imp,keys=Object.keys(s.sel).filter(k=>s.sel[k]&&isTooth(k)).sort();
-  $('sgImps').innerHTML=keys.length?keys.map(k=>{const m=SURG.imp[k];return `<button type="button" data-impedit="${k}">${esc(toothTxt([k]))} — ${m&&m.b&&m.d&&m.l?esc(impTxt(m)):'<span class="miss">برند و سایز ثبت نشده؛ بزنید</span>'}</button>`}).join(''):'<p class="note">ایمپلنتی برای این جلسه علامت نخورده. در بخش «پایه ایمپلنت» روی شماره‌ی دندان بزنید.</p>';
-  document.querySelectorAll('#surgSecs .t[data-sid="imp"]').forEach(b=>{b.classList.toggle('hasimp',!!SURG.imp[b.dataset.k]);b.setAttribute('aria-pressed',!!s.sel[b.dataset.k])})}
-let IMPK=null,IMPH='';
+/* every fixture of this session: implant, All on X and overdenture teeth */
+function impKeys(){return IMPSECS.flatMap(id=>Object.keys(SURG.s[id].sel).filter(k=>SURG.s[id].sel[k]&&isTooth(k)).sort().map(k=>({k,id})))}
+function renderImps(){if(!SURG)return;try{renderPick()}catch(e){}const keys=impKeys();
+  $('sgImps').innerHTML=keys.length?keys.map(({k,id})=>{const m=SURG.imp[k];return `<button type="button" data-impedit="${k}" data-impsid="${id}">${esc(toothTxt([k]))}${id!=='imp'?' ('+esc(SEC[id].t)+')':''} — ${m&&m.b&&m.d&&m.l?esc(impTxt(m)):'<span class="miss">برند و سایز ثبت نشده؛ بزنید</span>'}</button>`}).join(''):'<p class="note">ایمپلنتی برای این جلسه علامت نخورده. در بخش «پایه ایمپلنت»، All on X یا اوردنچر روی شماره‌ی دندان بزنید.</p>';
+  IMPSECS.forEach(id=>{const s=SURG.s[id];document.querySelectorAll(`#surgSecs .t[data-sid="${id}"]`).forEach(b=>{b.classList.toggle('hasimp',!!SURG.imp[b.dataset.k]);b.setAttribute('aria-pressed',!!s.sel[b.dataset.k])})});needUpd()}
+let IMPK=null,IMPH='',IMPSID='imp';
 function catOpts(){return (SET.catalog||[]).map((c,i)=>`<option value="${i}">${esc(c.b+(c.sys?' · '+c.sys:''))}${GRPN[c.g]?' ('+GRPN[c.g]+')':''}</option>`).join('')}
 function impSync(){const ci=$('imp_cat').value,c=(SET.catalog||[])[ci];const man=!c;$('impManW').hidden=!man;
   const sel=(S,I,vals,v)=>{const has=c&&vals&&vals.length;S.hidden=!has;I.hidden=!!has;if(has){S.innerHTML='<option value="">—</option>'+vals.map(x=>`<option ${String(v)===String(x)?'selected':''}>${esc(x)}</option>`).join('')+'<option value="__">سایر…</option>';if(v&&!vals.includes(v)){S.value='__';I.hidden=false}}};
@@ -2021,33 +2067,58 @@ function impSync(){const ci=$('imp_cat').value,c=(SET.catalog||[])[ci];const man
 function impStock(){const el=$('impStock');if(!el)return;const ci=$('imp_cat').value,c=(SET.catalog||[])[ci];const b=c?c.b:$('imp_b').value,sys=c?c.sys:$('imp_sys').value,d=impVal($('imp_dS'),$('imp_d')),l=impVal($('imp_lS'),$('imp_l'));
   if(!INV.loaded||!b||!d||!l){el.hidden=true;return}const i=INV.items.find(x=>x.kind==='fix'&&sysKey(x.b,x.sys)===sysKey(b,sys)&&nk(x.d)===nk(d)&&nk(x.l)===nk(l));const q=i?Number(i.qty)||0:0;
   el.hidden=false;el.style.color=q>0?'':'var(--bad)';el.textContent=q>0?`موجودی انبار برای این سایز: ${fa(q)} عدد (با ثبت جلسه یکی کم می‌شود)`:'این سایز در انبار موجود نیست؛ با ثبت جلسه موجودی منفی می‌شود و انباردار باخبر می‌شود.'}
-function openImp(k){IMPK=k;const m=SURG.imp[k]||{};const cat=SET.catalog||[];
+function openImp(k,sid){IMPK=k;IMPSID=sid||'imp';const m=Object.assign({},SURG.imp[k]||{});const cat=SET.catalog||[];
+  /* default brand: the plan's brand group (All on X is always Italian); the last brand picked in this session if it is in that group */
+  if(!m.b){const g=IMPSID==='aox'?'it':(GRPN[SURG.rec.brand]?SURG.rec.brand:'');const lc=cat[SURG.lastCat];
+    if(lc&&(!g||lc.g===g)){m.b=lc.b;m.sys=lc.sys}else if(g){const c=cat.find(c=>c.g===g);if(c){m.b=c.b;m.sys=c.sys}else if(!cat.length)m.b=GRPN[g]}}
   $('impTitle').textContent='ایمپلنت · '+toothTxt([k]);$('impMsg').textContent='';
   $('imp_cat').innerHTML=(cat.length?'<option value="">— انتخاب کنید —</option>'+catOpts():'')+'<option value="m">سایر (نوشتن دستی)</option>';
   const ci=cat.findIndex(c=>c.b===m.b&&c.sys===m.sys);$('imp_cat').value=ci>=0?String(ci):(m.b?'m':(cat.length?'':'m'));$('impCatW').hidden=false;
   $('imp_b').value=m.b||'';$('imp_sys').value=m.sys||'';$('imp_d').value=m.d||'';$('imp_l').value=m.l||'';$('imp_hs').value=m.hs||'';IMPH=m.ht||'';
   document.querySelectorAll('#impSheet [data-ht]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ht===IMPH));
-  impSync();$('impDel').hidden=!SURG.s.imp.sel[k];$('impSheet').hidden=false}
+  impSync();$('impDel').hidden=!SURG.s[IMPSID].sel[k];$('impSheet').hidden=false}
 function impVal(S,I){return S.hidden||S.value==='__'?toEn(I.value).trim():S.value}
 function impSave(){const ci=$('imp_cat').value,c=(SET.catalog||[])[ci];
-  const m={b:c?c.b:$('imp_b').value.trim(),sys:c?c.sys:$('imp_sys').value.trim(),g:c?c.g:'',d:impVal($('imp_dS'),$('imp_d')),l:impVal($('imp_lS'),$('imp_l')),ht:IMPH,hs:impVal($('imp_hS'),$('imp_hs'))};
+  const m={b:c?c.b:$('imp_b').value.trim(),sys:c?c.sys:$('imp_sys').value.trim(),g:c?c.g:'',d:impVal($('imp_dS'),$('imp_d')),l:impVal($('imp_lS'),$('imp_l')),ht:IMPH,hs:''};
   if(!m.b){$('impMsg').className='msg err';$('impMsg').textContent='برند را انتخاب کنید.';return}
   if(!m.d||!m.l){$('impMsg').className='msg err';$('impMsg').textContent='قطر و طول فیکسچر را وارد کنید.';return}
-  SURG.imp[IMPK]=m;SURG.s.imp.sel[IMPK]=true;$('impSheet').hidden=true;renderImps()}
-function impDel(){delete SURG.imp[IMPK];SURG.s.imp.sel[IMPK]=false;$('impSheet').hidden=true;renderImps()}
-async function surgSave(t){if(!SURG)return;const m=$('sgMsg');const sel=Object.keys(SURG.s.imp.sel).filter(k=>SURG.s.imp.sel[k]&&isTooth(k));
+  if(c)SURG.lastCat=Number(ci);
+  SURG.imp[IMPK]=m;SURG.s[IMPSID].sel[IMPK]=true;$('impSheet').hidden=true;if(IMPSID!=='imp')reSec(IMPSID);renderImps();exRefresh(IMPSID)}
+function impDel(){delete SURG.imp[IMPK];SURG.s[IMPSID].sel[IMPK]=false;$('impSheet').hidden=true;if(IMPSID!=='imp')reSec(IMPSID);renderImps();exRefresh(IMPSID)}
+/* surgery day: check the session, show it for one review, then save */
+let SGP=null;
+function surgSave(t){if(!SURG)return;const m=$('sgMsg');m.className='msg err';
+  const by=$('sg_by').value.trim();if(!by){m.textContent='نام جراح را بنویسید.';$('sg_by').focus();return}
+  const keys=impKeys(),sel=keys.map(o=>o.k);
   const miss=sel.filter(k=>!(SURG.imp[k]&&SURG.imp[k].b&&SURG.imp[k].d&&SURG.imp[k].l));
-  if(miss.length){m.className='msg err';m.textContent='برند و سایز ایمپلنتِ این دندان‌ها ثبت نشده: '+toothTxt(miss);return}
+  if(miss.length){m.textContent='برند و سایز ایمپلنتِ این دندان‌ها ثبت نشده: '+toothTxt(miss);return}
+  /* tooth counts: plan «total count» and All on X / overdenture fixtures must match the teeth picked */
+  const bad=[];SECTIONS.forEach(x=>{const st=SURG.s[x.id];['U','L'].forEach(j=>{const want=sgWant(x.id,j),got=teethSel(st,j),jl=j==='U'?'فک بالا':'فک پایین';
+    if(x.sgt){if(want!==got)bad.push(`${x.t} ${jl}: ${fa(want)} پایه، ولی ${fa(got)} دندان زده شده`)}
+    else if(want&&got&&want!==got)bad.push(`${x.t} ${jl}: در طرح ${fa(want)} عدد، ولی ${fa(got)} دندان زده شده`)})});
+  if(bad.length){m.innerHTML='تعداد دندان‌ها با طرح نمی‌خواند:<br>'+bad.map(esc).join('<br>');return}
   const used=SECTIONS.some(x=>rowUsed({s:SURG.s,brand:'ko',pay:{}},x));
-  if(!used&&!t.dataset.armed){t.dataset.armed='1';m.className='msg err';m.textContent='هیچ کاری برای این جلسه علامت نخورده. اگر درست است دوباره «ثبت جلسه» را بزنید.';setTimeout(()=>delete t.dataset.armed,5000);return}delete t.dataset.armed;
-  const by=$('sg_by').value.trim();try{localStorage.setItem('implantSurgBy',by)}catch(e){}
+  if(!used){m.textContent='هیچ کاری برای این جلسه علامت نخورده. از فهرست سمت راست درمان انجام‌شده را باز کنید و علامت بزنید.';return}
+  m.textContent='';try{localStorage.setItem('implantSurgBy',by)}catch(e){}
   const imp={};sel.forEach(k=>imp[k]=SURG.imp[k]);
-  const ses={fu:[...document.querySelectorAll('[data-fu]')].filter(c=>c.checked).map(c=>c.dataset.fu),n:SURG.prev.length+1,at:new Date().toISOString(),jalali:jalali(new Date()).slash,by,note:$('sg_note').value.trim(),s:secDoc(SURG.s),imp};
+  const fu=[...document.querySelectorAll('[data-fu]')].filter(c=>c.checked).map(c=>c.dataset.fu);
+  const ses={fu,n:SURG.prev.length+1,at:new Date().toISOString(),jalali:jalali(new Date()).slash,by,note:'',s:secDoc(SURG.s),imp};
   const fin=$('sg_fin').checked,all=SURG.prev.concat([ses]);
+  const left=fin?secLines(remainingS(SURG.plan,all)):[];
+  SGP={ses,fin,all};
+  const FUN={numb:'فردا: چک بی‌حسی',week:'یک هفته بعد: چکاپ',suture:'دو هفته بعد: کشیدن بخیه'};
+  $('srBody').innerHTML=`<p class="note"><b>${esc(SURG.rec.h.name||'')}</b> · جلسه‌ی ${fa(ses.n)} · ${esc(ses.jalali)} · جراح: ${esc(by)}</p>`+
+    `<h4 style="margin:6px 0 2px">کارهای این جلسه</h4><ul class="rvl">${secLines(SURG.s).map(l=>`<li><b>${esc(l.t)}:</b> ${esc(l.d)}</li>`).join('')}</ul>`+
+    (keys.length?`<h4 style="margin:6px 0 2px">ایمپلنت‌ها (${fa(keys.length)} عدد)</h4><ul class="rvl">${keys.map(({k,id})=>`<li>${esc(toothTxt([k]))}${id!=='imp'?' ('+esc(SEC[id].t)+')':''} — ${esc(impTxt(SURG.imp[k]))}</li>`).join('')}</ul>`:'')+
+    `<h4 style="margin:6px 0 2px">پیگیری‌ها</h4><p class="note" style="margin:0">${fu.length?fu.map(k=>FUN[k]).join('، '):'بدون پیگیری'}</p>`+
+    (fin?`<p class="note" style="margin-top:8px"><b>این آخرین جلسه است؛ درمان جراحی بسته می‌شود.</b></p>`+(left.length?`<div class="banner" style="margin-top:6px"><span class="rvbad">این موارد طرح هنوز انجام نشده:</span><ul class="rvl">${left.map(l=>`<li>${esc(l.t)}: ${esc(l.d)}</li>`).join('')}</ul>اگر عمداً انجام نمی‌شوند تأیید کنید؛ وگرنه «این آخرین جلسه است» را بردارید.</div>`:''):'');
+  $('srOk').textContent=fin&&left.length?'با وجود موارد باقی‌مانده، ثبت و پایان جراحی':'تأیید و ثبت جلسه';
+  $('srMsg').textContent='';$('sgRev').hidden=false}
+async function surgCommit(t){if(!SURG||!SGP)return;const m=$('srMsg');const {ses,fin,all}=SGP;
   const actual=surgActual(SURG.rec,all),planned=surgPlanned(SURG.rec);
   t.disabled=true;m.className='msg';m.textContent='در حال ثبت…';
-  try{const j=await api('surgSave',{id:SURG.id,session:ses,finish:fin,actual,planned,brand:SURG.rec.brand,sendId:SURG.sid},{timeout:12000,tries:3});
-    const rec=SURG.rec,sg={sessions:all,finished:fin,actual,planned,diff:actual-planned};
+  try{await api('surgSave',{id:SURG.id,session:ses,finish:fin,actual,planned,brand:SURG.rec.brand,sendId:SURG.sid},{timeout:12000,tries:3});
+    const rec=SURG.rec,sg={sessions:all,finished:fin,actual,planned,diff:actual-planned};SGP=null;$('sgRev').hidden=true;
     toast(fin?`جراحی ${rec.h.name} ثبت شد و درمان جراحی به پایان رسید.`:`جلسه‌ی ${fa(all.length)} جراحی ${rec.h.name} ثبت شد.`);
     show('queue');pollQ(true);if(fin)openDone(rec,sg,false)}
   catch(e){m.className='msg err';m.textContent=e.message}finally{t.disabled=false}}
@@ -2101,7 +2172,8 @@ async function surgDownload(kind,r,sg){const b=kind==='card'?await implantCardPD
 document.addEventListener('click',e=>{if(SURG&&e.target.closest&&e.target.closest('#surgSecs'))setTimeout(renderPick,0)});
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
   if(t.dataset.sgsec){const id=t.dataset.sgsec;if(SURG.openSecs.has(id))SURG.openSecs.delete(id);else SURG.openSecs=new Set([id]);renderSurg();if(SURG.openSecs.has(id)){const el=document.querySelector(`#surgSecs [data-sec="${id}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'})}return}
-  if(t.dataset.impedit){openImp(t.dataset.impedit);return}
+  if(t.dataset.impedit){openImp(t.dataset.impedit,t.dataset.impsid);return}
+  if(t.id==='srOk'){surgCommit(t);return}if(t.id==='srBack'){$('sgRev').hidden=true;return}
   if(t.dataset.ht){IMPH=IMPH===t.dataset.ht?'':t.dataset.ht;document.querySelectorAll('#impSheet [data-ht]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ht===IMPH));return}
   if(t.id==='impOk'){impSave();return}if(t.id==='impDel'){impDel();return}if(t.id==='impClose'){$('impSheet').hidden=true;return}
   if(t.id==='sgSave'){surgSave(t);return}if(t.id==='sgBack'){show('queue');return}
