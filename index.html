@@ -581,6 +581,9 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
         <label class="f">تاریخ مراجعه<input id="rc_date"></label>
         <label class="f">شماره موبایل<input id="rc_phone" inputmode="tel" class="ltr"></label>
         <label class="f">سن<input id="rc_age" inputmode="numeric"></label>
+        <label class="f">شهر<input id="rc_city" list="dlCity" placeholder="مثلاً یزد"></label>
+        <label class="f">معرف<input id="rc_ref" list="dlRef" placeholder="چه کسی یا از کجا معرفی شده؟"></label>
+        <datalist id="dlCity"><option value="یزد"><option value="میبد"><option value="اردکان"><option value="مهریز"><option value="تفت"><option value="اشکذر"><option value="زارچ"><option value="حمیدیا"><option value="بافق"><option value="ابرکوه"><option value="بهاباد"><option value="هرات (خاتم)"><option value="مروست"><option value="نیر"><option value="ندوشن"><option value="عقدا"><option value="کرمان"><option value="اصفهان"><option value="تهران"><option value="شیراز"></datalist><datalist id="dlRef"><option value="بیمار قبلی کلینیک"><option value="دوستان و آشنایان"><option value="اینستاگرام"><option value="گوگل / سایت"><option value="تابلو و عبور"><option value="پزشک یا دندانپزشک دیگر"><option value="بیمه / سازمان"></datalist>
         <label class="f">پذیرنده<select id="rc_asst"></select></label>
       </div>
       <div class="banner" id="rcDup" hidden></div>
@@ -685,6 +688,8 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
         <label class="f">سن<input id="h_age" data-h="age" inputmode="numeric"></label>
         <label class="f">نام پزشک<input id="h_doc" data-h="doc"></label>
         <label class="f">پذیرنده<input id="h_asst" data-h="asst"></label>
+        <label class="f">شهر<input id="h_city" data-h="city" list="dlCity"></label>
+        <label class="f">معرف<input id="h_ref" data-h="ref" list="dlRef"></label>
       </div>
       <div class="banner info" id="staffNote" hidden></div>
       <div class="med" id="fMed" data-medbox="f"></div>
@@ -1289,7 +1294,7 @@ function headerBlock(r,meta){return {h:340,draw(cx,top){
   const lw=drawLogo(cx,C.L,top-2,96);T(cx,SET.clinic||'',C.R,top+20,{s:22,w:800});T(cx,SET.doctor||'',C.L+(lw?lw+14:0),top+20,{s:20,w:700,a:'left'});
   T(cx,meta.title||'طرح درمان ایمپلنت',PW/2,top+70,{s:42,w:800,a:'center'});T(cx,'(مشخصات فردی بیمار)',PW/2,top+112,{s:20,c:'#444',a:'center'});
   const y0=top+140,rowH=50,colW=(C.R-C.L)/3;box(cx,C.L,y0,C.R-C.L,rowH*3,null,RULE,1.2);cx.fillStyle='#bbb';cx.fillRect(C.L,y0+rowH,C.R-C.L,1);cx.fillRect(C.L,y0+2*rowH,C.R-C.L,1);
-  const f=[['نام و نام خانوادگی',r.h.name],['کد ملی',r.h.nid],['سن',r.h.age],['تاریخ مراجعه',r.h.date],['موبایل',r.h.phone],['نام پزشک',r.h.doc],['پذیرنده',r.h.asst],['تماس جهت هماهنگی',SET.phone]];
+  const f=[['نام و نام خانوادگی',r.h.name],['کد ملی',r.h.nid],['سن',r.h.age],['تاریخ مراجعه',r.h.date],['موبایل',r.h.phone],['نام پزشک',r.h.doc],['پذیرنده',r.h.asst],['شهر',r.h.city],['تماس جهت هماهنگی',SET.phone]];
   f.forEach(([k,v],i)=>{const col=i%3,row=Math.floor(i/3),xr=C.R-col*colW-14,y=y0+row*rowH+rowH/2;T(cx,k+':',xr,y,{s:17,c:'#555'});const kw=Wd(cx,k+':',{s:17});
     const val=faD(v||'—');let vs=22;while(Wd(cx,val,{s:vs,w:800})>colW-kw-36&&vs>14)vs--;T(cx,val,xr-kw-10,y,{s:vs,w:800})});
   T(cx,meta.dateLine||('تاریخ تأیید طرح: '+(meta.jalali||'')),C.R,top+316,{s:18,w:700,c:'#333'})}}}
@@ -1706,7 +1711,7 @@ const qTime=iso=>{try{return new Date(iso).toLocaleTimeString('fa-IR',{hour:'2-d
 const QLBL={waiting:['wait','منتظر پزشک'],reviewing:['rev','نزد پزشک'],consult:['wait','منتظر مشاور'],consulting:['rev','نزد مشاور'],done:['done','ثبت شد'],surgery:['surg','در جراحی'],surgdone:['done','جراحی انجام شد'],undecided:['wait','تصمیم نگرفته'],lost:['fail','انصراف داد']};
 function qPill(x){if(ROLE==='consultant'&&x.settle==='pending'){const d=x.surg&&x.surg.diff||0;return `<span class="pill settle">تسویه اختلاف ${d>0?'+':'−'}${fa(Math.abs(d))}</span>`}
   const l=QLBL[x.queue]||['draft',x.queue];return `<span class="pill ${l[0]}">${l[1]}</span>`}
-function qMeta(x){return [x.age?'سن '+faD(x.age):'',x.phone?faD(x.phone):'',x.nid?'کد ملی '+faD(x.nid):'',ROLE==='surgery'?'در جراحی از ساعت '+qTime(x.surgAt):'پذیرش '+qTime(x.queuedAt),ROLE==='surgery'&&x.surgN?fa(x.surgN)+' جلسه ثبت شده':'',x.asst&&ROLE!=='surgery'?'توسط '+x.asst:''].filter(Boolean).map(esc).join(' · ')}
+function qMeta(x){return [x.age?'سن '+faD(x.age):'',x.city?x.city:'',x.phone?faD(x.phone):'',x.nid?'کد ملی '+faD(x.nid):'',ROLE==='surgery'?'در جراحی از ساعت '+qTime(x.surgAt):'پذیرش '+qTime(x.queuedAt),ROLE==='surgery'&&x.surgN?fa(x.surgN)+' جلسه ثبت شده':'',x.asst&&ROLE!=='surgery'?'توسط '+x.asst:''].filter(Boolean).map(esc).join(' · ')}
 function renderSurgQ(){const now=QITEMS.filter(x=>x.queue==='surgery'),wait=QITEMS.filter(x=>x.wait&&x.queue!=='surgery');
   const card=(x,i,w)=>`<button type="button" class="qitem${FRESH.has(x.id)?' fresh':''}" data-qopen="${esc(x.id)}">
       <div class="row1"><div>${i!=null?`<span class="qn">${fa(i+1)}</span>`:''}<span class="nm">${esc(x.name)}</span></div>${w?`<span class="pill">${x.jalali?'تأیید '+esc(x.jalali):'تأییدشده'}</span>`:qPill(x)}</div>
@@ -1729,7 +1734,7 @@ function renderQ(){try{renderKpi()}catch(e){}try{renderConx();renderSurgAppts();
     $('rList').innerHTML=QITEMS.length?QITEMS.map((x,i)=>`<div class="item"><div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span>
       <div class="meta">${qMeta(x)}</div>${x.note?`<div class="meta">${esc(x.note)}</div>`:''}</div>${qPill(x)}</div>
       ${x.queue==='waiting'?`<div class="acts"><button class="btn sm ghost" data-qedit="${esc(x.id)}" type="button">ویرایش</button><button class="btn sm ghost" data-qdel="${esc(x.id)}" type="button">حذف از صف</button></div>`:''}</div>`).join(''):'<div class="empty">امروز هنوز بیماری پذیرش نشده.</div>'}}
-const RCF=['name','nid','date','phone','age','asst','note'];
+const RCF=['name','nid','date','phone','age','asst','city','ref','note'];
 function fillRecep(v){const el=$('rc_asst');if(!el)return;const L=(SET.recep||[]).filter(Boolean);const cur=v!==undefined?v:el.value;
   el.innerHTML=`<option value="">${L.length?'— انتخاب پذیرنده —':'— فهرست پذیرنده‌ها در تنظیمات وارد نشده —'}</option>`+L.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('')+(cur&&!L.includes(cur)?`<option selected>${esc(cur)}</option>`:'');
   if(!cur){let last='';try{last=localStorage.getItem('implantRecep')||''}catch(e){}if(L.includes(last))el.value=last}}
@@ -1755,13 +1760,13 @@ async function qOpen(t){if(t.disabled)return;const id=t.dataset.qopen,x=QITEMS.f
   const loc=newestDoc(id,null);
   // the inbox already carries the plan (or a newer copy is on this device): open at once, tell the server in the background
   if(x&&(x.data||loc)){const nd=newestDoc(id,x.data||null),d=nd||x.data||{},r=fromDoc(id,d),isLoc=!!(nd&&loc&&nd.updatedAt===loc.updatedAt);
-    if(!r.h.name)Object.assign(r.h,{name:x.name,nid:x.nid,date:x.date||r.h.date,phone:x.phone,age:x.age,asst:x.asst});
+    if(!r.h.name)Object.assign(r.h,{name:x.name,nid:x.nid,date:x.date||r.h.date,phone:x.phone,age:x.age,asst:x.asst,city:x.city||'',ref:x.ref||''});
     if(!r.note&&x.note)r.note=x.note;if(x.med&&!Object.keys(r.med.y).length)r.med=medNorm(x.med);
     if(r.status==='queued')r.status='draft';
     meta(r,x);openForm(r);if(isLoc){dirty=true;toast('آخرین تغییراتِ ذخیره‌نشده‌ی این بیمار روی این دستگاه بازیابی شد.')}
     mark();return}
   if(ROLE==='doctor'&&x&&x.status==='queued'){ // nothing saved yet: open instantly from the inbox data
-    const r=blankForm();r.id=id;r.status='draft';Object.assign(r.h,{name:x.name,nid:x.nid,date:x.date||r.h.date,phone:x.phone,age:x.age,asst:x.asst,doc:docName()});r.note=x.note;r.med=medNorm(x.med);
+    const r=blankForm();r.id=id;r.status='draft';Object.assign(r.h,{name:x.name,nid:x.nid,date:x.date||r.h.date,phone:x.phone,age:x.age,asst:x.asst,city:x.city||'',ref:x.ref||'',doc:docName()});r.note=x.note;r.med=medNorm(x.med);
     openForm(r);mark();return}
   t.disabled=true;t.classList.add('loading');
   try{const j=await api('queueOpen',{id});const sd=j.data||{},nd=newestDoc(id,sd);const r=meta(fromDoc(id,nd||sd),j);
@@ -1856,7 +1861,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
     if(t.dataset.single){Object.keys(s.sel).forEach(o=>{if(!isTooth(o)&&o.split(':')[0]===t.dataset.g)s.sel[o]=false});document.querySelectorAll(`.chip[data-sid="${t.dataset.sid}"][data-g="${t.dataset.g}"]`).forEach(c=>c.setAttribute('aria-pressed','false'))}
     s.sel[k]=on;t.setAttribute('aria-pressed',on);touch();recalc();return}
   if(t.dataset.aot!==undefined){const sx=AS().aox;if(t.dataset.aot)sx.isel['t:long']=true;else delete sx.isel['t:long'];reSec('aox');touch();recalc();return}
-  if(t.dataset.cmode!==undefined){const sx=AS().cbct;if(t.dataset.cmode){sx.isel['m:ct']=true;['q1','q2','q3','q4'].forEach(q=>sx.sel[q]=true)}else delete sx.isel['m:ct'];reSec('cbct');touch();recalc();return}
+  if(t.dataset.cmode!==undefined){const sx=AS().cbct;if(t.dataset.cmode){sx.isel['m:ct']=true;['q1','q2','q3','q4'].forEach(q=>sx.sel[q]=true)}else if(sx.isel['m:ct']){delete sx.isel['m:ct'];['q1','q2','q3','q4'].forEach(q=>sx.sel[q]=false)}reSec('cbct');touch();recalc();return}
   if(t.hasAttribute('data-spadd')){const sx=AS().imp;sx.sp=sx.sp||[];sx.sp.push({k:'',b:'',d:'',l:''});reSec('imp');touch();const r=document.querySelectorAll('[data-sec="imp"] .sp-row');if(r.length)r[r.length-1].querySelector('select').focus();return}
   if(t.dataset.spdel){AS().imp.sp.splice(Number(t.dataset.spdel),1);reSec('imp');touch();return}
   if(t.dataset.isid){if(t.disabled)return;const x=SEC[t.dataset.isid],s=AS()[t.dataset.isid],k=t.dataset.ik,on=!s.isel[k];s.isel[k]=on;t.setAttribute('aria-pressed',on);
@@ -2095,7 +2100,7 @@ async function surgDownload(kind,r,sg){const b=kind==='card'?await implantCardPD
 
 document.addEventListener('click',e=>{if(SURG&&e.target.closest&&e.target.closest('#surgSecs'))setTimeout(renderPick,0)});
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
-  if(t.dataset.sgsec){const id=t.dataset.sgsec;if(SURG.openSecs.has(id))SURG.openSecs.delete(id);else SURG.openSecs.add(id);renderSurg();if(SURG.openSecs.has(id)){const el=document.querySelector(`#surgSecs [data-sec="${id}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'})}return}
+  if(t.dataset.sgsec){const id=t.dataset.sgsec;if(SURG.openSecs.has(id))SURG.openSecs.delete(id);else SURG.openSecs=new Set([id]);renderSurg();if(SURG.openSecs.has(id)){const el=document.querySelector(`#surgSecs [data-sec="${id}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'})}return}
   if(t.dataset.impedit){openImp(t.dataset.impedit);return}
   if(t.dataset.ht){IMPH=IMPH===t.dataset.ht?'':t.dataset.ht;document.querySelectorAll('#impSheet [data-ht]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ht===IMPH));return}
   if(t.id==='impOk'){impSave();return}if(t.id==='impDel'){impDel();return}if(t.id==='impClose'){$('impSheet').hidden=true;return}
@@ -2259,7 +2264,7 @@ async function openFile(id,name,tab,lab){LO=null;PYF={kind:'cash',part:'s'};cons
 function renderFile(){if(!PF)return;const {id,j}=PF,r=fromDoc(id,j.data||{}),h=r.h||{},sg=j.surg||{},ses=sg.sessions||[],tasks=j.tasks||[],price=ROLE==='consultant'||ROLE==='staff'||ROLE==='manager';
   $('pfTitle').textContent='پرونده‌ی '+(h.name||'بیمار');
   const head=`<div class="pf-head">${j.photo?`<img class="sgphoto" src="${j.photo}" alt="">`:'<div class="sgphoto pf-noimg">بدون عکس</div>'}<div class="kv">
-    ${h.nid?`<span>کد ملی</span><span>${esc(faD(h.nid))}</span>`:''}${h.phone?`<span>موبایل</span><span>${esc(faD(h.phone))}</span>`:''}${h.age?`<span>سن</span><span>${esc(faD(h.age))}</span>`:''}${h.asst?`<span>پذیرنده</span><span>${esc(h.asst)}</span>`:''}${h.doc?`<span>پزشک</span><span>${esc(h.doc)}</span>`:''}
+    ${h.nid?`<span>کد ملی</span><span>${esc(faD(h.nid))}</span>`:''}${h.phone?`<span>موبایل</span><span>${esc(faD(h.phone))}</span>`:''}${h.age?`<span>سن</span><span>${esc(faD(h.age))}</span>`:''}${h.city?`<span>شهر</span><span>${esc(h.city)}</span>`:''}${h.ref?`<span>معرف</span><span>${esc(h.ref)}</span>`:''}${h.asst?`<span>پذیرنده</span><span>${esc(h.asst)}</span>`:''}${h.doc?`<span>پزشک</span><span>${esc(h.doc)}</span>`:''}
     <span>وضعیت</span><span>${statusPill(Object.assign({},j,{name:h.name}))}</span></div></div>`;
   const ms=medShort(r.med);
   const tl=[];tl.push({d:j.createdAt,t:'پذیرش',s:h.asst?'توسط '+h.asst:''});
@@ -2329,7 +2334,7 @@ document.addEventListener('input',e=>{if(['rc_nid','rc_phone','rc_name'].include
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const sh=[...document.querySelectorAll('.sheet:not([hidden])')].pop();if(sh&&sh.id!=='cSheet'&&!busy)sh.hidden=true});
 
 /* ======================= treatment flow: appointments, prosthesis & lab, payments, follow-ups, consent, patient link, dashboard ======================= */
-const AKL={surg:'جراحی',uncover:'آنکاوری',impr:'قالب‌گیری',tryin:'امتحان پروتز',deliv:'تحویل پروتز',suture:'کشیدن بخیه',check:'چکاپ دوره‌ای',other:'ویزیت'};
+const AKL={postop:'پیگیری بعد از جراحی',surg:'جراحی',uncover:'آنکاوری',impr:'قالب‌گیری',tryin:'امتحان پروتز',deliv:'تحویل پروتز',suture:'کشیدن بخیه',check:'چکاپ دوره‌ای',other:'ویزیت'};
 const PST=[['heal','ترمیم و آنکاوری'],['impr','قالب‌گیری'],['lab','لابراتوار'],['tryin','امتحان پروتز'],['deliv','تحویل پروتز'],['done','تحویل شد']];
 const PSTN=Object.fromEntries(PST);
 const LST={new:'سفارش جدید',recv:'دریافت در لابراتوار',making:'در حال ساخت',ready:'آماده؛ ارسال شد',redo:'برگشت برای اصلاح',done:'تحویل بیمار شد',cancel:'لغو شد'};
@@ -2359,12 +2364,12 @@ const CAL={start:'',sel:'',items:[],loaded:false};
 const weekStart=d=>{const g=new Date(d+'T12:00:00Z').getUTCDay();return dAdd(d,-((g+1)%7))};
 async function loadCal(){if(!CAL.start){CAL.sel=tDay();CAL.start=weekStart(CAL.sel)}const td=tDay(),from=CAL.start<td?CAL.start:td,end=dAdd(CAL.start,6),to=end>dAdd(td,1)?end:dAdd(td,1);
   try{const j=await api('apptList',{from,to});CAL.items=j.items||[];CAL.loaded=true;renderCal()}catch(e){if(e.message!=='aborted')$('calList').innerHTML=`<div class="empty">${esc(e.message)}</div>`}}
-function apptMsg(a){const c=SET.clinic||'کلینیک';return `${a.name?a.name+' عزیز':'بیمار عزیز'}، سلام. یادآوری نوبت ${AKL[a.kind]||'ویزیت'} شما در ${c}: ${wDay(a.day)} ${jDay(a.day)} ساعت ${faD(a.time)}.${SET.phone?' هماهنگی: '+SET.phone:''}`}
+function apptMsg(a){const c=SET.clinic||'کلینیک';return `${a.name?a.name+' عزیز':'بیمار عزیز'}، سلام. یادآوری نوبت ${AKL[a.kind]||'ویزیت'} شما در ${c}: ${wDay(a.day)} ${jDay(a.day)}${a.time?' ساعت '+faD(a.time):''}.${SET.phone?' هماهنگی: '+SET.phone:''}`}
 function apptCard(a,o={}){const n=dDiff(a.day,tDay()),st=a.st||'set',can=canAppt();
   const stp=st==='done'?'<span class="pill done">انجام شد</span>':st==='cancel'?'<span class="pill">لغو شد</span>':st==='noshow'?'<span class="pill settle">نیامد</span>':a.sms?'<span class="pill done">یادآوری رفت</span>':'';
   const sms=a.phone&&smsLink(a.phone,apptMsg(a));
-  return `<div class="item appt st-${st}"><div class="row1"><div><span class="tm">${faD(a.time)}</span><span class="nm">${esc(a.name)}</span>
-    <div class="meta">${o.date?esc(wDay(a.day)+' '+jDay(a.day))+' · ':''}${a.dur?fa(a.dur)+' دقیقه':''}${a.doc?' · '+esc(a.doc):''}${a.phone?' · '+esc(faD(a.phone)):''}</div>${a.note?`<div class="meta">${esc(a.note)}</div>`:''}</div>
+  return `<div class="item appt st-${st}"><div class="row1"><div><span class="tm">${a.time?faD(a.time):'بدون ساعت'}</span><span class="nm">${esc(a.name)}</span>
+    <div class="meta">${!a.time&&a.st==='set'&&can?'<b class="late">ساعت را تعیین کنید</b> · ':''}${a.by==='خودکار'?'ثبت خودکار از روز جراحی · ':''}${o.date?esc(wDay(a.day)+' '+jDay(a.day))+' · ':''}${a.dur?fa(a.dur)+' دقیقه':''}${a.doc?' · '+esc(a.doc):''}${a.phone?' · '+esc(faD(a.phone)):''}</div>${a.note?`<div class="meta">${esc(a.note)}</div>`:''}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="pill ${a.kind==='surg'?'k-surg':'rev'}">${esc(AKL[a.kind]||a.kind)}</span>${stp}</div></div>
     <div class="acts">${st==='set'&&sms&&n>=0&&n<=2?`<a class="btn sm${a.sms?' ghost':''}" href="${sms}" data-asms="${esc(a.id)}">${a.sms?'پیامک دوباره':'پیامک یادآوری'}</a>`:''}${a.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(a.phone))}">تماس</a>`:''}
       ${st==='set'&&(can||ROLE==='surgery')&&n<=0?`<button class="btn sm" data-ast="done" data-aid="${esc(a.id)}" type="button">انجام شد</button>`:''}
@@ -2621,6 +2626,9 @@ function renderDash(){const D=DASH.data;if(!D)return;const from=perStart(DASH.pe
   const grp=(arr,key,lbl)=>{const g={};arr.forEach(p=>{const k=key(p)||'';g[k]=g[k]||[0,0];g[k][0]+=p.t;g[k][1]++});return Object.keys(g).map(k=>[lbl(k),g[k][0],fa(g[k][1])+' طرح']).sort((a,b)=>b[1]-a[1])};
   h+=`<section class="card"><h2>ارزش تأییدشده به تفکیک برند</h2>${hb2(grp(appr,p=>p.b,k=>(BRANDS.find(b=>b.k===k)||{}).n||'بدون برند / ارجاع'),v=>fa(v))}</section>`;
   h+=`<section class="card"><h2>به تفکیک پزشک</h2>${hb2(grp(appr,p=>p.doc,k=>k||'نامشخص'),v=>fa(v))}</section>`;
+  const cnt=(arr,key,lbl)=>{const g={};arr.forEach(p=>{const k=key(p)||'';g[k]=(g[k]||0)+1});return Object.keys(g).map(k=>[lbl(k),g[k]]).sort((a,b)=>b[1]-a[1]).slice(0,10)};
+  h+=`<section class="card"><h2>بیماران به تفکیک معرف</h2>${hb2(cnt(created,p=>p.ref,k=>k||'نامشخص'),v=>fa(v)+' بیمار')}</section>`;
+  h+=`<section class="card"><h2>بیماران به تفکیک شهر</h2>${hb2(cnt(created,p=>p.city,k=>k||'نامشخص'),v=>fa(v)+' بیمار')}</section>`;
   const why={};P.filter(p=>p.lr&&inP(p.la)).forEach(p=>why[p.lr]=(why[p.lr]||0)+1);
   h+=`<section class="card"><h2>دلیل تأیید نکردن طرح</h2>${hb2(Object.keys(why).map(k=>[k,why[k]]).sort((a,b)=>b[1]-a[1]),v=>fa(v)+' بیمار')}</section>`;
   const nm=Object.fromEntries(P.map(p=>[p.id,p]));
