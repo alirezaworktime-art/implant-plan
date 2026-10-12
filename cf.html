@@ -2060,17 +2060,18 @@ function renderImps(){if(!SURG)return;try{renderPick()}catch(e){}const keys=impK
   $('sgImps').innerHTML=keys.length?keys.map(({k,id})=>{const m=SURG.imp[k];return `<button type="button" data-impedit="${k}" data-impsid="${id}">${esc(toothTxt([k]))}${id!=='imp'?' ('+esc(SEC[id].t)+')':''} — ${m&&m.b&&m.d&&m.l?esc(impTxt(m)):'<span class="miss">برند و سایز ثبت نشده؛ بزنید</span>'}</button>`}).join(''):'<p class="note">ایمپلنتی برای این جلسه علامت نخورده. در بخش «پایه ایمپلنت»، All on X یا اوردنچر روی شماره‌ی دندان بزنید.</p>';
   IMPSECS.forEach(id=>{const s=SURG.s[id];document.querySelectorAll(`#surgSecs .t[data-sid="${id}"]`).forEach(b=>{b.classList.toggle('hasimp',!!SURG.imp[b.dataset.k]);b.setAttribute('aria-pressed',!!s.sel[b.dataset.k])})});needUpd()}
 let IMPK=null,IMPH='',IMPSID='imp';
-function catOpts(){return (SET.catalog||[]).map((c,i)=>`<option value="${i}">${esc(c.b+(c.sys?' · '+c.sys:''))}${GRPN[c.g]?' ('+GRPN[c.g]+')':''}</option>`).join('')}
-function impSync(){const ci=$('imp_cat').value,c=(SET.catalog||[])[ci];const man=!c;$('impManW').hidden=!man;
+function catOpts(){return catM().map((c,i)=>`<option value="${i}">${esc(c.b+(c.sys?' · '+c.sys:''))}${GRPN[c.g]?' ('+GRPN[c.g]+')':''}</option>`).join('')}
+function impSync(){const ci=$('imp_cat').value,c=catM()[ci];const man=!c;$('impManW').hidden=!man;
   const sel=(S,I,vals,v)=>{const has=c&&vals&&vals.length;S.hidden=!has;I.hidden=!!has;if(has){S.innerHTML='<option value="">—</option>'+vals.map(x=>`<option ${String(v)===String(x)?'selected':''}>${esc(x)}</option>`).join('')+'<option value="__">سایر…</option>';if(v&&!vals.includes(v)){S.value='__';I.hidden=false}}};
-  sel($('imp_dS'),$('imp_d'),c&&c.d,$('imp_d').value);sel($('imp_lS'),$('imp_l'),c&&c.l,$('imp_l').value);sel($('imp_hS'),$('imp_hs'),c&&c.h,$('imp_hs').value);impStock()}
-function impStock(){const el=$('impStock');if(!el)return;const ci=$('imp_cat').value,c=(SET.catalog||[])[ci];const b=c?c.b:$('imp_b').value,sys=c?c.sys:$('imp_sys').value,d=impVal($('imp_dS'),$('imp_d')),l=impVal($('imp_lS'),$('imp_l'));
+  sel($('imp_dS'),$('imp_d'),c&&c.d,$('imp_d').value);const dv=impVal($('imp_dS'),$('imp_d')),LL=catLens(c,dv);if(c&&LL&&$('imp_l').value&&!LL.includes($('imp_l').value))$('imp_l').value='';sel($('imp_lS'),$('imp_l'),LL,$('imp_l').value);sel($('imp_hS'),$('imp_hs'),c&&c.h,$('imp_hs').value);impStock()}
+function impStock(){const el=$('impStock');if(!el)return;const ci=$('imp_cat').value,c=catM()[ci];const b=c?c.b:$('imp_b').value,sys=c?c.sys:$('imp_sys').value,d=impVal($('imp_dS'),$('imp_d')),l=impVal($('imp_lS'),$('imp_l'));
   if(!INV.loaded||!b||!d||!l){el.hidden=true;return}const i=INV.items.find(x=>x.kind==='fix'&&sysKey(x.b,x.sys)===sysKey(b,sys)&&nk(x.d)===nk(d)&&nk(x.l)===nk(l));const q=i?Number(i.qty)||0:0;
   el.hidden=false;el.style.color=q>0?'':'var(--bad)';el.textContent=q>0?`موجودی انبار برای این سایز: ${fa(q)} عدد (با ثبت جلسه یکی کم می‌شود)`:'این سایز در انبار موجود نیست؛ با ثبت جلسه موجودی منفی می‌شود و انباردار باخبر می‌شود.'}
-function openImp(k,sid){IMPK=k;IMPSID=sid||'imp';const m=Object.assign({},SURG.imp[k]||{});const cat=SET.catalog||[];
+function openImp(k,sid){IMPK=k;IMPSID=sid||'imp';const m=Object.assign({},SURG.imp[k]||{});const cat=catM();
   /* default brand: the plan's brand group (All on X is always Italian); the last brand picked in this session if it is in that group */
   if(!m.b){const g=IMPSID==='aox'?'it':(GRPN[SURG.rec.brand]?SURG.rec.brand:'');const lc=cat[SURG.lastCat];
-    if(lc&&(!g||lc.g===g)){m.b=lc.b;m.sys=lc.sys}else if(g){const c=cat.find(c=>c.g===g);if(c){m.b=c.b;m.sys=c.sys}else if(!cat.length)m.b=GRPN[g]}}
+    const plus=g==='it'&&cat.find(c=>sysKey(c.b,c.sys)==='jd|plus');
+    if(plus){m.b=plus.b;m.sys=plus.sys}else if(lc&&(!g||lc.g===g)){m.b=lc.b;m.sys=lc.sys}else if(g){const c=cat.find(c=>c.g===g);if(c){m.b=c.b;m.sys=c.sys}else if(!cat.length)m.b=GRPN[g]}}
   $('impTitle').textContent='ایمپلنت · '+toothTxt([k]);$('impMsg').textContent='';
   $('imp_cat').innerHTML=(cat.length?'<option value="">— انتخاب کنید —</option>'+catOpts():'')+'<option value="m">سایر (نوشتن دستی)</option>';
   const ci=cat.findIndex(c=>c.b===m.b&&c.sys===m.sys);$('imp_cat').value=ci>=0?String(ci):(m.b?'m':(cat.length?'':'m'));$('impCatW').hidden=false;
@@ -2078,7 +2079,7 @@ function openImp(k,sid){IMPK=k;IMPSID=sid||'imp';const m=Object.assign({},SURG.i
   document.querySelectorAll('#impSheet [data-ht]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ht===IMPH));
   impSync();$('impDel').hidden=!SURG.s[IMPSID].sel[k];$('impSheet').hidden=false}
 function impVal(S,I){return S.hidden||S.value==='__'?toEn(I.value).trim():S.value}
-function impSave(){const ci=$('imp_cat').value,c=(SET.catalog||[])[ci];
+function impSave(){const ci=$('imp_cat').value,c=catM()[ci];
   const m={b:c?c.b:$('imp_b').value.trim(),sys:c?c.sys:$('imp_sys').value.trim(),g:c?c.g:'',d:impVal($('imp_dS'),$('imp_d')),l:impVal($('imp_lS'),$('imp_l')),ht:IMPH,hs:''};
   if(!m.b){$('impMsg').className='msg err';$('impMsg').textContent='برند را انتخاب کنید.';return}
   if(!m.d||!m.l){$('impMsg').className='msg err';$('impMsg').textContent='قطر و طول فیکسچر را وارد کنید.';return}
@@ -2183,6 +2184,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.dataset.tosurg){t.disabled=true;try{await api('toSurgery',{id:t.dataset.tosurg});toast('به کارتابل جراحی فرستاده شد.');loadList();pollQ(true)}catch(err){alertMsg(err.message)}finally{t.disabled=false}return}
   if(t.dataset.srep||t.dataset.scard||t.dataset.settle){const id=t.dataset.srep||t.dataset.scard||t.dataset.settle;t.disabled=true;
     try{const o=await surgRecord(id);if(t.dataset.settle)openDone(o.r,o.sg,true);else await surgDownload(t.dataset.scard?'card':'rep',o.r,o.sg)}catch(err){alertMsg(err.message)}finally{t.disabled=false}return}});
+document.addEventListener('change',e=>{if(e.target.id==='imp_dS'&&e.target.value!=='__')setTimeout(impSync,0);if(e.target.id==='in_dS'&&e.target.value!=='__')setTimeout(invNewSync,0)});
 document.addEventListener('change',e=>{if(['imp_dS','imp_lS'].includes(e.target.id))impStock();if(e.target.id==='imp_cat'){impSync();return}
   if(['imp_dS','imp_lS','imp_hS'].includes(e.target.id)){const I=$(e.target.id.replace('S','').replace('imp_h','imp_hs'));if(e.target.value==='__'){I.hidden=false;I.value='';I.focus()}else{I.hidden=true;I.value=e.target.value}}});
 
@@ -2194,6 +2196,13 @@ const invCanEdit=()=>ROLE==='inventory';
 const invNote=t=>esc(t||'').replace(/دندان (UR|UL|LR|LL)(\d)/g,(m,q,n)=>'دندان '+toothTxt([q+n]));
 const nk=v=>{const t=toEn(v).trim().replace(/[\/٫,]/g,'.');const f=parseFloat(t);return isFinite(f)&&/^[\d.]+$/.test(t)?String(f):t.toLowerCase().replace(/[×*]/g,'x').replace(/\s/g,'')};
 const sysKey=(b,s)=>String(b||'').trim().toLowerCase()+'|'+String(s||'').trim().toLowerCase();
+/* settings catalog merged by brand + system (a system may span several rows, e.g. JD Plus Ø6 has an extra 6 mm length); dl = lengths of each diameter */
+let CATM_SRC=null,CATM_V=[];
+function catM(){const c=SET.catalog||[];if(c===CATM_SRC)return CATM_V;const m=new Map(),srt=a=>a.sort((x,y)=>parseFloat(x)-parseFloat(y)||String(x).localeCompare(y)),put=(a,v)=>{if(!a.includes(v))a.push(v)};
+  c.forEach(x=>{const k=sysKey(x.b,x.sys);let o=m.get(k);if(!o){o={g:x.g,b:x.b,sys:x.sys,d:[],l:[],h:[],dl:{}};m.set(k,o)}
+    (x.d||[]).forEach(d=>{put(o.d,d);const L=o.dl[d]=o.dl[d]||[];(x.l||[]).forEach(l=>put(L,l))});(x.l||[]).forEach(l=>put(o.l,l));(x.h||[]).forEach(h=>put(o.h,h))});
+  CATM_V=[...m.values()].map(o=>{srt(o.d);srt(o.l);Object.values(o.dl).forEach(srt);return o});CATM_SRC=c;return CATM_V}
+const catLens=(c,d)=>c?((d&&c.dl[d])||c.l):null;
 function invState(i){const q=Number(i.qty)||0,mn=Number(i.min)||0;return q<0?'neg':q===0?'out':(mn&&q<=mn)?'low':'ok'}
 function invLbl(i){if(!i)return '';if(i.kind==='other')return i.name;const bs=[i.b,i.sys].filter(Boolean).join(' ');
   return i.kind==='fix'?`${bs}، Ø${i.d} × ${i.l}`:`${KLBL[i.kind]} ${bs}، ${i.d}`}
@@ -2204,7 +2213,7 @@ async function pollInv(force){if(!ROLE||INV.busy||!CF_ON)return;if(!force&&docum
 function setInvLive(ok){const el=$('iLive');if(!el)return;el.classList.toggle('off',!ok);el.textContent=ok?'زنده':'اتصال قطع است؛ دوباره تلاش می‌شود…'}
 function invBadge(){const n=INV.items.filter(i=>{const s=invState(i);return s==='low'||s==='out'||s==='neg'}).filter(i=>Number(i.min)||Number(i.qty)<0).length;const b=$('invBadge');b.hidden=!n||ROLE!=='inventory';b.textContent=fa(n)}
 function invSystems(){const map=new Map();const add=(M,v)=>{const k=nk(v);if(k&&!M.has(k))M.set(k,toEn(v).trim())};
-  (SET.catalog||[]).forEach(c=>{const k=sysKey(c.b,c.sys);if(!map.has(k))map.set(k,{b:c.b,sys:c.sys,d:new Map(),l:new Map(),items:{}});const s=map.get(k);(c.d||[]).forEach(v=>add(s.d,v));(c.l||[]).forEach(v=>add(s.l,v))});
+  (SET.catalog||[]).forEach(c=>{const k=sysKey(c.b,c.sys);if(!map.has(k))map.set(k,{b:c.b,sys:c.sys,d:new Map(),l:new Map(),items:{},ok:new Set()});const s=map.get(k);(c.d||[]).forEach(v=>add(s.d,v));(c.l||[]).forEach(v=>add(s.l,v));(c.d||[]).forEach(d=>(c.l||[]).forEach(l=>s.ok.add(nk(d)+'x'+nk(l))))});
   INV.items.filter(i=>i.kind==='fix').forEach(i=>{const k=sysKey(i.b,i.sys);if(!map.has(k))map.set(k,{b:i.b,sys:i.sys,d:new Map(),l:new Map(),items:{}});const s=map.get(k);add(s.d,i.d);add(s.l,i.l);s.items[nk(i.d)+'x'+nk(i.l)]=i});
   const srt=M=>[...M.values()].sort((x,y)=>parseFloat(x)-parseFloat(y)||String(x).localeCompare(y));
   return [...map.values()].map(s=>({...s,d:srt(s.d),l:srt(s.l)}))}
@@ -2226,7 +2235,7 @@ function renderInv(){if($('viewInv').hidden&&ROLE!=='inventory'){invBadge();retu
     if(!sys.length){B.innerHTML=`<div class="empty">${q?'نتیجه‌ای پیدا نشد.':'هنوز فیکسچری ثبت نشده.'+(invCanEdit()?' با «ورود کالا» اولین فیکسچرها را وارد کنید.':'')}${!(SET.catalog||[]).length?'<br>برای دیدن جدول کامل سایزها، برندها و سایزها را در «تنظیمات» وارد کنید.':''}</div>`;return}
     const top=it.filter(i=>U[i.id]).sort((a,b)=>U[b.id]-U[a.id]).slice(0,8),mx=top.length?U[top[0].id]:1;
     B.innerHTML=sys.map(s=>{const tot=Object.values(s.items).reduce((a,i)=>a+(Number(i.qty)||0),0);
-      let rows=s.d.map(d=>{const cells=s.l.map(l=>{const i=s.items[nk(d)+'x'+nk(l)];if(INV.low&&!(i&&['low','out','neg'].includes(invState(i))))return `<td><span class="cell none" aria-hidden="true"></span></td>`;
+      let rows=s.d.map(d=>{const cells=s.l.map(l=>{const i=s.items[nk(d)+'x'+nk(l)];if(!i&&s.ok&&s.ok.size&&!s.ok.has(nk(d)+'x'+nk(l)))return '<td></td>';if(INV.low&&!(i&&['low','out','neg'].includes(invState(i))))return `<td><span class="cell none" aria-hidden="true"></span></td>`;
         const st=i?invState(i):'none';return `<td><button type="button" class="cell ${st}" data-icell="${esc(s.b)}|${esc(s.sys)}|${esc(d)}|${esc(l)}" title="Ø${esc(d)} × ${esc(l)}">${i?fa(Number(i.qty)||0):'·'}</button></td>`}).join('');
         return `<tr><th class="r">Ø${esc(d)}</th>${cells}</tr>`}).join('');
       return `<section class="sys"><div class="sys-h"><div><b>${esc(s.b)}</b> <small>${esc(s.sys||'')}</small></div><span class="tot">${fa(tot)} عدد</span></div>
@@ -2270,14 +2279,14 @@ async function invSaveMin(t){const c=INV.cur;if(!c||!c.id)return;t.disabled=true
 function invBy(){const v=$('ivBy')?$('ivBy').value.trim():'';try{if(v)localStorage.setItem('implantInvBy',v)}catch(e){}return v||(()=>{try{return localStorage.getItem('implantInvBy')||''}catch(e){return ''}})()}
 /* new stock sheet */
 function openInvNew(){INV.kind='fix';$('inMsg').textContent='';$('in_n').value='1';$('in_note').value='';['in_b','in_sys','in_d','in_l','in_hs','in_name'].forEach(id=>$(id).value='');$('in_unit').value='عدد';
-  $('in_cat').innerHTML=((SET.catalog||[]).length?'<option value="">— انتخاب کنید —</option>'+(SET.catalog||[]).map((c,i)=>`<option value="${i}">${esc(c.b+(c.sys?' '+c.sys:''))}</option>`).join(''):'')+'<option value="m">سایر (نوشتن دستی)</option>';
-  $('in_cat').value=(SET.catalog||[]).length?'':'m';$('in_sug').innerHTML=INV_SUG.map(s=>`<button type="button" class="chip" data-isug="${esc(s)}">${esc(s)}</button>`).join('');
+  $('in_cat').innerHTML=(catM().length?'<option value="">— انتخاب کنید —</option>'+catM().map((c,i)=>`<option value="${i}">${esc(c.b+(c.sys?' '+c.sys:''))}</option>`).join(''):'')+'<option value="m">سایر (نوشتن دستی)</option>';
+  $('in_cat').value=catM().length?'':'m';$('in_sug').innerHTML=INV_SUG.map(s=>`<button type="button" class="chip" data-isug="${esc(s)}">${esc(s)}</button>`).join('');
   try{$('in_by').value=localStorage.getItem('implantInvBy')||''}catch(e){}invNewSync();$('invMvSheet').hidden=false}
-function invNewSync(){const k=INV.kind,c=(SET.catalog||[])[$('in_cat').value];document.querySelectorAll('[data-ikind]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ikind===k));
+function invNewSync(){const k=INV.kind,c=catM()[$('in_cat').value];document.querySelectorAll('[data-ikind]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ikind===k));
   $('in_catW').hidden=k==='other';$('in_manW').hidden=k==='other'||!!c;$('in_fixW').hidden=k!=='fix';$('in_hsW').hidden=k==='fix'||k==='other';$('in_othW').hidden=k!=='other';
   const fill=(S,I,vals)=>{const has=c&&vals&&vals.length;S.hidden=!has;I.hidden=!!has;if(has){const v=S.value;S.innerHTML='<option value="">—</option>'+vals.map(x=>`<option${v===x?' selected':''}>${esc(x)}</option>`).join('')}};
-  fill($('in_dS'),$('in_d'),c&&c.d);fill($('in_lS'),$('in_l'),c&&c.l);fill($('in_hS'),$('in_hs'),c&&c.h)}
-async function invSaveNew(t){const m=$('inMsg'),k=INV.kind,c=(SET.catalog||[])[$('in_cat').value];const pv=(S,I)=>S.hidden?toEn(I.value).trim():S.value;
+  fill($('in_dS'),$('in_d'),c&&c.d);const idv=$('in_dS').hidden?toEn($('in_d').value).trim():$('in_dS').value;fill($('in_lS'),$('in_l'),catLens(c,idv));fill($('in_hS'),$('in_hs'),c&&c.h)}
+async function invSaveNew(t){const m=$('inMsg'),k=INV.kind,c=catM()[$('in_cat').value];const pv=(S,I)=>S.hidden?toEn(I.value).trim():S.value;
   const spec={kind:k,b:c?c.b:$('in_b').value.trim(),sys:c?c.sys:$('in_sys').value.trim(),d:k==='fix'?pv($('in_dS'),$('in_d')):pv($('in_hS'),$('in_hs')),l:pv($('in_lS'),$('in_l')),name:$('in_name').value.trim(),unit:$('in_unit').value.trim()};
   const n=parseInt(toEn($('in_n').value),10);
   const err=k==='other'?(!spec.name&&'نام قلم را بنویسید.'):(!spec.b?'برند را انتخاب کنید.':k==='fix'&&(!spec.d||!spec.l)?'قطر و طول فیکسچر را انتخاب کنید.':k!=='fix'&&!spec.d?'سایز را وارد کنید.':'');
