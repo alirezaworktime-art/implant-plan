@@ -418,13 +418,18 @@ body[data-role="doctor"] #viewForm .calc,body[data-role="doctor"] #totalsCard,bo
 #viewSurg .sgpick{position:fixed;right:max(8px,calc((100vw - 1040px)/2 - 182px));top:84px;z-index:6;width:170px;max-height:calc(100vh - 100px);overflow:auto;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--sh)}
 #viewSurg .sgpick .chip{text-align:right;border-radius:10px;font-size:.82rem;padding:6px 10px;min-height:38px}
 #viewSurg .sgpick .sgh{font-size:.74rem;color:var(--muted);font-weight:700;padding:2px 4px}
-@media (max-width:1420px){#viewSurg{padding-right:182px!important}}
-@media (max-width:720px){#viewSurg .sgpick{width:98px;top:122px;right:4px;padding:5px;gap:4px}#viewSurg .sgpick .chip{font-size:.7rem;padding:4px 6px;min-height:34px;line-height:1.35}#viewSurg{padding-right:102px!important}#viewSurg .pview{grid-template-columns:1fr}#viewSurg .mc{overflow-x:auto;max-width:100%}#viewSurg .mc i{width:15px}#viewSurg .card{padding:12px}}
+#viewSurg .sgpick2{right:auto;left:max(8px,calc((100vw - 1040px)/2 - 182px))}
+@media (max-width:1420px){#viewSurg{padding-right:182px!important;padding-left:182px!important}}
+.sgteam{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px}.sgteam .f{min-width:220px;flex:1}
+h2 .sgas{font-size:.78rem;font-weight:600;padding:3px 6px;border-radius:8px;border:1px solid var(--line);background:var(--sunk);color:inherit;margin-inline-start:auto;max-width:150px}
+.rcs{display:flex;flex-wrap:wrap;gap:6px}.rc{width:48px;height:48px;border-radius:50%!important;padding:0!important;display:inline-flex;align-items:center;justify-content:center;font-size:.86rem;direction:ltr}
+#impSheet #imp_dS,#impSheet #imp_lS{display:none!important}
+@media (max-width:720px){#viewSurg .sgpick{width:98px;top:122px;right:4px;padding:5px;gap:4px}#viewSurg .sgpick .chip{font-size:.7rem;padding:4px 6px;min-height:34px;line-height:1.35}#viewSurg{padding-right:102px!important}#viewSurg .pview{grid-template-columns:minmax(0,1fr)}#viewSurg .pv-card,#viewSurg .card{min-width:0}#viewSurg .mc{overflow-x:auto;max-width:100%}#viewSurg .mc i{width:15px}#viewSurg .card{padding:12px}#viewSurg .sgpick2{position:static;width:auto;max-height:none;flex-direction:row;flex-wrap:wrap;margin:10px 0}#viewSurg{padding-left:0!important}}
 #impSheet .in{max-width:440px;gap:9px}
 .need{font-size:.84rem;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;margin:0}.need.ok{color:var(--ok);background:var(--ok-soft)}
 .rvl{margin:0;padding:0 18px 0 0;font-size:.88rem;line-height:1.9}.rvbad{color:var(--bad);font-weight:700}
 .sgc.inplan{border-color:var(--accent);color:var(--accent);font-weight:700}.sgc.marked{background:var(--accent-soft)}.sgc[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.fu{display:flex;flex-direction:column;gap:6px}.fu .pwshow{white-space:normal;width:auto}
+.fu{display:flex;flex-direction:column;gap:6px}.fu .pwshow,#viewSurg .pwshow{white-space:normal;width:auto}
 .task.late{border-inline-start-color:var(--bad)}.task.done{opacity:.6}
 a.btn{text-decoration:none}
 /* patient file, overview strip, filters */
@@ -656,20 +661,19 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
   <!-- form -->
   <!-- surgery day (surgery assistant) -->
   <section id="viewSurg" class="wrap" style="padding:0" hidden>
-    <section class="card sgpat"><img id="sgPhoto" class="sgphoto" alt="عکس بیمار" hidden><div><h2 id="sgName">روز جراحی</h2><div class="meta" id="sgMeta"></div><div class="qwarn" id="sgMed" hidden></div><div class="note" id="sgStaff" hidden></div></div></section>
+    <section class="card sgpat"><img id="sgPhoto" class="sgphoto" alt="عکس بیمار" hidden><div style="flex:1"><h2 id="sgName">روز جراحی</h2><div class="meta" id="sgMeta"></div><div class="qwarn" id="sgMed" hidden></div><div class="note" id="sgStaff" hidden></div><div class="sgteam"><label class="f">جراح *<input id="sg_by" list="dlSgDoc" autocomplete="off"><datalist id="dlSgDoc"></datalist></label><div class="grp"><span>پزشک دستیار امروز *</span><div class="chips" id="sgAsst"></div></div></div></div></section>
     <section class="card"><h2>طرح درمان تأییدشده</h2><div class="pview" id="sgPlan"></div><div id="sgPrev"></div></section>
-    <section class="card"><h2 id="sgTitle">جلسه‌ی جراحی امروز</h2>
-      <p class="note">از فهرست سمت راست، درمان را بزنید تا جدولش باز شود و کار انجام‌شده را علامت بزنید. درمان‌های طرح بالای فهرست‌اند. برای ایمپلنت، All on X و اوردنچر روی شماره‌ی دندان بزنید تا برند و سایز را ثبت کنید.</p>
-      <div class="legend"><span><i style="box-shadow:inset 0 0 0 2px var(--accent)"></i>در طرح، انجام نشده</span><span><i style="background:var(--accent)"></i>انجام شد</span><span><i style="background:var(--warn)"></i>خارج از طرح</span></div></section>
     <div class="sgpick" id="sgPick"></div>
     <div id="surgSecs" class="wrap" style="padding:0"></div>
-    <section class="card"><h2>ایمپلنت‌های این جلسه</h2><div class="implist" id="sgImps"></div></section>
+    <div class="sgpick sgpick2" id="sgPick2"></div>
     <section class="card"><h2>ثبت جلسه</h2>
-      <label class="f">نام جراح *<input id="sg_by" list="dlSgDoc" autocomplete="off"><datalist id="dlSgDoc"></datalist></label>
-      <div class="grp"><span>پیگیری‌ها</span><div class="fu">
+      <div id="sgImpW" hidden><h3 style="margin:0 0 6px;font-size:.95rem">ایمپلنت‌های این جلسه</h3><div class="implist" id="sgImps"></div></div>
+      <div class="grp"><span>پیگیری‌ها (نوبت خودکار در کارتابل پذیرش)</span><div class="fu">
         <label class="pwshow"><input type="checkbox" data-fu="numb" checked> فردا: چک بی‌حسی</label>
         <label class="pwshow"><input type="checkbox" data-fu="week" checked> یک هفته بعد: چکاپ</label>
-        <label class="pwshow"><input type="checkbox" data-fu="suture" checked> دو هفته بعد: کشیدن بخیه</label></div></div>
+        <label class="pwshow"><input type="checkbox" data-fu="suture" checked> دو هفته بعد: کشیدن بخیه</label>
+        <label class="pwshow"><input type="checkbox" id="sg_unc"> آنکاوری</label></div></div>
+      <div class="chips" id="sgUncM" hidden><button type="button" class="chip" data-unc="3" aria-pressed="true">سه ماه بعد</button><button type="button" class="chip" data-unc="4" aria-pressed="false">چهار ماه بعد</button></div>
       <label class="pwshow"><input type="checkbox" id="sg_fin"> این آخرین جلسه است (پایان درمان جراحی)</label>
       <div class="msg" id="sgMsg"></div>
       <div class="btns"><button class="btn" id="sgSave" type="button">ثبت جلسه</button><button class="btn ghost" id="sgBack" type="button">بازگشت به کارتابل</button></div></section>
@@ -903,8 +907,8 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
     <h3 id="impTitle">ایمپلنت</h3>
     <label class="f" id="impCatW">برند<select id="imp_cat"></select></label>
     <div class="fields" id="impManW"><label class="f">برند<input id="imp_b"></label><input id="imp_sys" type="hidden"></div>
-    <div class="fields"><label class="f">قطر فیکسچر (mm)<select id="imp_dS"></select><input id="imp_d" inputmode="decimal" class="ltr"></label>
-      <label class="f">طول فیکسچر (mm)<select id="imp_lS"></select><input id="imp_l" inputmode="decimal" class="ltr"></label></div>
+    <div><label class="f">قطر فیکسچر (mm)<select id="imp_dS"></select><div class="rcs" id="imp_dSC"></div><input id="imp_d" inputmode="decimal" class="ltr"></label>
+      <label class="f">طول فیکسچر (mm)<select id="imp_lS"></select><div class="rcs" id="imp_lSC"></div><input id="imp_l" inputmode="decimal" class="ltr"></label></div>
     <div class="grp"><span>کاور / هیلینگ</span><div class="chips"><button type="button" class="chip" data-ht="cover" aria-pressed="false">کاور اسکرو</button><button type="button" class="chip" data-ht="heal" aria-pressed="false">هیلینگ اباتمنت</button></div></div>
     <label class="f" hidden>سایز کاور / هیلینگ<select id="imp_hS"></select><input id="imp_hs" class="ltr"></label>
     <p class="note" id="impStock" hidden></p>
@@ -971,7 +975,7 @@ const bz=f=>Object.fromEntries(BRANDS.map(b=>[b.k,f?f(b.k):0]));
    price: unit (qty × price) · flat · brandUnit (qty × brand price) · implantBrand (implants × implant brand price) · items */
 const SECTIONS=[
  {id:'ext',t:'کشیدن دندان',kind:'teeth',n:8,price:'unit',cnt:'jaw',jmax:16},
- {id:'surg',t:'جراحی دندان نهفته',kind:'items',price:'items',two:true,items:[{k:'c',l:'جراحی نیش نهفته',type:'quad',pk:'surg_c',ul:'هر دندان'},{k:'w',l:'جراحی عقل نهفته',type:'quad',pk:'surg_w',ul:'هر دندان'}]},
+ {id:'surg',t:'جراحی دندان نهفته',kind:'items',price:'items',two:true,items:[{k:'c',l:'جراحی نیش نهفته',type:'quad',pk:'surg_c',ul:'هر دندان',tn:7},{k:'w',l:'جراحی عقل نهفته',type:'quad',pk:'surg_w',ul:'هر دندان'}]},
  {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',cnt:'jaws',jmax:14,text:'توضیحات'},
  {id:'sub',t:'ایمپلنت ساب‌پریوستئال',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
  {id:'aox',t:'All on X',sgt:7,kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'aox',prosJaw:true,def:'19000000',
@@ -1044,7 +1048,8 @@ function qty(s,x){
     return t||(x.groups&&chipSel(s)?1:0)}
   if(x.price==='implantBrand'||x.price==='aox')return Object.keys(s.sel).filter(k=>s.sel[k]).reduce((a,k)=>a+num(k.split(':')[1]),0);
   return chipSel(s)}
-function itemQty(s,it){if(it.type==='count')return num(s.icnt[it.k]);const on=Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':'));return it.qn?on.reduce((a,k)=>a+(num(s.icnt[k])||1),0):on.length}
+function tnTeeth(s,it,q){return Object.keys(s.isel).filter(z=>s.isel[z]&&z.startsWith(it.k+'n:'+q)).map(z=>z.split(':')[1]).sort()}
+function itemQty(s,it){if(it.type==='count')return num(s.icnt[it.k]);const on=Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':'));if(it.tn)return on.reduce((a,k)=>a+(tnTeeth(s,it,k.split(':')[1]).length||1),0);return it.qn?on.reduce((a,k)=>a+(num(s.icnt[k])||1),0):on.length}
 function rowTotals(r,x){const s=r.s[x.id],q=qty(s,x),o={flat:0,brand:bz()};
   if(x.price==='unit')o.flat=q*num(s.price);
   else if(x.price==='flat')o.flat=(q||(s.text||'').trim())?num(s.price):0;
@@ -1113,7 +1118,8 @@ function quadHTML(x){const s=AS()[x.id];return `<div class="quad">${QUADS.map(([
 function itemsHTML(x){const s=AS()[x.id];
   return `<div class="items${x.two?' two':''}${x.three?' three':''}">${x.items.map(it=>`<div class="item-box"><b>${it.l}</b>
     ${it.type==='quad'?`<div class="quad">${IQUADS.map(([q,t])=>`<button type="button" class="qd" data-isid="${x.id}" data-ik="${it.k}:${q}" title="${t}" aria-pressed="${!!s.isel[it.k+':'+q]}">${q}</button>`).join('')}</div><div class="sides quad-sides"><span>راست بیمار</span><span>چپ بیمار</span></div>`+
-      (it.qn?`<div class="qcnt">${['UR','UL','LR','LL'].filter(q=>s.isel[it.k+':'+q]).map(q=>`<div class="f"><span>تعداد ${q}</span>${pickHTML(`data-icnt="${x.id}" data-ik="${it.k}:${q}"`,it.qn,s.icnt[it.k+':'+q]||'1',it.l+'، تعداد ناحیه‌ی '+QNAME[q])}</div>`).join('')}</div>`:'')
+      (it.qn?`<div class="qcnt">${['UR','UL','LR','LL'].filter(q=>s.isel[it.k+':'+q]).map(q=>`<div class="f"><span>تعداد ${q}</span>${pickHTML(`data-icnt="${x.id}" data-ik="${it.k}:${q}"`,it.qn,s.icnt[it.k+':'+q]||'1',it.l+'، تعداد ناحیه‌ی '+QNAME[q])}</div>`).join('')}</div>`:'')+
+      (it.tn?`<div class="qcnt">${['UR','UL','LR','LL'].filter(q=>s.isel[it.k+':'+q]).map(q=>`<div class="f"><span>شماره‌ی دندان ${q}</span><div class="rcs">${Array.from({length:it.tn},(_,i)=>i+1).map(i=>`<button type="button" class="chip rc" data-isid="${x.id}" data-ik="${it.k}n:${q}${i}" aria-pressed="${!!s.isel[it.k+'n:'+q+i]}">${fa(i)}</button>`).join('')}</div></div>`).join('')}</div>`:'')
       :it.type==='chips'?`<div class="chips">${it.o.map(o=>`<button type="button" class="chip" data-isid="${x.id}" data-ik="${esc(it.k+':'+o)}" aria-pressed="${!!s.isel[it.k+':'+o]}"${x.excl&&s.isel[x.excl[it.k+':'+o]]?' disabled':''}>${o}</button>`).join('')}</div>`
       :`<div class="f"><span>تعداد</span>${pickHTML(`data-icnt="${x.id}" data-ik="${it.k}"`,it.max,s.icnt[it.k],x.t+'، '+it.l)}</div>`}
     ${SURG?'':`<label class="f pz">قیمت ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}${x.id==='surg'?'<small class="dr-only"> (میلیون تومان)</small>':''}<input class="price" inputmode="decimal" data-ip="${x.id}" data-ik="${it.k}" value="${esc(s.ip[it.k])}"></label>`}
@@ -1143,9 +1149,12 @@ function priceHTML(x){const s=AS()[x.id];if(SURG)return '';if(x.price==='aox')re
     (x.prosJaw?`<label class="f">پروتز هر فک (به پارت پروتز اضافه می‌شود)<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="pcalc_${x.id}"></div>`:'');
   if(!x.price||x.price==='items')return '';
   return `<label class="f">${x.price==='unit'?'قیمت '+(x.ul||'هر واحد'):'قیمت'}<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label>`}
+const SURGEON=()=>SET.surgeon||'دکتر سید مجتبی علویکیا',ASSTS=()=>(SET.assts&&SET.assts.length?SET.assts:['دکتر صادقی','دکتر اکبرپور','دکتر باصری']);
+function asstSel(x){if(!SURG||!SURG.asst)return '';const v=SURG.sa[x.id]||SURG.asst;return `<select class="sgas" data-sgasst="${x.id}" title="پزشک دستیار این بخش">${ASSTS().map(n=>`<option value="${esc(n)}" ${n===v?'selected':''}>دستیار: ${esc(n)}</option>`).join('')}</select>`}
+function renderAsst(){$('sgAsst').innerHTML=ASSTS().map(n=>`<button type="button" class="chip" data-sgas="${esc(n)}" aria-pressed="${SURG&&SURG.asst===n}">${esc(n)}</button>`).join('')}
 function sectionHTML(x){const s=AS()[x.id];
   const tag=x.pros?'<span class="tag p">پروتز</span>':(x.price?'<span class="tag">جراحی</span>':'');const wide=x.kind==='teeth'||(x.kind==='items'&&x.n);
-  return `<section class="card" data-sec="${x.id}" data-kind="${x.pros?'pros':x.price?'surg':'info'}"${wide?' data-wide':''}><h2><span class="h2t">${x.t}${x.price==='aox'?aoxTypeHTML(x):''}</span>${SURG?'':tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x)+needHTML(x):x.kind==='chips'?chipsHTML(x)+(x.price==='aox'?aoxHTML(x):'')+(SURG&&x.sgt?sgChartHTML(x):''):x.kind==='items'?(x.n?chartHTML(x)+cntHTML(x):'')+(x.base&&!SURG?`<label class="f">قیمت جراحی هر واحد<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="bcalc_${x.id}"></div>`:'')+itemsHTML(x):x.kind==='quad'?quadHTML(x)+(x.id==='cbct'?cbctHTML(x):''):''}${x.id==='imp'?spHTML(x):''}
+  return `<section class="card" data-sec="${x.id}" data-kind="${x.pros?'pros':x.price?'surg':'info'}"${wide?' data-wide':''}><h2><span class="h2t">${x.t}${x.price==='aox'?aoxTypeHTML(x):''}</span>${SURG?asstSel(x):tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x)+needHTML(x):x.kind==='chips'?chipsHTML(x)+(x.price==='aox'?aoxHTML(x):'')+(SURG&&x.sgt?sgChartHTML(x):''):x.kind==='items'?(x.n?chartHTML(x)+cntHTML(x):'')+(x.base&&!SURG?`<label class="f">قیمت جراحی هر واحد<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="bcalc_${x.id}"></div>`:'')+itemsHTML(x):x.kind==='quad'?quadHTML(x)+(x.id==='cbct'?cbctHTML(x):''):''}${x.id==='imp'?spHTML(x):''}
     ${x.text?`<label class="f">${x.text}<input id="tx_${x.id}" data-tx="${x.id}" value="${esc(s.text)}"></label>`:''}
     ${priceHTML(x)}<div class="calc" id="calc_${x.id}"></div></section>`}
 function renderForm(){
@@ -1305,7 +1314,7 @@ function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];le
     x.items.forEach((it,ii)=>{const cxm=C.midR-(C.midW/n)*(ii+.5);draws.push((cx,top)=>{const y0=top+pad+yy;
       T(cx,it.l,cxm,y0+14,{s:19,w:800,a:'center'});const yt=y0+34,yc=yt+bh+4;cx.fillStyle=INK;cx.fillRect(cxm-1.5,yt,3,2*bh+8);cx.fillRect(cxm-2*bw,yc-1.5,4*bw,3);
       [['UR',-1,-1],['UL',1,-1],['LR',-1,1],['LL',1,1]].forEach(([q,dx,dy])=>{const on=!!s.isel[it.k+':'+q],xc=cxm+dx*bw,ycc=yc+dy*(bh/2+2);
-        checkbox(cx,xc+32,ycc,on);T(cx,q+(on&&it.qn?' ×'+fa(num(s.icnt[it.k+':'+q])||1):''),xc-14,ycc,{s:19,w:on?800:400,c:on?INK:'#888',a:'center'})})})});
+        checkbox(cx,xc+32,ycc,on);const tt=on&&it.tn?tnTeeth(s,it,q).map(z=>fa(z.slice(2))).join(','):'';T(cx,q+(on&&it.qn?' ×'+fa(num(s.icnt[it.k+':'+q])||1):'')+(tt?' '+tt:''),xc-14,ycc,{s:tt?15:19,w:on?800:400,c:on?INK:'#888',a:'center'})})})});
     mh+=34+2*bh+16}
   else if(x.kind==='items'){const lines=[];x.items.forEach(it=>{
       if(it.type==='chips')lines.push(...chipLine(c,chipItems(c,[{l:it.l,o:it.o}],(gi,o)=>!!s.isel[it.k+':'+o])[0],maxW));
@@ -1906,6 +1915,8 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.dataset.spdel){AS().imp.sp.splice(Number(t.dataset.spdel),1);reSec('imp');touch();return}
   if(t.dataset.isid){if(t.disabled)return;const x=SEC[t.dataset.isid],s=AS()[t.dataset.isid],k=t.dataset.ik,on=!s.isel[k];s.isel[k]=on;t.setAttribute('aria-pressed',on);
     if(x.id==='cbct'&&on&&(k==='z:1'||k==='zs:1')){const o=k==='z:1'?'zs:1':'z:1';delete s.isel[o];const ob=document.querySelector(`[data-isid="cbct"][data-ik="${o}"]`);if(ob)ob.setAttribute('aria-pressed','false')}
+    const ti=(x.items||[]).find(it=>it.tn&&k.startsWith(it.k+':'));if(ti){if(!on){const q=k.split(':')[1];Object.keys(s.isel).forEach(z=>{if(z.startsWith(ti.k+'n:'+q))delete s.isel[z]})}reSec(x.id);touch();return}
+    const tq=(x.items||[]).find(it=>it.tn&&k.startsWith(it.k+'n:'));if(tq){const q=k.split(':')[1].slice(0,2);if(on&&!s.isel[tq.k+':'+q])s.isel[tq.k+':'+q]=true;touch();recalc();return}
     const qi=(x.items||[]).find(it=>it.qn&&k.startsWith(it.k+':'));if(qi){if(on&&!num(s.icnt[k]))s.icnt[k]='1';if(!on)delete s.icnt[k];reSec(x.id);touch();return}
     if(x.excl&&x.excl[k]){const o=x.excl[k];if(on)s.isel[o]=false;const ob=document.querySelector(`[data-isid="${x.id}"][data-ik="${o}"]`);if(ob){ob.disabled=on;if(on)ob.setAttribute('aria-pressed','false')}}touch();recalc();return}
   if(t.dataset.plan){CUR=Number(t.dataset.plan);renderForm();window.scrollTo(0,0);return}
@@ -1996,7 +2007,7 @@ function secDesc(S,x){const s=S[x.id];if(!s)return '';const p=[];const on=Object
   const ch=on.filter(k=>!isTooth(k));if(ch.length)p.push(ch.map(k=>QDN[k]||(x.groups&&x.groups[k.split(':')[0]]&&x.groups[k.split(':')[0]].l?x.groups[k.split(':')[0]].l+' '+k.split(':')[1]:k.split(':').slice(1).join(':')||k)).join('، '));
   if(x.price==='aox'&&p.length){p.push(s.isel['t:long']?'لانگ':'کلاسیک');if(s.isel['t:long']&&(s.ip.ln||'').trim())p.push('توضیحات: '+s.ip.ln.trim())}
   (s.sp||[]).forEach(r=>{if(r.k||r.b)p.push('مورد خاص '+(r.k?(isTooth(r.k)?toothTxt([r.k]):QNAME[r.k]||r.k):'')+' '+[r.b,r.d?'Ø'+r.d:'',r.l?'L'+r.l:''].filter(Boolean).join(' '))});
-  (x.items||[]).forEach(it=>{const q=itemQty(s,it);if(!q)return;if(it.type==='toggle'){p.push(it.l);return}if(it.qn){p.push(`${it.l}: `+Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':')).map(k=>k.split(':')[1]+' ('+fa(num(s.icnt[k])||1)+' عدد)').join('، '));return}if(it.type==='count')p.push(`${it.l}: ${fa(q)}`);else p.push(`${it.l}: ${Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':')).map(k=>k.split(':')[1]).join('، ')}`)});
+  (x.items||[]).forEach(it=>{const q=itemQty(s,it);if(!q)return;if(it.type==='toggle'){p.push(it.l);return}if(it.tn){p.push(`${it.l}: `+Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':')).map(k=>{const q=k.split(':')[1],tt=tnTeeth(s,it,q);return tt.length?toothTxt(tt):q}).join('، '));return}if(it.qn){p.push(`${it.l}: `+Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':')).map(k=>k.split(':')[1]+' ('+fa(num(s.icnt[k])||1)+' عدد)').join('، '));return}if(it.type==='count')p.push(`${it.l}: ${fa(q)}`);else p.push(`${it.l}: ${Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':')).map(k=>k.split(':')[1]).join('، ')}`)});
   if((s.text||'').trim()&&x.text)p.push(`${x.text}: ${s.text.trim()}`);
   if(x.id==='cbct'&&p.length)p.unshift(s.isel['m:ct']?CTTXT:'CBCT');
   return p.join(' — ')}
@@ -2027,19 +2038,17 @@ function surgPlanned(rec){const T0=totals(PV(rec,1));return (rec.brand==='ref'?M
 
 function openSurg(x){const d=x.data||{};const rec=fromDoc(x.id,d);if(!rec.h.name)Object.assign(rec.h,{name:x.name,nid:x.nid,phone:x.phone,age:x.age});
   const sg=x.surg||{sessions:[]},prev=sg.sessions||[];
-  F=blankForm();const st0=sessionStart(rec.s,prev);SURG={id:x.id,rec,prev,plan:rec.s,s:st0.R,need:st0.need,imp:{},sid:uuid()};
-  $('sgName').textContent='روز جراحی · '+(rec.h.name||'');
+  F=blankForm();const st0=sessionStart(rec.s,prev);SURG={id:x.id,rec,prev,plan:rec.s,s:st0.R,need:st0.need,imp:{},sid:uuid(),asst:'',sa:{},unc:3,uncT:false};
+  try{const a=JSON.parse(localStorage.getItem('implantAsst')||'{}');if(a.d===jalali(new Date()).slash&&ASSTS().includes(a.n))SURG.asst=a.n}catch(e){}
+  $('sgName').textContent=(rec.h.name||'')+` · جلسه‌ی ${fa(prev.length+1)} جراحی · ${jalali(new Date()).slash}`;
   $('sgMeta').textContent=[rec.h.nid?'کد ملی '+faD(rec.h.nid):'',rec.h.age?'سن '+faD(rec.h.age):'',rec.h.phone?faD(rec.h.phone):'',rec.brand&&rec.brand!=='ref'?'برند طرح: '+BRANDS.find(b=>b.k===rec.brand).n:'',rec.jalali?'تأیید طرح '+rec.jalali:''].filter(Boolean).join(' · ');
   const ms=medShort(rec.med);$('sgMed').hidden=!ms;$('sgMed').textContent=ms?'⚠ '+ms:'';
   $('sgPlan').innerHTML=planViewHTML(rec.s);
   const ph=$('sgPhoto');ph.hidden=true;ph.removeAttribute('src');if(x.photo){ph.src=x.photo;ph.hidden=false}else if(CF_ON)api('get',{id:x.id},{prio:'bg'}).then(j=>{if(j.photo&&SURG&&SURG.id===x.id){ph.src=j.photo;ph.hidden=false}}).catch(()=>{});
   document.querySelectorAll('[data-fu]').forEach(c=>c.checked=true);
   const nd=Object.keys(SURG.need);
-  $('sgPrev').innerHTML=(nd.length?`<p class="note">این موارد در طرح با «تعداد کل» آمده‌اند؛ امروز شماره‌ی دندان‌ها را بزنید: ${nd.map(id=>esc(SEC[id].t)+' ('+['U','L'].filter(j=>SURG.need[id][j]).map(j=>(j==='U'?'بالا ':'پایین ')+fa(SURG.need[id][j])).join('، ')+')').join('؛ ')}</p>`:'')+
-    (prev.length?`<h3 style="margin:10px 0 4px;font-size:.95rem">جلسه‌های قبلی</h3>`+prev.map(ss=>{const S=secFrom(ss.s||{});const ll=secLines(S);
-      return `<p class="note"><b>جلسه ${fa(ss.n||0)} · ${esc(ss.jalali||'')}</b>${ss.by?' · '+esc(ss.by):''}<br>${ll.map(l=>esc(l.t+': '+l.d)).join('<br>')}${Object.keys(ss.imp||{}).length?'<br>ایمپلنت‌ها: '+Object.keys(ss.imp).map(k=>esc(toothTxt([k])+' '+impTxt(ss.imp[k]))).join('؛ '):''}</p>`}).join(''):'');
-  $('sgTitle').textContent=`جلسه‌ی ${fa(prev.length+1)} جراحی · ${jalali(new Date()).slash}`;
-  $('dlSgDoc').innerHTML=(SET.docs||[]).map(d=>`<option value="${esc(d)}">`).join('');$('sg_fin').checked=false;$('sgMsg').textContent='';try{$('sg_by').value=localStorage.getItem('implantSurgBy')||''}catch(e){}
+  $('sgPrev').innerHTML=nd.length?`<p class="note">این موارد در طرح با «تعداد کل» آمده‌اند؛ امروز شماره‌ی دندان‌ها را بزنید: ${nd.map(id=>esc(SEC[id].t)+' ('+['U','L'].filter(j=>SURG.need[id][j]).map(j=>(j==='U'?'بالا ':'پایین ')+fa(SURG.need[id][j])).join('، ')+')').join('؛ ')}</p>`:'';
+  $('dlSgDoc').innerHTML=(SET.docs||[]).map(d=>`<option value="${esc(d)}">`).join('');$('sg_fin').checked=false;$('sgMsg').textContent='';$('sg_by').value=SURGEON();renderAsst();$('sg_unc').checked=false;$('sgUncM').hidden=true;document.querySelectorAll('[data-unc]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.unc==='3'));
   $('sections').innerHTML='';renderSurg();show('surg');if(CF_ON)pollInv(true);SURG&&(SURG.open=true)}
 const SURG_SECS=()=>SECTIONS.filter(x=>(x.price||x.kind!=='none')&&x.id!=='cons');
 function renderSurg(){if(!SURG)return;SURG.openSecs=SURG.openSecs||new Set();renderPick();
@@ -2047,8 +2056,11 @@ function renderSurg(){if(!SURG)return;SURG.openSecs=SURG.openSecs||new Set();ren
 /* small treatment picker: open only the tables you need */
 function renderPick(){if(!SURG)return;const P=SURG.plan,S=SURG.s,pv={brand:'ko',pay:{}};
   const L=SURG_SECS().filter(x=>!(EXG.includes(x.id)&&jawBlocked(x.id,'U')&&jawBlocked(x.id,'L'))).map(x=>({x,p:rowUsed(Object.assign({s:P},pv),x)}));
-  $('sgPick').innerHTML='<span class="sgh">درمان‌ها</span>'+L.filter(o=>o.p).concat(L.filter(o=>!o.p)).map(({x})=>{const inPlan=rowUsed(Object.assign({s:P},pv),x),on=rowUsed(Object.assign({s:S},pv),x);
-    return `<button type="button" class="chip sgc${inPlan?' inplan':''}${on?' marked':''}" data-sgsec="${x.id}" aria-pressed="${SURG.openSecs.has(x.id)}">${x.t}${on?' ✓':''}</button>`}).join('')}
+  const btn=({x,p})=>{const on=rowUsed(Object.assign({s:S},pv),x);
+    return `<button type="button" class="chip sgc${p?' inplan':''}${on?' marked':''}" data-sgsec="${x.id}" aria-pressed="${SURG.openSecs.has(x.id)}">${x.t}${on?' ✓':''}</button>`};
+  const A=L.filter(o=>o.p),B=L.filter(o=>!o.p);
+  $('sgPick').innerHTML='<span class="sgh">درمان‌های طرح</span>'+(A.length?A.map(btn).join(''):'<span class="sgh">—</span>');
+  $('sgPick2').innerHTML='<span class="sgh">خارج از طرح</span>'+B.map(btn).join('')}
 function planViewHTML(S){const pv={s:S,brand:'ko',pay:{}};const used=SECTIONS.filter(x=>rowUsed(pv,x));if(!used.length)return '<p class="note">طرحی ثبت نشده.</p>';
   return used.map(x=>{const st=S[x.id];let mc='';
     if(x.kind==='teeth'||x.n){const row=j=>{let r='';for(let i=x.n;i>=1;i--)r+=`<i class="${st.sel[j+'R'+i]?'on':''}">${i}</i>`;r+='<b></b>';for(let i=1;i<=x.n;i++)r+=`<i class="${st.sel[j+'L'+i]?'on':''}">${i}</i>`;return `<div class="mr">${r}</div>`};
@@ -2057,12 +2069,14 @@ function planViewHTML(S){const pv={s:S,brand:'ko',pay:{}};const used=SECTIONS.fi
 /* every fixture of this session: implant, All on X and overdenture teeth */
 function impKeys(){return IMPSECS.flatMap(id=>Object.keys(SURG.s[id].sel).filter(k=>SURG.s[id].sel[k]&&isTooth(k)).sort().map(k=>({k,id})))}
 function renderImps(){if(!SURG)return;try{renderPick()}catch(e){}const keys=impKeys();
+  $('sgImpW').hidden=!keys.length;
+  if(!SURG.uncT){const cov=keys.some(({k})=>SURG.imp[k]&&SURG.imp[k].ht==='cover');$('sg_unc').checked=cov;$('sgUncM').hidden=!cov}
   $('sgImps').innerHTML=keys.length?keys.map(({k,id})=>{const m=SURG.imp[k];return `<button type="button" data-impedit="${k}" data-impsid="${id}">${esc(toothTxt([k]))}${id!=='imp'?' ('+esc(SEC[id].t)+')':''} — ${m&&m.b&&m.d&&m.l?esc(impTxt(m)):'<span class="miss">برند و سایز ثبت نشده؛ بزنید</span>'}</button>`}).join(''):'<p class="note">ایمپلنتی برای این جلسه علامت نخورده. در بخش «پایه ایمپلنت»، All on X یا اوردنچر روی شماره‌ی دندان بزنید.</p>';
   IMPSECS.forEach(id=>{const s=SURG.s[id];document.querySelectorAll(`#surgSecs .t[data-sid="${id}"]`).forEach(b=>{b.classList.toggle('hasimp',!!SURG.imp[b.dataset.k]);b.setAttribute('aria-pressed',!!s.sel[b.dataset.k])})});needUpd()}
 let IMPK=null,IMPH='',IMPSID='imp';
 function catOpts(){return catM().map((c,i)=>`<option value="${i}">${esc(c.b+(c.sys?' · '+c.sys:''))}${GRPN[c.g]?' ('+GRPN[c.g]+')':''}</option>`).join('')}
 function impSync(){const ci=$('imp_cat').value,c=catM()[ci];const man=!c;$('impManW').hidden=!man;
-  const sel=(S,I,vals,v)=>{const has=c&&vals&&vals.length;S.hidden=!has;I.hidden=!!has;if(has){S.innerHTML='<option value="">—</option>'+vals.map(x=>`<option ${String(v)===String(x)?'selected':''}>${esc(x)}</option>`).join('')+'<option value="__">سایر…</option>';if(v&&!vals.includes(v)){S.value='__';I.hidden=false}}};
+  const sel=(S,I,vals,v)=>{const has=c&&vals&&vals.length;S.hidden=!has;I.hidden=!!has;if(has){S.innerHTML='<option value="">—</option>'+vals.map(x=>`<option ${String(v)===String(x)?'selected':''}>${esc(x)}</option>`).join('')+'<option value="__">سایر…</option>';if(v&&!vals.includes(v)){S.value='__';I.hidden=false}}const bx=$(S.id+'C');if(bx){bx.hidden=!has;bx.innerHTML=has?vals.map(x=>`<button type="button" class="chip rc" data-rcs="${S.id}" data-v="${esc(x)}" aria-pressed="${S.value===String(x)}">${esc(x)}</button>`).join('')+`<button type="button" class="chip rc" data-rcs="${S.id}" data-v="__" aria-pressed="${S.value==='__'}" style="font-size:.72rem">سایر</button>`:''}};
   sel($('imp_dS'),$('imp_d'),c&&c.d,$('imp_d').value);const dv=impVal($('imp_dS'),$('imp_d')),LL=catLens(c,dv);if(c&&LL&&$('imp_l').value&&!LL.includes($('imp_l').value))$('imp_l').value='';sel($('imp_lS'),$('imp_l'),LL,$('imp_l').value);sel($('imp_hS'),$('imp_hs'),c&&c.h,$('imp_hs').value);impStock()}
 function impStock(){const el=$('impStock');if(!el)return;const ci=$('imp_cat').value,c=catM()[ci];const b=c?c.b:$('imp_b').value,sys=c?c.sys:$('imp_sys').value,d=impVal($('imp_dS'),$('imp_d')),l=impVal($('imp_lS'),$('imp_l'));
   if(!INV.loaded||!b||!d||!l){el.hidden=true;return}const i=INV.items.find(x=>x.kind==='fix'&&sysKey(x.b,x.sys)===sysKey(b,sys)&&nk(x.d)===nk(d)&&nk(x.l)===nk(l));const q=i?Number(i.qty)||0:0;
@@ -2075,7 +2089,7 @@ function openImp(k,sid){IMPK=k;IMPSID=sid||'imp';const m=Object.assign({},SURG.i
   $('impTitle').textContent='ایمپلنت · '+toothTxt([k]);$('impMsg').textContent='';
   $('imp_cat').innerHTML=(cat.length?'<option value="">— انتخاب کنید —</option>'+catOpts():'')+'<option value="m">سایر (نوشتن دستی)</option>';
   const ci=cat.findIndex(c=>c.b===m.b&&c.sys===m.sys);$('imp_cat').value=ci>=0?String(ci):(m.b?'m':(cat.length?'':'m'));$('impCatW').hidden=false;
-  $('imp_b').value=m.b||'';$('imp_sys').value=m.sys||'';$('imp_d').value=m.d||'';$('imp_l').value=m.l||'';$('imp_hs').value=m.hs||'';IMPH=m.ht||'';
+  $('imp_b').value=m.b||'';$('imp_sys').value=m.sys||'';$('imp_d').value=m.d||'';$('imp_l').value=m.l||'';$('imp_hs').value=m.hs||'';IMPH=m.ht!==undefined?m.ht:'cover';
   document.querySelectorAll('#impSheet [data-ht]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ht===IMPH));
   impSync();$('impDel').hidden=!SURG.s[IMPSID].sel[k];$('impSheet').hidden=false}
 function impVal(S,I){return S.hidden||S.value==='__'?toEn(I.value).trim():S.value}
@@ -2090,6 +2104,7 @@ function impDel(){delete SURG.imp[IMPK];SURG.s[IMPSID].sel[IMPK]=false;$('impShe
 let SGP=null;
 function surgSave(t){if(!SURG)return;const m=$('sgMsg');m.className='msg err';
   const by=$('sg_by').value.trim();if(!by){m.textContent='نام جراح را بنویسید.';$('sg_by').focus();return}
+  if(!SURG.asst){m.textContent='پزشک دستیار امروز را از بالای صفحه انتخاب کنید.';$('sgAsst').scrollIntoView({behavior:'smooth',block:'center'});return}
   const keys=impKeys(),sel=keys.map(o=>o.k);
   const miss=sel.filter(k=>!(SURG.imp[k]&&SURG.imp[k].b&&SURG.imp[k].d&&SURG.imp[k].l));
   if(miss.length){m.textContent='برند و سایز ایمپلنتِ این دندان‌ها ثبت نشده: '+toothTxt(miss);return}
@@ -2099,19 +2114,22 @@ function surgSave(t){if(!SURG)return;const m=$('sgMsg');m.className='msg err';
     else if(want&&got&&want!==got)bad.push(`${x.t} ${jl}: در طرح ${fa(want)} عدد، ولی ${fa(got)} دندان زده شده`)})});
   if(bad.length){m.innerHTML='تعداد دندان‌ها با طرح نمی‌خواند:<br>'+bad.map(esc).join('<br>');return}
   const used=SECTIONS.some(x=>rowUsed({s:SURG.s,brand:'ko',pay:{}},x));
-  if(!used){m.textContent='هیچ کاری برای این جلسه علامت نخورده. از فهرست سمت راست درمان انجام‌شده را باز کنید و علامت بزنید.';return}
-  m.textContent='';try{localStorage.setItem('implantSurgBy',by)}catch(e){}
+  if(!used){m.textContent='هیچ کاری برای این جلسه علامت نخورده. از فهرست‌های کناری درمان انجام‌شده را باز کنید و علامت بزنید.';return}
+  m.textContent='';
   const imp={};sel.forEach(k=>imp[k]=SURG.imp[k]);
   const fu=[...document.querySelectorAll('[data-fu]')].filter(c=>c.checked).map(c=>c.dataset.fu);
-  const ses={fu,n:SURG.prev.length+1,at:new Date().toISOString(),jalali:jalali(new Date()).slash,by,note:'',s:secDoc(SURG.s),imp};
+  const usedX=SECTIONS.filter(x=>rowUsed({s:SURG.s,brand:'ko',pay:{}},x)),sa={};usedX.forEach(x=>{if(SURG.sa[x.id]&&SURG.sa[x.id]!==SURG.asst)sa[x.id]=SURG.sa[x.id]});
+  const unc=$('sg_unc').checked?SURG.unc:0;
+  const ses={fu,n:SURG.prev.length+1,at:new Date().toISOString(),jalali:jalali(new Date()).slash,by,asst:SURG.asst,sa,unc,note:'',s:secDoc(SURG.s),imp};
   const fin=$('sg_fin').checked,all=SURG.prev.concat([ses]);
   const left=fin?secLines(remainingS(SURG.plan,all)):[];
   SGP={ses,fin,all};
   const FUN={numb:'فردا: چک بی‌حسی',week:'یک هفته بعد: چکاپ',suture:'دو هفته بعد: کشیدن بخیه'};
-  $('srBody').innerHTML=`<p class="note"><b>${esc(SURG.rec.h.name||'')}</b> · جلسه‌ی ${fa(ses.n)} · ${esc(ses.jalali)} · جراح: ${esc(by)}</p>`+
-    `<h4 style="margin:6px 0 2px">کارهای این جلسه</h4><ul class="rvl">${secLines(SURG.s).map(l=>`<li><b>${esc(l.t)}:</b> ${esc(l.d)}</li>`).join('')}</ul>`+
+  $('srBody').innerHTML=`<p class="note"><b>${esc(SURG.rec.h.name||'')}</b> · جلسه‌ی ${fa(ses.n)} · ${esc(ses.jalali)} · جراح: ${esc(by)} · دستیار: ${esc(SURG.asst)}</p>`+
+    `<h4 style="margin:6px 0 2px">کارهای این جلسه</h4><ul class="rvl">${usedX.map(x=>`<li><b>${esc(x.t)}:</b> ${esc(secDesc(SURG.s,x)||'—')}${sa[x.id]?` <i>(دستیار: ${esc(sa[x.id])})</i>`:''}</li>`).join('')}</ul>`+
     (keys.length?`<h4 style="margin:6px 0 2px">ایمپلنت‌ها (${fa(keys.length)} عدد)</h4><ul class="rvl">${keys.map(({k,id})=>`<li>${esc(toothTxt([k]))}${id!=='imp'?' ('+esc(SEC[id].t)+')':''} — ${esc(impTxt(SURG.imp[k]))}</li>`).join('')}</ul>`:'')+
-    `<h4 style="margin:6px 0 2px">پیگیری‌ها</h4><p class="note" style="margin:0">${fu.length?fu.map(k=>FUN[k]).join('، '):'بدون پیگیری'}</p>`+
+    `<h4 style="margin:6px 0 2px">پیگیری‌ها</h4><p class="note" style="margin:0">${fu.length||unc?fu.map(k=>FUN[k]).concat(unc?[(unc===4?'چهار':'سه')+' ماه بعد: آنکاوری']:[]).join('، '):'بدون پیگیری'}</p>`+
+    (!unc&&keys.some(({k})=>SURG.imp[k].ht==='cover')?`<div class="banner" style="margin-top:6px"><span class="rvbad">ایمپلنت با کاور اسکرو ثبت شده ولی نوبت آنکاوری زده نشده.</span></div>`:'')+
     (fin?`<p class="note" style="margin-top:8px"><b>این آخرین جلسه است؛ درمان جراحی بسته می‌شود.</b></p>`+(left.length?`<div class="banner" style="margin-top:6px"><span class="rvbad">این موارد طرح هنوز انجام نشده:</span><ul class="rvl">${left.map(l=>`<li>${esc(l.t)}: ${esc(l.d)}</li>`).join('')}</ul>اگر عمداً انجام نمی‌شوند تأیید کنید؛ وگرنه «این آخرین جلسه است» را بردارید.</div>`:''):'');
   $('srOk').textContent=fin&&left.length?'با وجود موارد باقی‌مانده، ثبت و پایان جراحی':'تأیید و ثبت جلسه';
   $('srMsg').textContent='';$('sgRev').hidden=false}
@@ -2158,7 +2176,7 @@ function surgBlocks(sg){const blocks=[];
   (sg.sessions||[]).forEach(ss=>{blocks.push(bigTitle(`جلسه‌ی ${fa(ss.n||0)} جراحی — ${ss.jalali||''}`));
     const ll=secLines(secFrom(ss.s||{}));blocks.push(textBlock('کارهای انجام‌شده',ll.length?ll.map(l=>'• '+l.t+': '+l.d):['—']));
     const rows=impRows(ss.imp);if(rows.length){blocks.push(textBlock('ایمپلنت‌ها',[]));blocks.push(impTable(rows))}
-    const o=[];if(ss.note)o.push('توضیحات: '+ss.note);if(ss.by)o.push('دستیار: '+ss.by);if(o.length)blocks.push(textBlock('',o))});
+    const o=[];if(ss.note)o.push('توضیحات: '+ss.note);if(ss.by)o.push('جراح: '+ss.by);if(ss.asst)o.push('دستیار: '+ss.asst);Object.keys(ss.sa||{}).forEach(id=>{if(SEC[id])o.push('دستیار '+SEC[id].t+': '+ss.sa[id])});if(o.length)blocks.push(textBlock('',o))});
   if(sg.finished)blocks.push(textBlock('',['درمان جراحی به پایان رسید.']));
   return blocks}
 async function surgReportPDF(r,sg){const blocks=surgBlocks(sg);
@@ -2174,6 +2192,9 @@ document.addEventListener('click',e=>{if(SURG&&e.target.closest&&e.target.closes
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
   if(t.dataset.sgsec){const id=t.dataset.sgsec;if(SURG.openSecs.has(id))SURG.openSecs.delete(id);else SURG.openSecs=new Set([id]);renderSurg();if(SURG.openSecs.has(id)){const el=document.querySelector(`#surgSecs [data-sec="${id}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'})}return}
   if(t.dataset.impedit){openImp(t.dataset.impedit,t.dataset.impsid);return}
+  if(t.dataset.sgas&&SURG){SURG.asst=t.dataset.sgas;try{localStorage.setItem('implantAsst',JSON.stringify({d:jalali(new Date()).slash,n:SURG.asst}))}catch(e){}renderAsst();renderSurg();return}
+  if(t.dataset.unc&&SURG){SURG.unc=Number(t.dataset.unc);document.querySelectorAll('[data-unc]').forEach(b=>b.setAttribute('aria-pressed',b===t));return}
+  if(t.dataset.rcs){const S=$(t.dataset.rcs);S.value=t.dataset.v;S.dispatchEvent(new Event('change',{bubbles:true}));t.parentNode.querySelectorAll('.rc').forEach(b=>b.setAttribute('aria-pressed',b===t));return}
   if(t.id==='srOk'){surgCommit(t);return}if(t.id==='srBack'){$('sgRev').hidden=true;return}
   if(t.dataset.ht){IMPH=IMPH===t.dataset.ht?'':t.dataset.ht;document.querySelectorAll('#impSheet [data-ht]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ht===IMPH));return}
   if(t.id==='impOk'){impSave();return}if(t.id==='impDel'){impDel();return}if(t.id==='impClose'){$('impSheet').hidden=true;return}
@@ -2184,6 +2205,8 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.dataset.tosurg){t.disabled=true;try{await api('toSurgery',{id:t.dataset.tosurg});toast('به کارتابل جراحی فرستاده شد.');loadList();pollQ(true)}catch(err){alertMsg(err.message)}finally{t.disabled=false}return}
   if(t.dataset.srep||t.dataset.scard||t.dataset.settle){const id=t.dataset.srep||t.dataset.scard||t.dataset.settle;t.disabled=true;
     try{const o=await surgRecord(id);if(t.dataset.settle)openDone(o.r,o.sg,true);else await surgDownload(t.dataset.scard?'card':'rep',o.r,o.sg)}catch(err){alertMsg(err.message)}finally{t.disabled=false}return}});
+document.addEventListener('change',e=>{if(SURG&&e.target.dataset&&e.target.dataset.sgasst){const id=e.target.dataset.sgasst;if(e.target.value===SURG.asst)delete SURG.sa[id];else SURG.sa[id]=e.target.value;return}
+  if(SURG&&e.target.id==='sg_unc'){SURG.uncT=true;$('sgUncM').hidden=!e.target.checked;return}});
 document.addEventListener('change',e=>{if(e.target.id==='imp_dS'&&e.target.value!=='__')setTimeout(impSync,0);if(e.target.id==='in_dS'&&e.target.value!=='__')setTimeout(invNewSync,0)});
 document.addEventListener('change',e=>{if(['imp_dS','imp_lS'].includes(e.target.id))impStock();if(e.target.id==='imp_cat'){impSync();return}
   if(['imp_dS','imp_lS','imp_hS'].includes(e.target.id)){const I=$(e.target.id.replace('S','').replace('imp_h','imp_hs'));if(e.target.value==='__'){I.hidden=false;I.value='';I.focus()}else{I.hidden=true;I.value=e.target.value}}});
@@ -2350,7 +2373,7 @@ function renderFile(){if(!PF)return;const {id,j}=PF,r=fromDoc(id,j.data||{}),h=r
   const ms=medShort(r.med);
   const tl=[];tl.push({d:j.createdAt,t:'پذیرش',s:h.asst?'توسط '+h.asst:''});
   if(j.jalali)tl.push({d:j.doneAt||j.updatedAt,t:'تأیید طرح درمان',s:(price?'جمع '+fa(Number(j.total)||0)+' تومان':'')+(r.brand&&r.brand!=='ref'?' · برند '+(BRANDS.find(b=>b.k===r.brand)||{}).n:''),j:j.jalali});
-  ses.forEach(ss=>{const S=secFrom(ss.s||{}),ll=secLines(S);tl.push({d:ss.at,t:`جلسه‌ی ${fa(ss.n||0)} جراحی`,s:ll.map(l=>l.t+': '+l.d).join(' · ')+(Object.keys(ss.imp||{}).length?' · ایمپلنت: '+Object.keys(ss.imp).map(k=>toothTxt([k])+' '+impTxt(ss.imp[k])).join('؛ '):'')+(ss.by?' · '+ss.by:'')})});
+  ses.forEach(ss=>{const S=secFrom(ss.s||{}),ll=secLines(S);tl.push({d:ss.at,t:`جلسه‌ی ${fa(ss.n||0)} جراحی`,s:ll.map(l=>l.t+': '+l.d).join(' · ')+(Object.keys(ss.imp||{}).length?' · ایمپلنت: '+Object.keys(ss.imp).map(k=>toothTxt([k])+' '+impTxt(ss.imp[k])).join('؛ '):'')+(ss.by?' · جراح: '+ss.by:'')+(ss.asst?' · دستیار: '+ss.asst:'')})});
   if(sg.finished)tl.push({d:sg.finishedAt,t:'پایان درمان جراحی',s:price&&sg.diff?'اختلاف هزینه '+(sg.diff>0?'+':'−')+fa(Math.abs(sg.diff)):''});
   if(j.settle==='pending')tl.push({d:sg.finishedAt,t:'منتظر تسویه‌ی اختلاف',s:'',w:1});if(j.settle==='done')tl.push({d:sg.settledAt,t:'تسویه شد',s:sg.settleNote||''});
   tasks.forEach(t=>{const L=TLBL[t.kind]||[t.kind,''];tl.push({d:t.due+'T08:00:00Z',j:jd(t.due+'T12:00:00Z'),t:L[0],s:t.done?'انجام شد':(dDiff(t.due,tDay())<0?'عقب‌افتاده':'برنامه‌ریزی‌شده'),fut:!t.done,w:!t.done&&dDiff(t.due,tDay())<0})});
