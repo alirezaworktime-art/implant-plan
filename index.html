@@ -424,8 +424,18 @@ body[data-role="doctor"] #viewForm .calc,body[data-role="doctor"] #totalsCard,bo
 h2 .sgas{font-size:.78rem;font-weight:600;padding:3px 6px;border-radius:8px;border:1px solid var(--line);background:var(--sunk);color:inherit;margin-inline-start:auto;max-width:150px}
 .rcs{display:flex;flex-wrap:wrap;gap:6px}.rc{width:48px;height:48px;border-radius:50%!important;padding:0!important;display:inline-flex;align-items:center;justify-content:center;font-size:.86rem;direction:ltr}
 #impSheet #imp_dS,#impSheet #imp_lS{display:none!important}
+.outs{display:grid;gap:8px}.outb{font:inherit;text-align:right;border:1px solid var(--line);background:var(--sunk);border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:3px;color:var(--ink)}
+.outb b{font-size:.98rem}.outb small{color:var(--muted);font-size:.78rem}.outb:hover{border-color:var(--accent)}.outb.bad b{color:var(--bad)}
+.xnob{background:var(--warn);color:#fff;font-weight:800;font-size:.8rem;border-radius:8px;padding:3px 10px;margin:-2px 0 6px;width:max-content}
+.sgdoc{font-size:.78rem;font-weight:700;color:var(--accent);margin-inline-start:auto;white-space:nowrap}
+.sgasw{display:inline-flex;gap:4px;align-items:center;margin-inline-start:auto;flex-wrap:wrap;justify-content:flex-end}.sgasw .sgas{margin:0}
+.sgadd{font:inherit;font-weight:800;width:28px;height:28px;border-radius:8px;border:1px dashed var(--accent);background:transparent;color:var(--accent);cursor:pointer;padding:0}
+.chart{container-type:inline-size}.chart-in{--fx:110px;--tm:34px}.chart-in.hascnt{--fx:154px;--tm:31px}
+.chart-in .t,.chart-in.hascnt .t{width:clamp(15px,calc((100cqw - var(--fx) - 6px * (var(--n,7) - 1)) / (2 * var(--n,7))),var(--tm))}
+@media (max-width:720px){nav.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(50px,1fr));overflow:visible}.tab{min-width:0;padding:5px 2px;font-size:.64rem}}
+@media (min-width:721px) and (max-width:1180px){nav.tabs{overflow:visible!important;max-width:none!important;flex-wrap:wrap}}
 #sgGo{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:7;box-shadow:var(--sh);padding:10px 22px;border-radius:999px}
-@media (max-width:520px){.t,.chart-in.hascnt .t{width:19px;height:34px;font-size:.72rem;border-radius:6px}.half{gap:1px}.mid{margin-inline:2px}.jaw{gap:3px;flex-wrap:wrap}.jlabel{width:24px;font-size:.62rem}.chart-in .jaw,.chart-in.hascnt .jaw{padding-right:0}.chart-in .sides,.chart-in.hascnt .sides{padding-right:0;padding-left:27px}.jcnt{width:100%;margin:4px 0 0;padding:0;border-left:0;flex-direction:row;align-items:center;gap:8px}.chart{overflow-x:visible}.chart-in{width:auto;margin:0}.jcnt{justify-content:center}.jcnt small{flex:none}.jcnt .pick{flex:0 0 110px;min-height:34px}}
+@media (max-width:520px){.chart-in .t,.chart-in.hascnt .t{width:clamp(13px,calc((100cqw - 44px - 2px * (var(--n,7) - 1)) / (2 * var(--n,7))),24px);height:34px;font-size:.72rem;border-radius:6px}.half{gap:1px}.mid{margin-inline:2px}.jaw{gap:3px;flex-wrap:wrap}.jlabel{width:24px;font-size:.62rem}.chart-in .jaw,.chart-in.hascnt .jaw{padding-right:0}.chart-in .sides,.chart-in.hascnt .sides{padding-right:0;padding-left:27px}.jcnt{width:100%;margin:4px 0 0;padding:0;border-left:0;flex-direction:row;align-items:center;gap:8px}.chart{overflow-x:visible}.chart-in{width:auto;margin:0}.jcnt{justify-content:center}.jcnt small{flex:none}.jcnt .pick{flex:0 0 110px;min-height:34px}}
 @media (pointer:coarse){#viewSurg .chip,#impSheet .chip,#viewSurg .t{min-height:44px}#viewSurg .pwshow{min-height:40px}#viewSurg .pwshow input{width:22px;height:22px}}
 @media (max-width:720px){#viewSurg .sgpick{position:sticky;top:0;right:auto;left:auto;width:auto;max-height:none;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;align-items:center;padding:6px;gap:5px;margin:0 0 10px;border-radius:12px}#viewSurg .sgpick .chip{font-size:.74rem;padding:5px 9px;min-height:34px;line-height:1.3;white-space:nowrap;flex:none}#viewSurg .sgpick .sgh{white-space:nowrap;flex:none}#viewSurg{padding-right:0!important}#viewSurg .pview{grid-template-columns:minmax(0,1fr)}#viewSurg .pv-card,#viewSurg .card{min-width:0}#viewSurg .mc{overflow-x:auto;max-width:100%}#viewSurg .mc i{width:15px}#viewSurg .card{padding:12px}#viewSurg .sgpick2{position:static;flex-wrap:wrap;overflow:visible;margin:10px 0}#viewSurg .sgpick2 .chip{white-space:normal}#viewSurg{padding-left:0!important}}
 #impSheet .in{max-width:440px;gap:9px}
@@ -619,6 +629,11 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
     <div class="list" id="rList"><div class="empty">در حال بارگذاری…</div></div>
 <div class="qhead"><h2>نوبت‌های امروز و فردا</h2><button class="btn sm ghost" type="button" data-gocal>تقویم نوبت‌ها</button></div>
     <div class="list" id="raList"><div class="empty">نوبتی ثبت نشده.</div></div>
+    <div class="qhead"><h2>صف نوبت‌دهی جراحی</h2></div>
+    <div class="list" id="bkList"><div class="empty">موردی نیست.</div></div>
+    <div class="qhead"><h2>پیگیری‌ها</h2></div>
+    <p class="note" style="margin:-4px 0 8px">بیمارانی که طرح را گرفتند و می‌خواهند فکر کنند؛ تماس بگیرید و نتیجه را ثبت کنید.</p>
+    <div class="list" id="flList"><div class="empty">موردی نیست.</div></div>
     <div class="qhead"><h2>پیگیری‌های بعد از جراحی</h2></div>
     <div class="list" id="fuList"><div class="empty">موردی نیست.</div></div>
     <div class="qhead"><h2>نوبت آنکاوری و چکاپ دوره‌ای</h2></div>
@@ -803,10 +818,23 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
   </div>
 </div>
 <!-- consultant: patient did not decide -->
+<div class="sheet" id="outSheet" hidden>
+  <div class="in">
+    <h3>نتیجه‌ی مشاوره</h3>
+    <p class="note">بیمار طرح درمان را گرفت؛ کدام حالت پیش آمد؟</p>
+    <div class="outs">
+      <button type="button" class="outb" data-out="book"><b>پذیرفت؛ نوبت روزهای بعد</b><small>ثبت نهایی طرح و رفتن به صف نوبت‌دهی پذیرش</small></button>
+      <button type="button" class="outb" data-out="today"><b>پذیرفت؛ جراحی همین امروز</b><small>ثبت نهایی و نوبت امروز با عنوان «جراحی خارج نوبت»</small></button>
+      <button type="button" class="outb" data-out="think"><b>می‌خواهد فکر کند</b><small>به «پیگیری‌ها»ی پذیرش می‌رود تا روزهای بعد تماس بگیرند</small></button>
+      <button type="button" class="outb bad" data-out="lost"><b>پشیمان شد و رفت</b><small>انصراف بیمار ثبت می‌شود</small></button>
+    </div>
+    <div class="btns"><button class="btn ghost" id="outClose" type="button">بستن</button></div>
+  </div>
+</div>
 <div class="sheet" id="unSheet" hidden>
   <div class="in">
-    <h3>بیمار هنوز تصمیم نگرفته</h3>
-    <p class="note">طرح ذخیره می‌شود و از کارتابل بیرون می‌رود. یک هفته و چهار هفته‌ی بعد در «پیگیری طرح‌های تأییدنشده» یادآوری می‌شود تا با بیمار تماس بگیرید.</p>
+    <h3 id="unTitle">بیمار هنوز تصمیم نگرفته</h3>
+    <p class="note" id="unNote">طرح ذخیره می‌شود و از کارتابل بیرون می‌رود. یک هفته و چهار هفته‌ی بعد در «پیگیری طرح‌های تأییدنشده» یادآوری می‌شود تا با بیمار تماس بگیرید.</p>
     <div class="grp"><span>دلیل اصلی</span><div class="chips" id="unWhy"></div></div>
     <label class="f">توضیح (اختیاری)<input id="un_note" placeholder="مثلاً: بعد از عید تماس بگیریم"></label>
     <div class="msg" id="unMsg"></div>
@@ -1104,13 +1132,13 @@ function jawUseOne(S,id,j){const s=S&&S[id];if(!s)return false;if(id==='imp')ret
   return Object.keys(s.sel||{}).some(k=>s.sel[k]&&(isTooth(k)?k[0]===j:k.split(':')[0]===gi))}
 const jawChip=(s,j)=>Object.keys(s.sel).some(k=>s.sel[k]&&!isTooth(k)&&k.split(':')[0]===(j==='U'?'0':'1'));
 /* name of the other treatment that already holds this jaw (plan and surgery day), or '' */
-function jawBlocked(id,j){if(!EXG.includes(id))return '';const Ss=SURG?[SURG.s]:[AS()];if(Ss.some(S=>jawUseOne(S,id,j)))return '';for(const o of EXG){if(o!==id&&Ss.some(S=>jawUseOne(S,o,j)))return SEC[o].t}return ''}
+function jawBlocked(id,j){if(!EXG.includes(id))return '';const Ss=SURG?[SURG.s,SURG.plan]:[AS()];if(Ss.some(S=>jawUseOne(S,id,j)))return '';for(const o of EXG){if(o!==id&&Ss.some(S=>jawUseOne(S,o,j)))return SEC[o].t}return ''}
 function exRefresh(sid){if(EXG.includes(sid))EXG.forEach(o=>{if(o!==sid)reSec(o)})}
 function toothBtn(sid,key,label){const bl=jawBlocked(sid,key[0]),nc=SURG&&(sid==='aox'||sid==='ovd')&&!jawChip(AS()[sid],key[0]);if(bl||nc)return `<button type="button" class="t" data-sid="${sid}" data-k="${key}" aria-pressed="false" disabled title="${bl?'در این فک '+esc(bl)+' انتخاب شده':'اول تعداد پایه‌ی این فک را بزنید'}">${label}</button>`;const lk=jawLocked(SEC[sid]||{},key[0]);const pl=SURG&&SURG.plan[sid]&&SURG.plan[sid].sel[key],hi=SURG&&sid==='imp'&&SURG.imp[key];return `<button type="button" class="t${pl?' pl':''}${hi?' hasimp':''}" data-sid="${sid}" data-k="${key}" aria-pressed="${!lk&&!!AS()[sid].sel[key]}"${lk?' disabled title="تعداد کل این فک انتخاب شده"':''}>${label}</button>`}
 function jawCntHTML(x,j){if(x.cnt!=='jaw'&&x.cnt!=='jaws')return '';if(SURG)return '';const s=AS()[x.id];
   if(jawBlocked(x.id,j))return `<div class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small><span class="pick" style="opacity:.35;cursor:not-allowed">—</span></div>`;
   const L=(x.cnt==='jaw'?'Full EXT':'تعداد کل')+' فک '+(j==='U'?'بالا':'پایین');return `<div class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small>${pickHTML(`data-jc="${x.id}" data-j="${j}" aria-label="${L}"`,x.jmax,s.jc[j],x.t+'، '+L)}</div>`}
-function chartHTML(x){const hc=(x.cnt==='jaw'||x.cnt==='jaws')&&!SURG;let h=`<div class="chart"><div class="chart-in${hc?' hascnt':''}">`;
+function chartHTML(x){const hc=(x.cnt==='jaw'||x.cnt==='jaws')&&!SURG;let h=`<div class="chart"><div class="chart-in${hc?' hascnt':''}" style="--n:${x.n}">`;
   [['U','بالا'],['L','پایین']].forEach(([j,l])=>{let r='',lf='';for(let i=x.n;i>=1;i--)r+=toothBtn(x.id,j+'R'+i,i);for(let i=1;i<=x.n;i++)lf+=toothBtn(x.id,j+'L'+i,i);
     h+=`<div class="jaw"><span class="jlabel">${l}</span><div class="half">${r}</div><span class="mid"></span><div class="half">${lf}</div>${jawCntHTML(x,j)}</div>`});
   return h+'<div class="sides"><span>راست بیمار</span><span>چپ بیمار</span></div></div></div>'}
@@ -1167,7 +1195,10 @@ function priceHTML(x){const s=AS()[x.id];if(SURG)return '';if(x.price==='aox')re
   if(!x.price||x.price==='items')return '';
   return `<label class="f">${x.price==='unit'?'قیمت '+(x.ul||'هر واحد'):'قیمت'}<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label>`}
 const SURGEON=()=>SET.surgeon||'دکتر سید مجتبی علویکیا',ASSTS=()=>(SET.assts&&SET.assts.length?SET.assts:['دکتر صادقی','دکتر اکبرپور','دکتر باصری']);
-function asstSel(x){if(!SURG||!SURG.asst)return '';const v=SURG.sa[x.id]||SURG.asst;return `<select class="sgas" data-sgasst="${x.id}" title="پزشک دستیار این بخش">${ASSTS().map(n=>`<option value="${esc(n)}" ${n===v?'selected':''}>دستیار: ${esc(n)}</option>`).join('')}</select>`}
+const SOLO=['imp','ovd','aox','sub'];
+function asstSel(x){if(!SURG)return '';if(SOLO.includes(x.id))return `<span class="sgdoc">جراح: ${esc(SURGEON())}</span>`;if(!SURG.asst)return '';const v=SURG.sa[x.id]||SURG.asst,v2=SURG.sa2[x.id];
+  const opts=(cur,lbl)=>ASSTS().map(n=>`<option value="${esc(n)}" ${n===cur?'selected':''}>${lbl}${esc(n)}</option>`).join('');
+  return `<span class="sgasw"><select class="sgas" data-sgasst="${x.id}" title="پزشک دستیار این بخش">${opts(v,'دستیار: ')}</select>${v2!==undefined?`<select class="sgas" data-sgasst2="${x.id}" title="دستیار دوم"><option value="">✕ حذف دستیار دوم</option>${opts(v2,'دستیار ۲: ')}</select>`:`<button type="button" class="sgadd" data-sga2="${x.id}" title="افزودن دستیار دوم">+</button>`}</span>`}
 function renderAsst(){$('sgAsst').innerHTML=ASSTS().map(n=>`<button type="button" class="chip" data-sgas="${esc(n)}" aria-pressed="${SURG&&SURG.asst===n}">${esc(n)}</button>`).join('')}
 function sectionHTML(x){const s=AS()[x.id];
   const tag=x.pros?'<span class="tag p">پروتز</span>':(x.price?'<span class="tag">جراحی</span>':'');const wide=x.kind==='teeth'||(x.kind==='items'&&x.n);
@@ -1186,7 +1217,7 @@ function renderForm(){
   ['n1','m2','n3','cs','cp'].forEach(k=>document.getElementById('p_'+k).value=F.pay[k]||'');
   const en=document.getElementById('editNote');
   if(F.status==='confirmed'||F.status==='modified'){en.hidden=false;en.textContent=`این فرم در ${F.jalali||''} ثبت شده است. اگر چیزی را عوض کنید و دوباره «ثبت نهایی» بزنید، PDF تازه ساخته و دوباره ایمیل می‌شود.`}else en.hidden=true;
-  document.getElementById('confirmBtn').textContent=ROLE==='doctor'?'ارسال به مشاور':(F.status==='confirmed'||F.status==='modified')?'تأیید ویرایش و دانلود PDF':'تأیید نهایی و دانلود PDF';
+  document.getElementById('confirmBtn').textContent=ROLE==='doctor'?'ارسال به مشاور':ROLE==='consultant'&&CF_ON&&!(F.status==='confirmed'||F.status==='modified')?'نتیجه‌ی مشاوره':(F.status==='confirmed'||F.status==='modified')?'تأیید ویرایش و دانلود PDF':'تأیید نهایی و دانلود PDF';
   document.getElementById('payCard').hidden=ROLE==='doctor';
   renderMed('f');const sn=document.getElementById('staffNote');sn.hidden=!F.note;sn.textContent=F.note?'توضیحات پذیرش: '+F.note:'';
   renderPlanSw();recalc()}
@@ -1667,8 +1698,8 @@ async function finalize(t){if(busy)return;if(!(F.h.name||'').trim()){alertMsg('�
     F.status='confirmed';F.jalali=j.slash;F.pdfName=fname;if(wasConfirmed)F.edits=(F.edits||0)+1;
     const pdf=await buildPDF(F,{jalali:j.slash});downloadBlob(pdf.blob,fname);
     const d=toDoc(F);d.updatedAt=new Date().toISOString();const name=F.h.name.trim();
-    enqueue({kind:'confirm',id:F.id,name,payload:{record:{id:F.id,data:d,name,nid:F.h.nid||'',status:'confirmed',total:planTotal(F),jalali:F.jalali},pdf:pdf.b64,fileName:fname,mail:mailFor(F),sign:F.sign||''}});
-    leaveForm(`PDF ${name} دانلود شد؛ ذخیره در پس‌زمینه انجام می‌شود.`)}
+    enqueue({kind:'confirm',id:F.id,name,payload:{record:{id:F.id,data:d,name,nid:F.h.nid||'',status:'confirmed',total:planTotal(F),jalali:F.jalali},pdf:pdf.b64,fileName:fname,mail:mailFor(F),sign:F.sign||'',next:F._next||''}});
+    const nx=F._next;delete F._next;leaveForm(nx==='book'?`طرح ${name} ثبت شد و به صف نوبت‌دهی پذیرش رفت.`:nx==='today'?`طرح ${name} ثبت شد؛ نوبت امروز با عنوان «جراحی خارج نوبت» در کارتابل پذیرش قرار گرفت.`:`PDF ${name} دانلود شد؛ ذخیره در پس‌زمینه انجام می‌شود.`)}
   catch(e){alertMsg('ساخت PDF ناموفق بود: '+(e&&e.message||e))}
   finally{busy=false;t.disabled=false;t.textContent=old}}
 async function doConfirm(){if(busy||!lastPDF)return;if(F.brand==='ref'&&needBrand(F)){alertMsg('اول برند بیمار را انتخاب کنید.');return}busy=true;
@@ -1736,7 +1767,7 @@ function readPriceSettings(){const P={};document.querySelectorAll('#set_prices [
 let ROLE='',LROLE='staff',QV='',QITEMS=[],QSEEN=null,QTIMER=null,QBUSY=false,RC_EDIT=null,BACK_TO_Q=false;
 const QPOLL=CF_ON?3000:5000;
 const ROLE_LBL={staff:'پرسنل',doctor:'پزشک',consultant:'مشاور',surgery:'دستیار جراحی',inventory:'انباردار',lab:'لابراتوار',manager:'مدیر'};
-function applyRole(){document.body.dataset.role=ROLE||'';document.querySelectorAll('#nav [data-role]').forEach(b=>b.hidden=!b.dataset.role.split(' ').includes(ROLE)||(['tabInv','tabCal','tabPros','tabLab','tabDash'].includes(b.id)&&!CF_ON));$('undBtn').hidden=!(ROLE==='consultant'&&CF_ON);$('whoami').textContent=ROLE?(ROLE_LBL[ROLE]||'')+(SET.clinic?' · '+SET.clinic:''):'';$('qTitle').textContent=ROLE==='consultant'?'کارتابل مشاور':ROLE==='surgery'?'کارتابل جراحی':'بیماران در صف انتظار'}
+function applyRole(){document.body.dataset.role=ROLE||'';document.querySelectorAll('#nav [data-role]').forEach(b=>b.hidden=!b.dataset.role.split(' ').includes(ROLE)||(['tabInv','tabCal','tabPros','tabLab','tabDash'].includes(b.id)&&!CF_ON));$('undBtn').hidden=true;$('whoami').textContent=ROLE?(ROLE_LBL[ROLE]||'')+(SET.clinic?' · '+SET.clinic:''):'';$('qTitle').textContent=ROLE==='consultant'?'کارتابل مشاور':ROLE==='surgery'?'کارتابل جراحی':'بیماران در صف انتظار'}
 function home(){if(ROLE==='lab'){show('lab');return}if(ROLE==='manager'){show('dash');return}if(ROLE==='inventory'){show('inv');renderInv();pollInv(true);return}if(ROLE==='staff'){show('recep');rcReset()}else show('queue');renderQ();pollQ(false);if(CF_ON&&(ROLE==='doctor'||ROLE==='consultant'))pollInv(true)}
 let AC=null;function beep(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;[0,0.18].forEach((d,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=i?1046:784;g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(0.25,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.16);o.connect(g).connect(AC.destination);o.start(t+d);o.stop(t+d+0.17)})}catch(e){}}
 function startPoll(){stopPoll();if(FS_ON){fsListen();return}QTIMER=setInterval(()=>pollQ(false),QPOLL)}
@@ -1750,17 +1781,17 @@ async function pollQ(force){if(ROLE==='inventory'||ROLE==='lab'||ROLE==='manager
 const NEWQ={doctor:'waiting',consultant:'consult',surgery:'surgery'};
 let SV='';
 let TASKS=[],TASK_ALL={fu:false,uc:false};
-const TLBL={numb:['چک بی‌حسی (یک روز بعد از جراحی)','تماس بگیرید و بپرسید هنوز بی‌حس است یا نه.'],week:['چک عادی (یک هفته بعد)','تماس بگیرید و حال عمومی بیمار را بپرسید.'],suture:['نوبت کشیدن بخیه (دو هفته بعد)','برای کشیدن بخیه نوبت بدهید.'],uncover:['نوبت آنکاوری','برای آنکاوری ایمپلنت‌ها نوبت بدهید.'],labready:['کار لابراتوار آماده است','برای امتحان یا تحویل پروتز نوبت بدهید.'],recall:['چکاپ دوره‌ای ایمپلنت','برای معاینه و جرم‌گیری دوره‌ای نوبت بدهید.'],fol1:['پیگیری طرح (یک هفته بعد)','تماس بگیرید و درباره‌ی تصمیم بیمار بپرسید.'],fol4:['پیگیری طرح (چهار هفته بعد)','تماس بگیرید و درباره‌ی تصمیم بیمار بپرسید.']};
+const TLBL={book:['نوبت جراحی','بیمار طرح را پذیرفته؛ برای جراحی نوبت بدهید.'],fol1:['پیگیری یک هفته بعد','تماس بگیرید و بپرسید برای جراحی تصمیم گرفته یا نه.'],fol4:['پیگیری چهار هفته بعد','تماس بگیرید و بپرسید برای جراحی تصمیم گرفته یا نه.'],numb:['چک بی‌حسی (یک روز بعد از جراحی)','تماس بگیرید و بپرسید هنوز بی‌حس است یا نه.'],week:['چک عادی (یک هفته بعد)','تماس بگیرید و حال عمومی بیمار را بپرسید.'],suture:['نوبت کشیدن بخیه (دو هفته بعد)','برای کشیدن بخیه نوبت بدهید.'],uncover:['نوبت آنکاوری','برای آنکاوری ایمپلنت‌ها نوبت بدهید.'],labready:['کار لابراتوار آماده است','برای امتحان یا تحویل پروتز نوبت بدهید.'],recall:['چکاپ دوره‌ای ایمپلنت','برای معاینه و جرم‌گیری دوره‌ای نوبت بدهید.'],fol1:['پیگیری طرح (یک هفته بعد)','تماس بگیرید و درباره‌ی تصمیم بیمار بپرسید.'],fol4:['پیگیری طرح (چهار هفته بعد)','تماس بگیرید و درباره‌ی تصمیم بیمار بپرسید.']};
 const tDay=(d)=>{try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).format(d||new Date())}catch(e){return new Date().toISOString().slice(0,10)}};
 const dDiff=(a,b)=>Math.round((Date.parse(a+'T00:00:00Z')-Date.parse(b+'T00:00:00Z'))/864e5);
 function dueLbl(due){const n=dDiff(due,tDay());const j=jalali(new Date(due+'T12:00:00Z')).slash;return n===0?'امروز':n===1?'فردا':n<0?`${fa(-n)} روز گذشته (${j})`:`${j} (${fa(n)} روز دیگر)`}
 function renderTasks(){if(ROLE!=='staff')return;const today=tDay();const one=(t,uc)=>{const L=TLBL[t.kind]||[t.kind,''],n=dDiff(t.due,today),late=!t.done&&n<0;
     return `<div class="item task${t.done?' done':''}${late?' late':''}"><div class="row1"><div><div class="nm">${esc(t.name||'')}</div><div class="meta">${esc(L[0])}${uc&&t.info&&t.kind==='uncover'?' — '+esc(t.info.split(',').map(k=>toothTxt([k])).join('، ')):''}</div><div class="meta">${t.done?'انجام شد':esc(L[1])}</div></div>
       <span class="pill ${t.done?'done':late?'settle':n===0?'wait':''}">${dueLbl(t.due)}</span></div>
-      <div class="acts">${t.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(t.phone))}">تماس ${esc(faD(t.phone))}</a>${waLink(t.phone)?`<a class="btn sm ghost" target="_blank" rel="noopener" href="${waLink(t.phone,msgFor(t.kind,t.name))}">واتس‌اپ</a><a class="btn sm ghost" href="${smsLink(t.phone,msgFor(t.kind,t.name))}">پیامک</a>`:''}`:''}${!t.done&&['uncover','recall','labready','suture'].includes(t.kind)&&CF_ON?`<button class="btn sm" data-tbook="${esc(t.id)}" type="button">تعیین نوبت</button>`:''}<button class="btn sm ghost" data-file="${esc(t.plan)}" data-fname="${esc(t.name||'')}" type="button">پرونده</button>${t.done?`<button class="btn sm ghost" data-tundo="${esc(t.id)}" type="button">برگرداندن</button>`:`<button class="btn sm" data-tdone="${esc(t.id)}" type="button">انجام شد</button>`}</div></div>`};
+      <div class="acts">${t.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(t.phone))}">تماس ${esc(faD(t.phone))}</a>${waLink(t.phone)?`<a class="btn sm ghost" target="_blank" rel="noopener" href="${waLink(t.phone,msgFor(t.kind,t.name))}">واتس‌اپ</a><a class="btn sm ghost" href="${smsLink(t.phone,msgFor(t.kind,t.name))}">پیامک</a>`:''}`:''}${!t.done&&(t.kind==='fol1'||t.kind==='fol4')?`<button class="btn sm" data-undto="back" data-uid="${esc(t.plan)}" type="button">پذیرفت؛ برگشت به مشاور</button><button class="btn sm ghost" data-undto="lost" data-uid="${esc(t.plan)}" type="button">انصراف قطعی</button>`:''}${!t.done&&['uncover','recall','labready','suture','book'].includes(t.kind)&&CF_ON?`<button class="btn sm" data-tbook="${esc(t.id)}" type="button">تعیین نوبت</button>`:''}<button class="btn sm ghost" data-file="${esc(t.plan)}" data-fname="${esc(t.name||'')}" type="button">پرونده</button>${t.done?`<button class="btn sm ghost" data-tundo="${esc(t.id)}" type="button">برگرداندن</button>`:`<button class="btn sm" data-tdone="${esc(t.id)}" type="button">انجام شد</button>`}</div></div>`};
   const list=(el,arr,horizon,key,uc)=>{const show=arr.filter(t=>t.done||TASK_ALL[key]||dDiff(t.due,today)<=horizon),more=arr.length-show.length;
     $(el).innerHTML=(show.length?show.map(t=>one(t,uc)).join(''):'<div class="empty">فعلاً موردی نیست.</div>')+(more?`<button class="btn sm ghost" data-tall="${key}" type="button">نمایش ${fa(more)} مورد بعدی</button>`:'')};
-  list('fuList',TASKS.filter(t=>t.kind!=='uncover'&&t.kind!=='recall'),1,'fu',false);list('ucList',TASKS.filter(t=>t.kind==='uncover'||t.kind==='recall'),14,'uc',true)}
+  const FOLK=['fol1','fol4','book'];list('bkList',TASKS.filter(t=>t.kind==='book'),3650,'bk',false);list('flList',TASKS.filter(t=>t.kind==='fol1'||t.kind==='fol4'),7,'fl',false);list('fuList',TASKS.filter(t=>t.kind!=='uncover'&&t.kind!=='recall'&&!FOLK.includes(t.kind)),1,'fu',false);list('ucList',TASKS.filter(t=>t.kind==='uncover'||t.kind==='recall'),14,'uc',true)}
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
   if(t.dataset.tall){TASK_ALL[t.dataset.tall]=true;renderTasks();return}
   if(t.dataset.tdone||t.dataset.tundo){t.disabled=true;try{await api('taskDone',{id:t.dataset.tdone||t.dataset.tundo,undo:!!t.dataset.tundo,by:$('rc_asst').value||''});const x=TASKS.find(v=>v.id===(t.dataset.tdone||t.dataset.tundo));if(x)x.done=t.dataset.tdone?1:0;renderTasks();pollQ(true)}catch(err){alertMsg(err.message)}finally{t.disabled=false}}});
@@ -1907,7 +1938,10 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
     t.disabled=true;try{if(F.status==='new')F.status='draft';await saveRecord(F);t.textContent='ذخیره شد';setTimeout(()=>t.textContent='ذخیره پیش‌نویس',1600)}catch(err){alertMsg('ذخیره نشد: '+err.message)}finally{t.disabled=false}return}
   if(t.dataset.pick){const n=t.dataset.pick,b=PK.btn;PK.undo={s:F.s,s2:F.s2,alt:F.alt};if(n==='2'){if(F.alt.mode!=='full'){$('pkMsg').className='msg err';$('pkMsg').textContent='طرح دوم فقط توضیحی است؛ پزشک باید آن را به‌صورت طرح کامل (جای طرح ۱) بنویسد.';return}F.s=F.s2}
     F.s2=null;F.alt={mode:'none',text:''};CUR=1;touch();renderForm();$('pkSheet').hidden=true;if(b){b.dataset.picked='1';b.click();delete b.dataset.picked}return}
-  if(t.id==='pkClose'){$('pkSheet').hidden=true;return}
+  if(t.id==='pkClose'){$('pkSheet').hidden=true;delete F._next;return}
+  if(t.id==='confirmBtn'&&ROLE==='consultant'&&CF_ON&&!F._next&&!(F.status==='confirmed'||F.status==='modified')){$('outSheet').hidden=false;return}
+  if(t.id==='outClose'){$('outSheet').hidden=true;return}
+  if(t.dataset.out){const o=t.dataset.out;$('outSheet').hidden=true;if(o==='lost'||o==='think'){openUndecided(o==='lost'?'lost':'');return}F._next=o;$('confirmBtn').click();return}
   if(t.id==='confirmBtn'&&ROLE!=='doctor'&&F.alt&&F.alt.mode!=='none'&&!t.dataset.picked&&!t.dataset.signed){PK.btn=t;$('pkMsg').textContent='';$('pkSheet').hidden=false;return}
   if(t.id==='confirmBtn'){if(ROLE==='doctor')sendToConsult(t);else if(ROLE==='consultant'&&CF_ON&&!t.dataset.signed)openSign(t);else finalize(t);return}
   if(t.id==='cGo'){doConfirm();return}
@@ -2061,7 +2095,7 @@ function surgPlanned(rec){const T0=totals(PV(rec,1));return (rec.brand==='ref'?M
 
 function openSurg(x){const d=x.data||{};const rec=fromDoc(x.id,d);if(!rec.h.name)Object.assign(rec.h,{name:x.name,nid:x.nid,phone:x.phone,age:x.age});
   const sg=x.surg||{sessions:[]},prev=sg.sessions||[];
-  F=blankForm();const st0=sessionStart(rec.s,prev);SURG={id:x.id,rec,prev,plan:rec.s,s:st0.R,need:st0.need,imp:{},sid:uuid(),asst:'',sa:{},unc:3,uncT:false};
+  F=blankForm();const st0=sessionStart(rec.s,prev);SURG={id:x.id,rec,prev,plan:rec.s,s:st0.R,need:st0.need,imp:{},sid:uuid(),asst:'',sa:{},sa2:{},unc:3,uncT:false};
   try{const a=JSON.parse(localStorage.getItem('implantAsst')||'{}');if(a.d===jalali(new Date()).slash&&ASSTS().includes(a.n))SURG.asst=a.n}catch(e){}
   $('sgName').textContent=(rec.h.name||'')+` · جلسه‌ی ${fa(prev.length+1)} جراحی · ${jalali(new Date()).slash}`;
   $('sgMeta').textContent=[rec.h.nid?'کد ملی '+faD(rec.h.nid):'',rec.h.age?'سن '+faD(rec.h.age):'',rec.h.phone?faD(rec.h.phone):'',rec.brand&&rec.brand!=='ref'?'برند طرح: '+BRANDS.find(b=>b.k===rec.brand).n:'',rec.jalali?'تأیید طرح '+rec.jalali:''].filter(Boolean).join(' · ');
@@ -2075,10 +2109,10 @@ function openSurg(x){const d=x.data||{};const rec=fromDoc(x.id,d);if(!rec.h.name
   sgDraftLoad();$('sections').innerHTML='';renderSurg();show('surg');if(CF_ON)pollInv(true);SURG&&(SURG.open=true)}
 /* surgery-day draft: kept in this browser until the session is saved, restored on reopen the same day */
 const SGDK=id=>'implantSurgDraft:'+id;
-function sgDraftSave(){if(!SURG||!SURG.dirty||$('viewSurg').hidden)return;try{localStorage.setItem(SGDK(SURG.id),JSON.stringify({d:jalali(new Date()).slash,n:SURG.prev.length,s:secDoc(SURG.s),imp:SURG.imp,asst:SURG.asst,sa:SURG.sa,unc:SURG.unc,uncT:SURG.uncT,uc:$('sg_unc').checked,off:[...document.querySelectorAll('[data-fu]')].filter(c=>!c.checked).map(c=>c.dataset.fu),by:$('sg_by').value}))}catch(e){}}
+function sgDraftSave(){if(!SURG||!SURG.dirty||$('viewSurg').hidden)return;try{localStorage.setItem(SGDK(SURG.id),JSON.stringify({d:jalali(new Date()).slash,n:SURG.prev.length,s:secDoc(SURG.s),imp:SURG.imp,asst:SURG.asst,sa:SURG.sa,sa2:SURG.sa2,unc:SURG.unc,uncT:SURG.uncT,uc:$('sg_unc').checked,off:[...document.querySelectorAll('[data-fu]')].filter(c=>!c.checked).map(c=>c.dataset.fu),by:$('sg_by').value}))}catch(e){}}
 function sgDraftLoad(){let dr=null;try{dr=JSON.parse(localStorage.getItem(SGDK(SURG.id))||'null')}catch(e){}
   if(!dr)return;if(dr.d!==jalali(new Date()).slash||dr.n!==SURG.prev.length){try{localStorage.removeItem(SGDK(SURG.id))}catch(e){}return}
-  SURG.s=secFrom(dr.s||{});SURG.imp=dr.imp||{};if(dr.asst)SURG.asst=dr.asst;SURG.sa=dr.sa||{};SURG.unc=dr.unc||3;SURG.uncT=!!dr.uncT;SURG.dirty=true;
+  SURG.s=secFrom(dr.s||{});SURG.imp=dr.imp||{};if(dr.asst)SURG.asst=dr.asst;SURG.sa=dr.sa||{};SURG.sa2=dr.sa2||{};SURG.unc=dr.unc||3;SURG.uncT=!!dr.uncT;SURG.dirty=true;
   if(SURG.uncT){$('sg_unc').checked=!!dr.uc;$('sgUncM').hidden=!dr.uc}document.querySelectorAll('[data-unc]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.unc)===SURG.unc));
   document.querySelectorAll('[data-fu]').forEach(c=>c.checked=!(dr.off||[]).includes(c.dataset.fu));if(dr.by)$('sg_by').value=dr.by;renderAsst();
   toast('کارهای علامت‌خورده‌ی قبلی این جلسه (ذخیره‌نشده) بازیابی شد.')}
@@ -2140,7 +2174,8 @@ function impDel(){delete SURG.imp[IMPK];SURG.s[IMPSID].sel[IMPK]=false;$('impShe
 let SGP=null;
 function surgSave(t){if(!SURG)return;const m=$('sgMsg');m.className='msg err';
   const by=$('sg_by').value.trim();if(!by){m.textContent='نام جراح را بنویسید.';$('sg_by').focus();return}
-  if(!SURG.asst){m.textContent='پزشک دستیار امروز را از بالای صفحه انتخاب کنید.';$('sgAsst').scrollIntoView({behavior:'smooth',block:'center'});return}
+  const needA=SECTIONS.some(x=>!SOLO.includes(x.id)&&rowUsed({s:SURG.s,brand:'ko',pay:{}},x));
+  if(needA&&!SURG.asst){m.textContent='پزشک دستیار امروز را از بالای صفحه انتخاب کنید.';$('sgAsst').scrollIntoView({behavior:'smooth',block:'center'});return}
   const keys=impKeys(),sel=keys.map(o=>o.k);
   const miss=sel.filter(k=>!(SURG.imp[k]&&SURG.imp[k].b&&SURG.imp[k].d&&SURG.imp[k].l));
   if(miss.length){m.textContent='برند و سایز ایمپلنتِ این دندان‌ها ثبت نشده: '+toothTxt(miss);return}
@@ -2154,15 +2189,15 @@ function surgSave(t){if(!SURG)return;const m=$('sgMsg');m.className='msg err';
   m.textContent='';
   const imp={};sel.forEach(k=>imp[k]=SURG.imp[k]);
   const fu=[...document.querySelectorAll('[data-fu]')].filter(c=>c.checked).map(c=>c.dataset.fu);
-  const usedX=SECTIONS.filter(x=>rowUsed({s:SURG.s,brand:'ko',pay:{}},x)),sa={};usedX.forEach(x=>{if(SURG.sa[x.id]&&SURG.sa[x.id]!==SURG.asst)sa[x.id]=SURG.sa[x.id]});
+  const usedX=SECTIONS.filter(x=>rowUsed({s:SURG.s,brand:'ko',pay:{}},x)),sa={},sa2={};usedX.forEach(x=>{if(SOLO.includes(x.id))return;if(SURG.sa[x.id]&&SURG.sa[x.id]!==SURG.asst)sa[x.id]=SURG.sa[x.id];if(SURG.sa2[x.id])sa2[x.id]=SURG.sa2[x.id]});
   const unc=$('sg_unc').checked?SURG.unc:0;
-  const ses={fu,n:SURG.prev.length+1,at:new Date().toISOString(),jalali:jalali(new Date()).slash,by,asst:SURG.asst,sa,unc,note:'',s:secDoc(SURG.s),imp};
+  const ses={fu,n:SURG.prev.length+1,at:new Date().toISOString(),jalali:jalali(new Date()).slash,by,asst:needA?SURG.asst:'',sa,sa2,unc,note:'',s:secDoc(SURG.s),imp};
   const fin=$('sg_fin').checked,all=SURG.prev.concat([ses]);
   const left=fin?secLines(remainingS(SURG.plan,all)):[];
   SGP={ses,fin,all};
   const FUN={numb:'فردا: چک بی‌حسی',week:'یک هفته بعد: چکاپ',suture:'دو هفته بعد: کشیدن بخیه'};
-  $('srBody').innerHTML=`<p class="note"><b>${esc(SURG.rec.h.name||'')}</b> · جلسه‌ی ${fa(ses.n)} · ${esc(ses.jalali)} · جراح: ${esc(by)} · دستیار: ${esc(SURG.asst)}</p>`+
-    `<h4 style="margin:6px 0 2px">کارهای این جلسه</h4><ul class="rvl">${usedX.map(x=>`<li><b>${esc(x.t)}:</b> ${esc(secDesc(SURG.s,x)||'—')}${sa[x.id]?` <i>(دستیار: ${esc(sa[x.id])})</i>`:''}</li>`).join('')}</ul>`+
+  $('srBody').innerHTML=`<p class="note"><b>${esc(SURG.rec.h.name||'')}</b> · جلسه‌ی ${fa(ses.n)} · ${esc(ses.jalali)} · جراح: ${esc(by)}${needA?' · دستیار: '+esc(SURG.asst):''}</p>`+
+    `<h4 style="margin:6px 0 2px">کارهای این جلسه</h4><ul class="rvl">${usedX.map(x=>`<li><b>${esc(x.t)}:</b> ${esc(secDesc(SURG.s,x)||'—')}${SOLO.includes(x.id)?` <i>(جراح: ${esc(by)})</i>`:` <i>(دستیار: ${esc([sa[x.id]||SURG.asst,sa2[x.id]].filter(Boolean).join('، '))})</i>`}</li>`).join('')}</ul>`+
     (keys.length?`<h4 style="margin:6px 0 2px">ایمپلنت‌ها (${fa(keys.length)} عدد)</h4><ul class="rvl">${keys.map(({k,id})=>`<li>${esc(toothTxt([k]))}${id!=='imp'?' ('+esc(SEC[id].t)+')':''} — ${esc(impTxt(SURG.imp[k]))}</li>`).join('')}</ul>`:'')+
     `<h4 style="margin:6px 0 2px">پیگیری‌ها</h4><p class="note" style="margin:0">${fu.length||unc?fu.map(k=>FUN[k]).concat(unc?[(unc===4?'چهار':'سه')+' ماه بعد: آنکاوری']:[]).join('، '):'بدون پیگیری'}</p>`+
     (!unc&&keys.some(({k})=>SURG.imp[k].ht==='cover')?`<div class="banner" style="margin-top:6px"><span class="rvbad">ایمپلنت با کاور اسکرو ثبت شده ولی نوبت آنکاوری زده نشده.</span></div>`:'')+
@@ -2213,7 +2248,7 @@ function surgBlocks(sg){const blocks=[];
   (sg.sessions||[]).forEach(ss=>{blocks.push(bigTitle(`جلسه‌ی ${fa(ss.n||0)} جراحی — ${ss.jalali||''}`));
     const ll=secLines(secFrom(ss.s||{}));blocks.push(textBlock('کارهای انجام‌شده',ll.length?ll.map(l=>'• '+l.t+': '+l.d):['—']));
     const rows=impRows(ss.imp);if(rows.length){blocks.push(textBlock('ایمپلنت‌ها',[]));blocks.push(impTable(rows))}
-    const o=[];if(ss.note)o.push('توضیحات: '+ss.note);if(ss.by)o.push('جراح: '+ss.by);if(ss.asst)o.push('دستیار: '+ss.asst);Object.keys(ss.sa||{}).forEach(id=>{if(SEC[id])o.push('دستیار '+SEC[id].t+': '+ss.sa[id])});if(o.length)blocks.push(textBlock('',o))});
+    const o=[];if(ss.note)o.push('توضیحات: '+ss.note);if(ss.by)o.push('جراح: '+ss.by);if(ss.asst)o.push('دستیار: '+ss.asst);Object.keys(ss.sa||{}).forEach(id=>{if(SEC[id])o.push('دستیار '+SEC[id].t+': '+ss.sa[id])});Object.keys(ss.sa2||{}).forEach(id=>{if(SEC[id])o.push('دستیار دوم '+SEC[id].t+': '+ss.sa2[id])});if(o.length)blocks.push(textBlock('',o))});
   if(sg.finished)blocks.push(textBlock('',['درمان جراحی به پایان رسید.']));
   return blocks}
 async function surgReportPDF(r,sg){const blocks=surgBlocks(sg);
@@ -2230,6 +2265,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.dataset.sgsec){const id=t.dataset.sgsec;if(SURG.openSecs.has(id))SURG.openSecs.delete(id);else SURG.openSecs=new Set([id]);renderSurg();if(SURG.openSecs.has(id)){const el=document.querySelector(`#surgSecs [data-sec="${id}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'})}return}
   if(t.dataset.impedit){openImp(t.dataset.impedit,t.dataset.impsid);return}
   if(t.dataset.sgas&&SURG){SURG.asst=t.dataset.sgas;try{localStorage.setItem('implantAsst',JSON.stringify({d:jalali(new Date()).slash,n:SURG.asst}))}catch(e){}renderAsst();renderSurg();return}
+  if(t.dataset.sga2&&SURG){const id=t.dataset.sga2;SURG.sa2[id]=ASSTS().find(n=>n!==(SURG.sa[id]||SURG.asst))||ASSTS()[0];reSec(id);return}
   if(t.dataset.unc&&SURG){SURG.unc=Number(t.dataset.unc);document.querySelectorAll('[data-unc]').forEach(b=>b.setAttribute('aria-pressed',b===t));return}
   if(t.dataset.rcs){const S=$(t.dataset.rcs);S.value=t.dataset.v;S.dispatchEvent(new Event('change',{bubbles:true}));t.parentNode.querySelectorAll('.rc').forEach(b=>b.setAttribute('aria-pressed',b===t));return}
   if(t.id==='srOk'){surgCommit(t);return}if(t.id==='srBack'){$('sgRev').hidden=true;return}
@@ -2242,7 +2278,8 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.dataset.tosurg){t.disabled=true;try{await api('toSurgery',{id:t.dataset.tosurg});toast('به کارتابل جراحی فرستاده شد.');loadList();pollQ(true)}catch(err){alertMsg(err.message)}finally{t.disabled=false}return}
   if(t.dataset.srep||t.dataset.scard||t.dataset.settle){const id=t.dataset.srep||t.dataset.scard||t.dataset.settle;t.disabled=true;
     try{const o=await surgRecord(id);if(t.dataset.settle)openDone(o.r,o.sg,true);else await surgDownload(t.dataset.scard?'card':'rep',o.r,o.sg)}catch(err){alertMsg(err.message)}finally{t.disabled=false}return}});
-document.addEventListener('change',e=>{if(SURG&&e.target.dataset&&e.target.dataset.sgasst){const id=e.target.dataset.sgasst;if(e.target.value===SURG.asst)delete SURG.sa[id];else SURG.sa[id]=e.target.value;return}
+document.addEventListener('change',e=>{if(SURG&&e.target.dataset&&e.target.dataset.sgasst2){const id=e.target.dataset.sgasst2;if(!e.target.value)delete SURG.sa2[id];else SURG.sa2[id]=e.target.value;if(!e.target.value)reSec(id);return}
+  if(SURG&&e.target.dataset&&e.target.dataset.sgasst){const id=e.target.dataset.sgasst;if(e.target.value===SURG.asst)delete SURG.sa[id];else SURG.sa[id]=e.target.value;return}
   if(SURG&&e.target.id==='sg_unc'){SURG.uncT=true;$('sgUncM').hidden=!e.target.checked;return}});
 document.addEventListener('change',e=>{if(e.target.id==='imp_dS'&&e.target.value!=='__')setTimeout(impSync,0);if(e.target.id==='in_dS'&&e.target.value!=='__')setTimeout(invNewSync,0)});
 document.addEventListener('change',e=>{if(['imp_dS','imp_lS'].includes(e.target.id))impStock();if(e.target.id==='imp_cat'){impSync();return}
@@ -2509,7 +2546,7 @@ function apptMsg(a){const c=SET.clinic||'کلینیک';return `${a.name?a.name+'
 function apptCard(a,o={}){const n=dDiff(a.day,tDay()),st=a.st||'set',can=canAppt();
   const stp=st==='done'?'<span class="pill done">انجام شد</span>':st==='cancel'?'<span class="pill">لغو شد</span>':st==='noshow'?'<span class="pill settle">نیامد</span>':a.sms?'<span class="pill done">یادآوری رفت</span>':'';
   const sms=a.phone&&smsLink(a.phone,apptMsg(a));
-  return `<div class="item appt st-${st}"><div class="row1"><div><span class="tm">${a.time?faD(a.time):'بدون ساعت'}</span><span class="nm">${esc(a.name)}</span>
+  return `<div class="item appt st-${st}">${a.note==='جراحی خارج نوبت'?'<div class="xnob">جراحی خارج نوبت</div>':''}<div class="row1"><div><span class="tm">${a.time?faD(a.time):'بدون ساعت'}</span><span class="nm">${esc(a.name)}</span>
     <div class="meta">${!a.time&&a.st==='set'&&can?'<b class="late">ساعت را تعیین کنید</b> · ':''}${a.by==='خودکار'?'ثبت خودکار از روز جراحی · ':''}${o.date?esc(wDay(a.day)+' '+jDay(a.day))+' · ':''}${a.dur?fa(a.dur)+' دقیقه':''}${a.doc?' · '+esc(a.doc):''}${a.phone?' · '+esc(faD(a.phone)):''}</div>${a.note?`<div class="meta">${esc(a.note)}</div>`:''}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="pill ${a.kind==='surg'?'k-surg':'rev'}">${esc(AKL[a.kind]||a.kind)}</span>${stp}</div></div>
     <div class="acts">${st==='set'&&sms&&n>=0&&n<=2?`<a class="btn sm${a.sms?' ghost':''}" href="${sms}" data-asms="${esc(a.id)}">${a.sms?'پیامک دوباره':'پیامک یادآوری'}</a>`:''}${a.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(a.phone))}">تماس</a>`:''}
@@ -2708,11 +2745,12 @@ function renderConx(){const w=$('conxW');w.hidden=ROLE!=='consultant'||!CF_ON;if
   const rows=UND_ALL?QUND.map(u=>card(u,T.find(t=>t.plan===u.id&&dDiff(t.due,td)<=0))):due.filter(t=>und[t.plan]).map(t=>card(und[t.plan],t));
   $('folList').innerHTML=rows.length?rows.join(''):`<div class="empty">${QUND.length?'امروز پیگیری‌ای سررسید نشده.':'طرح تأییدنشده‌ای در انتظار نیست. اگر بیمار تصمیم نگرفت، در فرم «تصمیم نگرفت» را بزنید.'}</div>`;
   const b=$('undAll');b.hidden=!QUND.length;b.textContent=UND_ALL?'فقط پیگیری‌های امروز':`همه‌ی تصمیم‌نگرفته‌ها (${fa(QUND.length)})`}
-function openUndecided(){if(!(F.h.name||'').trim()){alertMsg('نام بیمار را وارد کنید.');return}UN={why:''};$('unWhy').innerHTML=UN_WHY.map(w=>`<button type="button" class="chip" data-unw="${w}" aria-pressed="false">${w}</button>`).join('');$('un_note').value='';$('unMsg').textContent='';$('unSheet').hidden=false}
+function openUndecided(mode){if(!(F.h.name||'').trim()){alertMsg('نام بیمار را وارد کنید.');return}UN={why:'',mode:mode||''};const L=UN.mode==='lost';$('unTitle').textContent=L?'بیمار پشیمان شد و رفت':'بیمار می‌خواهد فکر کند';$('unNote').textContent=L?'طرح ذخیره و انصراف بیمار ثبت می‌شود.':'طرح ذخیره می‌شود و از کارتابل بیرون می‌رود. یک هفته و چهار هفته‌ی بعد در «پیگیری‌ها»ی پذیرش یادآوری می‌شود تا با بیمار تماس بگیرند.';$('unGo').textContent=L?'ثبت انصراف':'ثبت و پیگیری بعداً';$('unWhy').innerHTML=UN_WHY.map(w=>`<button type="button" class="chip" data-unw="${w}" aria-pressed="false">${w}</button>`).join('');$('un_note').value='';$('unMsg').textContent='';$('unSheet').hidden=false}
 async function sendUndecided(t){const m=$('unMsg');if(!UN.why){m.className='msg err';m.textContent='دلیل را انتخاب کنید.';return}t.disabled=true;if(!t.dataset.sid)t.dataset.sid=uuid();
   try{const d=toDoc(F);d.updatedAt=new Date().toISOString();const name=F.h.name.trim();
-    await api('undecided',{record:{id:F.id,data:d,name,nid:F.h.nid||'',status:'draft',total:planTotal(F)},reason:UN.why,note:$('un_note').value.trim(),sendId:t.dataset.sid});delete t.dataset.sid;
-    $('unSheet').hidden=true;leaveForm(`${name}: پیگیری یک هفته و چهار هفته‌ی بعد یادآوری می‌شود.`);pollQ(true)}
+    const uj=await api('undecided',{record:{id:F.id,data:d,name,nid:F.h.nid||'',status:'draft',total:planTotal(F)},reason:UN.why,note:$('un_note').value.trim(),sendId:t.dataset.sid});delete t.dataset.sid;
+    if(UN.mode==='lost')await api('undecidedSet',{id:uj.id||F.id,to:'lost',reason:UN.why,note:$('un_note').value.trim()});
+    $('unSheet').hidden=true;leaveForm(UN.mode==='lost'?`انصراف ${name} ثبت شد.`:`${name}: در «پیگیری‌ها»ی پذیرش، یک هفته و چهار هفته‌ی بعد یادآوری می‌شود.`);pollQ(true)}
   catch(e){m.className='msg err';m.textContent=e.message}finally{t.disabled=false}}
 
 /* ---------- consent + signature ---------- */
@@ -2820,7 +2858,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button,a')
   if(t.id==='apChg'){AP.free=false;AP.plan='';AP.name='';AP.phone='';renderApWho();return}
   if(t.id==='apSave'){apSave(t);return}
   if(t.id==='apClose'){$('apSheet').hidden=true;return}
-  if(t.dataset.tbook){const k=TASKS.find(x=>x.id===t.dataset.tbook);if(k)openAppt({plan:k.plan,name:k.name,phone:k.phone,kind:{uncover:'uncover',recall:'check',labready:'tryin',suture:'suture'}[k.kind]||'other',task:k.id,lock:1});return}
+  if(t.dataset.tbook){const k=TASKS.find(x=>x.id===t.dataset.tbook);if(k)openAppt({plan:k.plan,name:k.name,phone:k.phone,kind:{uncover:'uncover',recall:'check',labready:'tryin',suture:'suture',book:'surg'}[k.kind]||'other',task:k.id,lock:1});return}
   /* prosthesis */
   if(t.dataset.prf){PR.f=t.dataset.prf;renderPros();return}
   if(t.dataset.pnext){if(t.dataset.pst==='done'&&!t.dataset.armed){t.dataset.armed='1';const o=t.textContent;t.textContent='تحویل شد؟ دوباره بزنید';setTimeout(()=>{if(t.isConnected){delete t.dataset.armed;t.textContent=o}},4000);return}prosSet(t.dataset.pnext,t.dataset.pst,'',t);return}
@@ -2860,7 +2898,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button,a')
     t.disabled=true;try{await api('undecidedSet',{id:t.dataset.uid,to:t.dataset.undto});toast(t.dataset.undto==='back'?'طرح به کارتابل مشاور برگشت.':'انصراف بیمار ثبت شد.');pollQ(true)}catch(err){alertMsg(err.message)}finally{t.disabled=false}return}
   /* signature */
   if(t.id==='sgnClear'){const c=$('sgnPad');c.getContext('2d').clearRect(0,0,c.width,c.height);SG.drawn=false;return}
-  if(t.id==='sgnClose'){$('sgnSheet').hidden=true;if(PK.undo){Object.assign(F,PK.undo);PK.undo=null;CUR=1;renderForm()}return}
+  if(t.id==='sgnClose'){$('sgnSheet').hidden=true;delete F._next;if(PK.undo){Object.assign(F,PK.undo);PK.undo=null;CUR=1;renderForm()}return}
   if(t.id==='sgnOk'||t.id==='sgnSkip'){if(t.id==='sgnOk'){if(!SG.drawn){$('sgnMsg').className='msg err';$('sgnMsg').textContent='بیمار هنوز امضا نکرده.';return}F.sign=signData()}
     $('sgnSheet').hidden=true;PK.undo=null;const b=SG.btn||$('confirmBtn');b.dataset.signed='1';try{await finalize(b)}finally{delete b.dataset.signed}return}
 });
