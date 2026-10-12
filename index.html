@@ -424,6 +424,8 @@ body[data-role="doctor"] #viewForm .calc,body[data-role="doctor"] #totalsCard,bo
 h2 .sgas{font-size:.78rem;font-weight:600;padding:3px 6px;border-radius:8px;border:1px solid var(--line);background:var(--sunk);color:inherit;margin-inline-start:auto;max-width:150px}
 .rcs{display:flex;flex-wrap:wrap;gap:6px}.rc{width:48px;height:48px;border-radius:50%!important;padding:0!important;display:inline-flex;align-items:center;justify-content:center;font-size:.86rem;direction:ltr}
 #impSheet #imp_dS,#impSheet #imp_lS{display:none!important}
+#sgGo{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:7;box-shadow:var(--sh);padding:10px 22px;border-radius:999px}
+@media (pointer:coarse){#viewSurg .chip,#impSheet .chip,#viewSurg .t{min-height:44px}#viewSurg .pwshow{min-height:40px}#viewSurg .pwshow input{width:22px;height:22px}}
 @media (max-width:720px){#viewSurg .sgpick{width:98px;top:122px;right:4px;padding:5px;gap:4px}#viewSurg .sgpick .chip{font-size:.7rem;padding:4px 6px;min-height:34px;line-height:1.35}#viewSurg{padding-right:102px!important}#viewSurg .pview{grid-template-columns:minmax(0,1fr)}#viewSurg .pv-card,#viewSurg .card{min-width:0}#viewSurg .mc{overflow-x:auto;max-width:100%}#viewSurg .mc i{width:15px}#viewSurg .card{padding:12px}#viewSurg .sgpick2{position:static;width:auto;max-height:none;flex-direction:row;flex-wrap:wrap;margin:10px 0}#viewSurg{padding-left:0!important}}
 #impSheet .in{max-width:440px;gap:9px}
 .need{font-size:.84rem;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:6px 10px;margin:0}.need.ok{color:var(--ok);background:var(--ok-soft)}
@@ -676,7 +678,7 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
       <div class="chips" id="sgUncM" hidden><button type="button" class="chip" data-unc="3" aria-pressed="true">سه ماه بعد</button><button type="button" class="chip" data-unc="4" aria-pressed="false">چهار ماه بعد</button></div>
       <label class="pwshow"><input type="checkbox" id="sg_fin"> این آخرین جلسه است (پایان درمان جراحی)</label>
       <div class="msg" id="sgMsg"></div>
-      <div class="btns"><button class="btn" id="sgSave" type="button">ثبت جلسه</button><button class="btn ghost" id="sgBack" type="button">بازگشت به کارتابل</button></div></section>
+      <div class="btns"><button class="btn" id="sgSave" type="button">ثبت جلسه</button><button class="btn" id="sgGo" type="button">ثبت جلسه ↓</button><button class="btn ghost" id="sgBack" type="button">بازگشت به کارتابل</button></div></section>
   </section>
 
   <!-- inventory -->
@@ -2049,7 +2051,20 @@ function openSurg(x){const d=x.data||{};const rec=fromDoc(x.id,d);if(!rec.h.name
   const nd=Object.keys(SURG.need);
   $('sgPrev').innerHTML=nd.length?`<p class="note">این موارد در طرح با «تعداد کل» آمده‌اند؛ امروز شماره‌ی دندان‌ها را بزنید: ${nd.map(id=>esc(SEC[id].t)+' ('+['U','L'].filter(j=>SURG.need[id][j]).map(j=>(j==='U'?'بالا ':'پایین ')+fa(SURG.need[id][j])).join('، ')+')').join('؛ ')}</p>`:'';
   $('dlSgDoc').innerHTML=(SET.docs||[]).map(d=>`<option value="${esc(d)}">`).join('');$('sg_fin').checked=false;$('sgMsg').textContent='';$('sg_by').value=SURGEON();renderAsst();$('sg_unc').checked=false;$('sgUncM').hidden=true;document.querySelectorAll('[data-unc]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.unc==='3'));
-  $('sections').innerHTML='';renderSurg();show('surg');if(CF_ON)pollInv(true);SURG&&(SURG.open=true)}
+  sgDraftLoad();$('sections').innerHTML='';renderSurg();show('surg');if(CF_ON)pollInv(true);SURG&&(SURG.open=true)}
+/* surgery-day draft: kept in this browser until the session is saved, restored on reopen the same day */
+const SGDK=id=>'implantSurgDraft:'+id;
+function sgDraftSave(){if(!SURG||!SURG.dirty||$('viewSurg').hidden)return;try{localStorage.setItem(SGDK(SURG.id),JSON.stringify({d:jalali(new Date()).slash,n:SURG.prev.length,s:secDoc(SURG.s),imp:SURG.imp,asst:SURG.asst,sa:SURG.sa,unc:SURG.unc,uncT:SURG.uncT,uc:$('sg_unc').checked,off:[...document.querySelectorAll('[data-fu]')].filter(c=>!c.checked).map(c=>c.dataset.fu),by:$('sg_by').value}))}catch(e){}}
+function sgDraftLoad(){let dr=null;try{dr=JSON.parse(localStorage.getItem(SGDK(SURG.id))||'null')}catch(e){}
+  if(!dr)return;if(dr.d!==jalali(new Date()).slash||dr.n!==SURG.prev.length){try{localStorage.removeItem(SGDK(SURG.id))}catch(e){}return}
+  SURG.s=secFrom(dr.s||{});SURG.imp=dr.imp||{};if(dr.asst)SURG.asst=dr.asst;SURG.sa=dr.sa||{};SURG.unc=dr.unc||3;SURG.uncT=!!dr.uncT;SURG.dirty=true;
+  if(SURG.uncT){$('sg_unc').checked=!!dr.uc;$('sgUncM').hidden=!dr.uc}document.querySelectorAll('[data-unc]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.unc)===SURG.unc));
+  document.querySelectorAll('[data-fu]').forEach(c=>c.checked=!(dr.off||[]).includes(c.dataset.fu));if(dr.by)$('sg_by').value=dr.by;renderAsst();
+  toast('کارهای علامت‌خورده‌ی قبلی این جلسه (ذخیره‌نشده) بازیابی شد.')}
+setInterval(sgDraftSave,3000);
+try{new IntersectionObserver(es=>{$('sgGo').hidden=es[0].isIntersecting}).observe($('sgSave'))}catch(e){}
+document.addEventListener('click',e=>{if(SURG&&e.target.closest&&e.target.closest('#viewSurg,#impSheet'))SURG.dirty=true},true);
+document.addEventListener('change',e=>{if(SURG&&e.target.closest&&e.target.closest('#viewSurg,#impSheet'))SURG.dirty=true},true);
 const SURG_SECS=()=>SECTIONS.filter(x=>(x.price||x.kind!=='none')&&x.id!=='cons');
 function renderSurg(){if(!SURG)return;SURG.openSecs=SURG.openSecs||new Set();renderPick();
   $('surgSecs').innerHTML=SURG_SECS().filter(x=>SURG.openSecs.has(x.id)).map(sectionHTML).join('');renderImps()}
@@ -2137,6 +2152,7 @@ async function surgCommit(t){if(!SURG||!SGP)return;const m=$('srMsg');const {ses
   const actual=surgActual(SURG.rec,all),planned=surgPlanned(SURG.rec);
   t.disabled=true;m.className='msg';m.textContent='در حال ثبت…';
   try{await api('surgSave',{id:SURG.id,session:ses,finish:fin,actual,planned,brand:SURG.rec.brand,sendId:SURG.sid},{timeout:12000,tries:3});
+    try{localStorage.removeItem(SGDK(SURG.id))}catch(e){}SURG.dirty=false;
     const rec=SURG.rec,sg={sessions:all,finished:fin,actual,planned,diff:actual-planned};SGP=null;$('sgRev').hidden=true;
     toast(fin?`جراحی ${rec.h.name} ثبت شد و درمان جراحی به پایان رسید.`:`جلسه‌ی ${fa(all.length)} جراحی ${rec.h.name} ثبت شد.`);
     show('queue');pollQ(true);if(fin)openDone(rec,sg,false)}
@@ -2198,7 +2214,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
   if(t.id==='srOk'){surgCommit(t);return}if(t.id==='srBack'){$('sgRev').hidden=true;return}
   if(t.dataset.ht){IMPH=IMPH===t.dataset.ht?'':t.dataset.ht;document.querySelectorAll('#impSheet [data-ht]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ht===IMPH));return}
   if(t.id==='impOk'){impSave();return}if(t.id==='impDel'){impDel();return}if(t.id==='impClose'){$('impSheet').hidden=true;return}
-  if(t.id==='sgSave'){surgSave(t);return}if(t.id==='sgBack'){show('queue');return}
+  if(t.id==='sgSave'||t.id==='sgGo'){surgSave(t);if($('sgRev').hidden&&$('sgMsg').textContent)$('sgMsg').scrollIntoView({behavior:'smooth',block:'center'});return}if(t.id==='sgBack'){show('queue');return}
   if(t.id==='sdClose'){$('sgDone').hidden=true;return}
   if(t.id==='sdRep'||t.id==='sdCard'){if(!SD)return;t.disabled=true;try{await surgDownload(t.id==='sdCard'?'card':'rep',SD.rec,SD.sg)}catch(err){$('sdMsg').className='msg err';$('sdMsg').textContent=err.message}finally{t.disabled=false}return}
   if(t.id==='sdSettle'){if(!SD)return;t.disabled=true;try{await api('settleDone',{id:SD.rec.id,note:$('sd_note').value.trim()});$('sgDone').hidden=true;toast('تسویه ثبت شد.');pollQ(true);if(!$('viewList').hidden)loadList()}catch(err){$('sdMsg').className='msg err';$('sdMsg').textContent=err.message}finally{t.disabled=false}return}
