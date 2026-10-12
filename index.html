@@ -396,6 +396,25 @@ button.kpi{cursor:pointer}button.kpi:hover{border-color:var(--line2)}
 /* doctor works without prices; the consultant sees them */
 body[data-role="doctor"] #viewForm .pz,body[data-role="doctor"] #viewForm label.f:has(> input.price),body[data-role="doctor"] #viewForm .grp:has(.brands),
 body[data-role="doctor"] #viewForm .calc,body[data-role="doctor"] #totalsCard,body[data-role="doctor"] #formBar .sum,body[data-role="doctor"] #viewForm p.note:has(+ .calc){display:none!important}
+
+/* surgery day: patient photo, plan view, treatment picker, follow-ups */
+.sgpat{flex-direction:row;align-items:center;gap:16px}
+.sgphoto{width:96px;height:96px;object-fit:cover;border-radius:14px;border:1px solid var(--line);flex:none;background:var(--sunk)}
+.photo-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pview{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.pv-card{border:1px solid var(--line);border-inline-start:4px solid var(--accent);border-radius:12px;padding:10px 12px;background:var(--sunk);display:flex;flex-direction:column;gap:6px}
+.pv-card[data-kind="pros"]{border-inline-start-color:var(--lapis)}
+.pv-card h3{margin:0;font-size:.92rem;font-weight:800}.pv-card p{margin:0;font-size:.84rem;line-height:1.7}
+.mc{direction:ltr;display:flex;flex-direction:column;gap:3px;align-self:center}
+.mc .mr{display:flex;gap:2px;align-items:center}.mc .mr+.mr{border-top:1.5px solid color-mix(in srgb,var(--ink) 45%,transparent);padding-top:3px}
+.mc i{font-style:normal;width:18px;height:20px;border-radius:5px;display:grid;place-items:center;font-size:.68rem;color:var(--muted);background:var(--surface);border:1px solid var(--line)}
+.mc i.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:800}.pv-card[data-kind="pros"] .mc i.on{background:var(--lapis);border-color:var(--lapis)}
+.mc b{width:2px;align-self:stretch;background:var(--ink);opacity:.45;margin:0 3px}
+.sgpick{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.sgpick .note{width:100%}
+.sgc.inplan{border-color:var(--accent);color:var(--accent);font-weight:700}.sgc.marked{background:var(--accent-soft)}.sgc[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.fu{display:flex;flex-direction:column;gap:6px}.fu .pwshow{white-space:normal;width:auto}
+.task.late{border-inline-start-color:var(--bad)}.task.done{opacity:.6}
+a.btn{text-decoration:none}
 /* exception: the doctor prices impacted canine / wisdom surgery and All on X long himself */
 body[data-role="doctor"] #viewForm .dr label.f:has(> input.price){display:flex!important}body[data-role="doctor"] #viewForm .calc.dr{display:block!important}
 .dr-only{display:none}body[data-role="doctor"] .dr-only{display:inline}
@@ -480,6 +499,10 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
     </section>
     <div class="qhead"><h2>صف امروز</h2><span class="live" id="rLive">زنده</span></div>
     <div class="list" id="rList"><div class="empty">در حال بارگذاری…</div></div>
+    <div class="qhead"><h2>ویزیت‌های بعد از جراحی</h2></div>
+    <div class="list" id="fuList"><div class="empty">موردی نیست.</div></div>
+    <div class="qhead"><h2>نوبت آنکاوری</h2></div>
+    <div class="list" id="ucList"><div class="empty">موردی نیست.</div></div>
   </section>
 
   <!-- archive -->
@@ -491,16 +514,21 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
   <!-- form -->
   <!-- surgery day (surgery assistant) -->
   <section id="viewSurg" class="wrap" style="padding:0" hidden>
-    <section class="card"><h2 id="sgName">روز جراحی</h2><div class="meta" id="sgMeta"></div><div class="qwarn" id="sgMed" hidden></div><div class="note" id="sgStaff" hidden></div></section>
-    <section class="card"><h2>طرح درمان تأییدشده</h2><ul class="plines" id="sgPlan"></ul><div id="sgPrev"></div></section>
+    <section class="card sgpat"><img id="sgPhoto" class="sgphoto" alt="عکس بیمار" hidden><div><h2 id="sgName">روز جراحی</h2><div class="meta" id="sgMeta"></div><div class="qwarn" id="sgMed" hidden></div><div class="note" id="sgStaff" hidden></div></div></section>
+    <section class="card"><h2>طرح درمان تأییدشده</h2><div class="pview" id="sgPlan"></div><div id="sgPrev"></div></section>
     <section class="card"><h2 id="sgTitle">جلسه‌ی جراحی امروز</h2>
       <p class="note">کارهایی که امروز انجام شد را علامت بزنید؛ موارد طرح از قبل علامت خورده‌اند. اگر کاری انجام نشد علامتش را بردارید و اگر کار اضافه‌ای شد اضافه کنید. برای ایمپلنت روی شماره‌ی دندان بزنید تا برند و سایز را ثبت کنید.</p>
-      <div class="legend"><span><i style="box-shadow:inset 0 0 0 2px var(--accent)"></i>در طرح، انجام نشده</span><span><i style="background:var(--accent)"></i>انجام شد</span><span><i style="background:var(--warn)"></i>خارج از طرح</span></div></section>
+      <div class="legend"><span><i style="box-shadow:inset 0 0 0 2px var(--accent)"></i>در طرح، انجام نشده</span><span><i style="background:var(--accent)"></i>انجام شد</span><span><i style="background:var(--warn)"></i>خارج از طرح</span></div>
+      <div class="sgpick" id="sgPick"></div></section>
     <div id="surgSecs" class="wrap" style="padding:0"></div>
     <section class="card"><h2>ایمپلنت‌های این جلسه</h2><div class="implist" id="sgImps"></div></section>
     <section class="card"><h2>ثبت جلسه</h2>
       <label class="f">توضیحات جراحی<textarea id="sg_note" rows="3" placeholder="نکات حین جراحی، داروها، توصیه‌ها…"></textarea></label>
       <label class="f">نام دستیار<input id="sg_by"></label>
+      <div class="grp"><span>پیگیری بعد از جراحی (در کارتابل پذیرش می‌آید)</span><div class="fu">
+        <label class="pwshow"><input type="checkbox" data-fu="numb" checked> چک بی‌حسی فوری یک‌روزه (فردا بپرسند هنوز بی‌حس است یا نه)</label>
+        <label class="pwshow"><input type="checkbox" data-fu="week" checked> چک عادی اول هفته (یک هفته بعد حال بیمار را بپرسند)</label>
+        <label class="pwshow"><input type="checkbox" data-fu="suture" checked> نوبت کشیدن بخیه (دو هفته بعد)</label></div></div>
       <label class="pwshow"><input type="checkbox" id="sg_fin"> این آخرین جلسه است (پایان درمان جراحی)</label>
       <div class="msg" id="sgMsg"></div>
       <div class="btns"><button class="btn" id="sgSave" type="button">ثبت جلسه</button><button class="btn ghost" id="sgBack" type="button">بازگشت به کارتابل</button></div></section>
@@ -540,21 +568,27 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
       <div class="rowline"><span>پارت پروتز (روکش)</span><span id="t_pros"></span></div>
       <div class="rowline big"><span>جمع کل</span><span id="t_all"></span></div>
     </section>
+    <section class="card" id="photoCard" hidden>
+      <h2>عکس بیمار <span class="tag">مشاور</span></h2>
+      <div class="photo-row"><img id="fPhoto" class="sgphoto" alt="عکس بیمار" hidden><div class="grp"><p class="note" id="photoNote">عکس بیمار برای شناسایی در روز جراحی. با دوربین گوشی یا از فایل.</p>
+        <div class="btns"><label class="btn ghost" style="cursor:pointer">انتخاب یا گرفتن عکس<input type="file" id="photoIn" accept="image/*" capture="user" hidden></label><button class="btn ghost danger" id="photoDel" type="button" hidden>حذف عکس</button></div><div class="msg" id="photoMsg"></div></div></div>
+    </section>
     <section class="card" id="payCard">
       <h2>شرایط پرداخت <span class="tag">مشاور</span></h2>
       <div class="grp"><span>پارت جراحی</span>
         <div class="chips" id="payOpt">
-          <button type="button" class="chip" data-opt="1">۳۰٪ نقد، باقی چک ماهانه</button>
-          <button type="button" class="chip" data-opt="2">۵۰٪ نقد، باقی یک چک</button>
+          <button type="button" class="chip" data-opt="1">نقد + چک ماهانه</button>
+          <button type="button" class="chip" data-opt="2">نقد + یک چک</button>
         </div>
       </div>
       <div class="fields">
+        <label class="f">درصد نقد پارت جراحی<input id="p_cs" class="price" inputmode="numeric" placeholder="۳۰"></label>
         <label class="f" id="lblN1">تعداد چک<input id="p_n1" class="price" inputmode="numeric"></label>
         <label class="f" id="lblM2">موعد چک (ماه بعد از جراحی)<input id="p_m2" class="price" inputmode="numeric"></label>
       </div>
       <div class="calc" id="paySurg"></div>
-      <div class="grp"><span>پارت پروتز · ۳۰٪ نقد، باقی چک ماهانه</span></div>
-      <div class="fields"><label class="f">تعداد چک<input id="p_n3" class="price" inputmode="numeric"></label></div>
+      <div class="grp"><span>پارت پروتز · نقد + چک ماهانه</span></div>
+      <div class="fields"><label class="f">درصد نقد پارت پروتز<input id="p_cp" class="price" inputmode="numeric" placeholder="۳۰"></label><label class="f">تعداد چک<input id="p_n3" class="price" inputmode="numeric"></label></div>
       <div class="calc" id="payPros"></div>
       <p class="note">قیمت‌ها تقریبی است. برای بیمارانی که زمان جراحی‌شان از دی‌ماه به بعد است، پارت پروتز به قیمت روز حساب می‌شود.</p>
     </section>
@@ -731,7 +765,7 @@ const SECTIONS=[
  {id:'ovd',t:'اوردنچر',kind:'chips',groups:[{l:'فک بالا، تعداد پایه',o:['2','3','4','5'],single:true},{l:'فک پایین، تعداد پایه',o:['2','3','4','5'],single:true}],price:'implantBrand'},
  {id:'fgg',t:'FGG و وستیبولوپلاستی',kind:'chips',groups:[{l:'فک بالا',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']},{l:'فک پایین',o:['⅓ خلف راست','⅓ قدام','⅓ خلف چپ']}],text:'زمان',price:'unit'},
  {id:'tmp',t:'روکش موقت',kind:'teeth',n:7,cnt:'jaws',jmax:14,groups:[{l:'نوع',o:['دنچر','Essix','PMMA']}],price:'unit',pros:true},
- {id:'cbct',t:'CT scan',kind:'quad',price:'flat',items:[{k:'z',l:'CBCT زایگوما، تریگوئید و نازال',type:'toggle',pk:'cbct_z'}]},
+ {id:'cbct',t:'CT scan',kind:'quad',items:[{k:'z',l:'CBCT زایگوما، تریگوئید و نازال',type:'toggle'}]},
  {id:'cons',t:'رضایت‌نامه',kind:'chips',groups:[{o:['نزدیک به عصب','دندان سالم']}]},
  {id:'anes',t:'زمان بیهوشی',kind:'none',text:'مدت',price:'flat'}
 ];
@@ -794,23 +828,26 @@ function rowTotals(r,x){const s=r.s[x.id],q=qty(s,x),o={flat:0,brand:bz()};
   if(x.price==='unit')o.flat=q*num(s.price);
   else if(x.price==='flat')o.flat=(q||(s.text||'').trim())?num(s.price):0;
   else if(x.price==='brandUnit')BRANDS.forEach(b=>o.brand[b.k]=q*num(s.bp[b.k]));
+  if(x.id==='imp'&&r.s.crw)o.pros=q*num(r.s.crw.price);
   else if(x.price==='implantBrand')BRANDS.forEach(b=>o.brand[b.k]=q*num(r.s.imp.bp[b.k]));
   if(x.price==='aox'){if(s.isel['t:long']){const on=q||chipSel(s);o.flat=on?num(s.ip.lt):0;o.pros=on?num(s.ip.lq):0;return o}o.flat=q*num(s.ip.cb);o.pros=chipSel(s)*num(s.price);return o}
   if(x.prosJaw)o.pros=chipSel(s)*num(s.price);
   else if(x.price==='items')o.flat=x.items.reduce((a,it)=>a+itemQty(s,it)*num(s.ip[it.k]),0)+(x.base?teethQty(s,x)*num(s.price):0);
-  if(x.items&&x.price!=='items')o.flat+=x.items.reduce((a,it)=>a+itemQty(s,it)*num(s.ip[it.k]),0);
+  if(x.items&&x.price&&x.price!=='items')o.flat+=x.items.reduce((a,it)=>a+itemQty(s,it)*num(s.ip[it.k]),0);
   return o}
 function totals(r){const surg=bz();let pros=0;
   SECTIONS.forEach(x=>{const t=rowTotals(r,x);pros+=t.pros||0;if(x.pros)pros+=t.flat;else BRANDS.forEach(b=>surg[b.k]+=t.flat+t.brand[b.k])});
   return {surg,pros}}
 const MIL=1e6,rnd=v=>v>=MIL?Math.round(v/MIL)*MIL:Math.round(v);
 function splitPay(T,pct,n){const c=Math.min(T,rnd(T*pct)),rest=T-c;n=Math.max(1,n||1);const per=rest>=MIL*n?Math.floor(rest/n/MIL)*MIL:Math.floor(rest/n);return {c,rest,n,per,last:rest-per*(n-1)}}
-function cashFor(r,S,P){return splitPay(S,r.pay.opt==='1'?.3:.5,1).c+splitPay(P,.3,1).c}
-function payText(r,brand){const T=totals(r),b=brand||r.brand,S=T.surg[b],p=r.pay,out={surg:'',pros:''};
+const pctS=r=>{const v=num(r.pay.cs);return r.pay.cs!==undefined&&String(r.pay.cs).trim()!==''?Math.min(100,v):(r.pay.opt==='1'?30:50)};
+const pctP=r=>{const v=num(r.pay.cp);return r.pay.cp!==undefined&&String(r.pay.cp).trim()!==''?Math.min(100,v):30};
+function cashFor(r,S,P){return splitPay(S,pctS(r)/100,1).c+splitPay(P,pctP(r)/100,1).c}
+function payText(r,brand){const T=totals(r),b=brand||effBrand(r),S=T.surg[b],p=r.pay,out={surg:'',pros:''},ps=pctS(r),pp=pctP(r);
   const chk=x=>x.n<2||x.per===x.last?`هر چک ${fa(x.per)}`:`${fa(x.n-1)} چک هر کدام ${fa(x.per)} و چک آخر ${fa(x.last)}`;
-  if(S){if(p.opt==='1'){const n=num(p.n1),x=splitPay(S,.3,n);out.surg=`۳۰٪ نقد: ${fa(x.c)}`+(n?` · مانده در ${fa(n)} فقره چک به فواصل یک‌ماهه، ${chk(x)}`:` · مانده: ${fa(x.rest)}`)}
-    else{const m=num(p.m2),x=splitPay(S,.5,1);out.surg=`۵۰٪ نقد: ${fa(x.c)} · مانده در یک فقره چک ${fa(x.rest)}`+(m?` برای ${fa(m)} ماه بعد از تاریخ جراحی`:'')}}
-  if(T.pros){const n=num(p.n3),x=splitPay(T.pros,.3,n);out.pros=`۳۰٪ نقد: ${fa(x.c)}`+(n?` · مانده در ${fa(n)} فقره چک به فواصل یک‌ماهه، ${chk(x)}`:` · مانده: ${fa(x.rest)}`)}
+  if(S){if(p.opt==='1'){const n=num(p.n1),x=splitPay(S,ps/100,n);out.surg=`${fa(ps)}٪ نقد: ${fa(x.c)}`+(n?` · مانده در ${fa(n)} فقره چک به فواصل یک‌ماهه، ${chk(x)}`:` · مانده: ${fa(x.rest)}`)}
+    else{const m=num(p.m2),x=splitPay(S,ps/100,1);out.surg=`${fa(ps)}٪ نقد: ${fa(x.c)}`+(x.rest?` · مانده در یک فقره چک ${fa(x.rest)}`:'')+(m?` برای ${fa(m)} ماه بعد از تاریخ جراحی`:'')}}
+  if(T.pros){const n=num(p.n3),x=splitPay(T.pros,pp/100,n);out.pros=`${fa(pp)}٪ نقد: ${fa(x.c)}`+(n?` · مانده در ${fa(n)} فقره چک به فواصل یک‌ماهه، ${chk(x)}`:` · مانده: ${fa(x.rest)}`)}
   return out}
 function rowUsed(r,x){const s=r.s[x.id];return !!(qty(s,x)||teethSel(s)||(x.cnt&&(num(s.jc.U)||num(s.jc.L)))||s.text||(x.items&&x.items.some(it=>itemQty(s,it))))}
 
@@ -850,7 +887,7 @@ const CTTXT='سی‌تی اسکن صورت و سینوس دو جهت بدون ک
 function cbctHTML(x){const s=AS()[x.id],ct=!!s.isel['m:ct'],sp=!!(s.isel['zx:1']||s.isel['z:1']);
   return `<div class="chips"><button type="button" class="chip" data-cmode="" aria-pressed="${!ct}">CBCT</button><button type="button" class="chip" data-cmode="ct" aria-pressed="${ct}">CT scan</button>
     <label class="pwshow" style="margin-inline-start:auto"><input type="checkbox" data-cspec ${sp?'checked':''}> خاص</label></div>`+(ct?`<p class="ctx">${CTTXT}</p>`:'')+
-    (sp?`<div class="item-box"><div class="chips"><button type="button" class="chip" data-isid="cbct" data-ik="z:1" aria-pressed="${!!s.isel['z:1']}">CBCT زایگوما، تریگوئید و نازال</button></div>${SURG?'':`<label class="f pz">قیمت<input class="price" inputmode="numeric" data-ip="cbct" data-ik="z" value="${esc(s.ip.z)}"></label>`}</div>`:'')}
+    (sp?`<div class="item-box"><div class="chips"><button type="button" class="chip" data-isid="cbct" data-ik="z:1" aria-pressed="${!!s.isel['z:1']}">CBCT زایگوما، تریگوئید و نازال</button></div></div>`:'')}
 function spHTML(x){const s=AS()[x.id],rows=s.sp||[];if(SURG&&!rows.length)return '';const cat=SET.catalog||[];
   const teeth=[];['UR','UL','LR','LL'].forEach(q=>{for(let i=1;i<=7;i++)teeth.push(q+i)});const selT=teeth.filter(k=>s.sel[k]);
   const opt=v=>`<option value="">ناحیه / دندان</option>`+(selT.length?`<optgroup label="دندان‌های انتخاب‌شده">${selT.map(k=>`<option value="${k}" ${v===k?'selected':''}>${esc(toothTxt([k]))}</option>`).join('')}</optgroup>`:'')+
@@ -879,7 +916,7 @@ function renderForm(){
   document.getElementById('sections').innerHTML=head+(textOnly?'':SECTIONS.map(sectionHTML).join(''));
   document.getElementById('totalsCard').hidden=textOnly;
   document.querySelectorAll('[data-h]').forEach(i=>i.value=F.h[i.dataset.h]||'');
-  ['n1','m2','n3'].forEach(k=>document.getElementById('p_'+k).value=F.pay[k]||'');
+  ['n1','m2','n3','cs','cp'].forEach(k=>document.getElementById('p_'+k).value=F.pay[k]||'');
   const en=document.getElementById('editNote');
   if(F.status==='confirmed'||F.status==='modified'){en.hidden=false;en.textContent=`این فرم در ${F.jalali||''} ثبت شده است. اگر چیزی را عوض کنید و دوباره «ثبت نهایی» بزنید، PDF تازه ساخته و دوباره ایمیل می‌شود.`}else en.hidden=true;
   document.getElementById('confirmBtn').textContent=ROLE==='doctor'?'ارسال به مشاور':(F.status==='confirmed'||F.status==='modified')?'تأیید ویرایش و دانلود PDF':'تأیید نهایی و دانلود PDF';
@@ -893,7 +930,7 @@ function recalc(){const pv={s:AS(),brand:F.brand,pay:F.pay};
   SECTIONS.forEach(x=>{const el=document.getElementById('calc_'+x.id);if(!el)return;const s=pv.s[x.id],q=qty(s,x);try{el.closest('.card').classList.toggle('used',!!rowUsed({s:pv.s,brand:'ko',pay:{}},x))}catch(e){}
     if(x.price==='unit'&&q)el.innerHTML=`${fa(q)} ${x.kind==='quad'?'Q':'واحد'} × ${fa(num(s.price))} = <b>${fa(q*num(s.price))}</b>`;
     else if(x.price==='aox'){}
-    else if((x.price==='brandUnit'||x.price==='implantBrand')&&q){const t=rowTotals(pv,x).brand;el.innerHTML=`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'} · `+BRANDS.map(b=>`${b.n} <b>${fa(t[b.k])}</b>`).join(' · ')}
+    else if((x.price==='brandUnit'||x.price==='implantBrand')&&q){const rt=rowTotals(pv,x),t=rt.brand;el.innerHTML=`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'} · `+BRANDS.map(b=>`${b.n} <b>${fa(t[b.k])}</b>`).join(' · ')+(rt.pros?`<br>روکش روی پایه‌ها (پارت پروتز): ${fa(q)} × ${fa(num(pv.s.crw.price))} = <b>${fa(rt.pros)}</b>`:'')}
     else if(x.kind==='teeth')el.textContent=q?`${fa(q)} واحد`:'';else el.textContent='';
     if(x.price==='aox'){const t=rowTotals(pv,x),L=!!s.isel['t:long'],e3=document.getElementById('pcalc_'+x.id),j=chipSel(s);
       if(L){el.innerHTML='';if(e3)e3.innerHTML=(t.flat||t.pros)?`پایه‌ها <b>${fa(t.flat)}</b> · پروتز <b>${fa(t.pros||0)}</b>`:(q||j?'قیمت لانگ را بنویسید.':'')}
@@ -911,7 +948,7 @@ function recalc(){const pv={s:AS(),brand:F.brand,pay:F.pay};
     document.getElementById('barTotal').textContent=(REF?rng(mn+T.pros,mx+T.pros):fa(T.surg[b]+T.pros))+' تومان';
     document.getElementById('barLbl').textContent=(CUR===2?'طرح ۲ · ':'')+'جمع کل · '+bn;
     const pt=payText(pv);document.getElementById('paySurg').textContent=pt.surg;document.getElementById('payPros').textContent=pt.pros}
-  const p=F.pay;document.querySelectorAll('#payOpt .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.opt===p.opt));
+  const p=F.pay;document.querySelectorAll('#payOpt .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.opt===p.opt));$('p_cs').placeholder=fa(p.opt==='1'?30:50);
   document.getElementById('lblN1').hidden=p.opt!=='1';document.getElementById('lblM2').hidden=p.opt!=='2';
   try{localStorage.setItem('implantPlanDraft',JSON.stringify(F))}catch(e){}}
 const touch=()=>{dirty=true;if(F.status==='confirmed')F.status='modified'};
@@ -953,6 +990,9 @@ function newestDoc(id,serverDoc){let best=serverDoc,bt=serverDoc&&serverDoc.upda
   OUTBOX.filter(o=>o.id===id&&o.payload&&o.payload.record).forEach(o=>{const d=o.payload.record.data;if(d&&(d.updatedAt||'')>bt){best=d;bt=d.updatedAt}});
   const l=ldGet(id);if(l&&(l.updatedAt||'')>bt){best=l;bt=l.updatedAt}
   return best===serverDoc?null:best}
+const BRAND_SEC=['imp','ovd','aox'];
+const needBrand=r=>[PV(r,1)].concat(r.alt&&r.alt.mode==='full'&&r.s2?[PV(r,2)]:[]).some(p=>BRAND_SEC.some(id=>rowUsed(p,SEC[id])));
+const effBrand=r=>r.brand&&r.brand!=='ref'?r.brand:(()=>{const T0=totals(r);return BRANDS.reduce((a,b)=>T0.surg[b.k]<T0.surg[a]?b.k:a,'ir')})();
 const planTotal=r=>{const T0=totals(PV(r,1));return (r.brand==='ref'?Math.min(...BRANDS.map(b=>T0.surg[b.k])):T0.surg[r.brand])+T0.pros};
 async function saveRecord(r){const d=toDoc(r);d.updatedAt=new Date().toISOString();
   const j=await api('save',{record:{id:r.id,data:d,name:(r.h.name||'').trim(),nid:r.h.nid||'',status:d.status,total:planTotal(r)}});
@@ -986,7 +1026,7 @@ function priceLines(r,x){const s=r.s[x.id],q=qty(s,x),L=[];if(!x.price)return L;
   else if(x.price==='flat'){const v=rowTotals(r,x).flat;if(v)L.push({t:fa(v),b:1})}
   else if(x.price==='aox'){const t=rowTotals(r,x),Lg=!!s.isel['t:long'];if(Lg){if(t.flat)L.push({t:`پایه‌ها: ${fa(t.flat)}`,c:'#444',s:17});if(t.pros)L.push({t:`پروتز: ${fa(t.pros)}`,c:'#444',s:17})}else{if(q)L.push({t:`${fa(q)} پایه × ${fa(num(s.ip.cb))}`,c:'#444',s:17});if(t.pros)L.push({t:`پروتز: ${fa(chipSel(s))} فک × ${fa(num(s.price))}`,c:'#444',s:17})}if(t.flat+(t.pros||0))L.push({t:fa(t.flat+(t.pros||0)),b:1})}
   else if(x.price==='items'){let sum=0;if(x.base){const bq=teethQty(s,x),u=num(s.price);if(bq&&u){sum+=bq*u;L.push({t:`جراحی: ${fa(bq)}×${fa(u)}`,c:'#444',s:17})}}x.items.forEach(it=>{const iq=itemQty(s,it),u=num(s.ip[it.k]);if(iq&&u){sum+=iq*u;L.push({t:`${it.l}: ${fa(iq)}×${fa(u)}`,c:'#444',s:17})}});if(sum)L.push({t:fa(sum),b:1})}
-  else{const t=rowTotals(r,x).brand;if(x.prosJaw&&chipSel(s)&&num(s.price))L.push({t:`پروتز: ${fa(chipSel(s))} فک × ${fa(num(s.price))}`,c:'#444',s:17});if(q)L.push({t:`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'}`,c:'#444',s:17});BRANDS.forEach(b=>{if(t[b.k])L.push({t:`${b.n}: ${fa(t[b.k])}`,b:b.k===r.brand,s:b.k===r.brand?19:17,c:b.k===r.brand?INK:'#555'})})}
+  else{const rt0=rowTotals(r,x),t=rt0.brand;if(x.id==='imp'&&rt0.pros)L.push({t:`روکش (پروتز): ${fa(q)}×${fa(num(r.s.crw.price))} = ${fa(rt0.pros)}`,c:'#444',s:16});if(x.prosJaw&&chipSel(s)&&num(s.price))L.push({t:`پروتز: ${fa(chipSel(s))} فک × ${fa(num(s.price))}`,c:'#444',s:17});if(q)L.push({t:`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'}`,c:'#444',s:17});BRANDS.forEach(b=>{if(t[b.k])L.push({t:`${b.n}: ${fa(t[b.k])}`,b:b.k===r.brand,s:b.k===r.brand?19:17,c:b.k===r.brand?INK:'#555'})})}
   return L}
 
 function sectionRow(r,x){const c=mctx(),s=r.s[x.id],sel=s.sel,pad=14,draws=[];let mh=0;const maxW=C.midW-2*pad;
@@ -1059,9 +1099,9 @@ function totalsBlock(r,title){const T0=totals(r),rows=BRANDS.map(b=>({b,s:T0.sur
     rows.forEach((x,i)=>{const y=y0+rh*(i+1),on=x.b.k===r.brand;if(on)box(cx,C.L,y,C.R-C.L,rh,FAINT);
       T(cx,x.b.n+(on?'  (انتخاب بیمار)':''),cols[0]-14,y+rh/2,{s:19,w:on?800:500});[x.s,x.p,x.t,x.c].forEach((v,j)=>T(cx,fa(v),cols[j+1]-14,y+rh/2,{s:j===2?21:19,w:j===2||on?800:400}))});
     box(cx,C.L,y0,C.R-C.L,rh*(rows.length+1),null,RULE,1.2);cols.slice(1,5).forEach(xx=>{cx.fillStyle='#bbb';cx.fillRect(xx,y0,1,rh*(rows.length+1))})}}}
-function payBlock(r){const pt=payText(r),bn=(BRANDS.find(b=>b.k===r.brand)||{n:'ارجاع به مشاور'}).n,L=[];
-  if(pt.surg)L.push(`پارت جراحی (${bn}): ${pt.surg}`);if(pt.pros)L.push(`پارت پروتز: ${pt.pros}`);if(!L.length)L.push('—');
-  L.push(r.pay.opt==='1'?'برای سایر برندها هم پیش‌پرداخت: ۳۰٪ پارت جراحی + ۳۰٪ پارت پروتز (ستون آخر جدول).':'برای سایر برندها هم پیش‌پرداخت: ۵۰٪ پارت جراحی + ۳۰٪ پارت پروتز (ستون آخر جدول).');
+function payBlock(r){const pt=payText(r),bn=(BRANDS.find(b=>b.k===r.brand)||{n:''}).n,L=[];
+  if(pt.surg)L.push(`پارت جراحی${bn&&needBrand(r)?' ('+bn+')':''}: ${pt.surg}`);if(pt.pros)L.push(`پارت پروتز: ${pt.pros}`);if(!L.length)L.push('—');
+  if(needBrand(r))L.push(`برای سایر برندها هم پیش‌پرداخت: ${fa(pctS(r))}٪ پارت جراحی + ${fa(pctP(r))}٪ پارت پروتز (ستون آخر جدول).`);
   return textBlock('شرایط پرداخت',L)}
 function medBlock(r){const c=mctx(),L=medList(r.med),pad=14,maxW=C.R-C.L-2*pad,lines=[];
   (L.length?L:['مورد خاصی گزارش نشده است.']).forEach(t=>wrap(c,'• '+t,maxW,{s:19,w:L.length?700:400}).forEach(x=>lines.push(x)));
@@ -1095,7 +1135,7 @@ function jpegPDF(pages){const enc=new TextEncoder(),parts=[],offs=[];let len=0;
 async function buildPDF(r,meta){
   try{await Promise.race([Promise.all([document.fonts.load(`400 20px Vazirmatn`),document.fonts.load(`700 20px Vazirmatn`),document.fonts.load(`800 20px Vazirmatn`)]),new Promise(r=>setTimeout(r,1500))])}catch(e){}
   const p1=PV(r,1),blocks=[];
-  SECTIONS.forEach(x=>blocks.push(sectionRow(p1,x)));
+  {const used=SECTIONS.filter(x=>rowUsed(p1,x));(used.length?used:SECTIONS).forEach(x=>blocks.push(sectionRow(p1,x)))}
   blocks.push({h:24,draw(){}});blocks.push(totalsBlock(p1,r.alt.mode!=='none'?'طرح اول · جمع کل به تفکیک برند ایمپلنت':null));blocks.push(payBlock(p1));
   if(r.alt.mode==='full'&&r.s2){const p2=PV(r,2);
     blocks.push({h:0,pageBreak:true,draw(){}});blocks.push(bigTitle('طرح درمان پیشنهادی دوم'));blocks.push(tableHead());
@@ -1105,6 +1145,8 @@ async function buildPDF(r,meta){
     blocks.push({h:20,draw(){}});blocks.push(bigTitle('طرح درمان پیشنهادی دوم'));blocks.push(textBlock('',r.alt.text.split(/\n/)))}
   blocks.push(textBlock('',['* قیمت‌های ارائه شده به صورت تقریبی می‌باشد.','* بیمارانی که زمان جراحی آنها از دی‌ماه سال جاری به بعد می‌باشد، پارت پروتز (روکش) به قیمت روز محاسبه می‌شود.'],{c:'#333'}));
   blocks.push(signBlock());
+  const sgS=r.surg&&(r.surg.sessions||[]).length?r.surg:null;
+  if(sgS){blocks.push({h:0,pageBreak:true,draw(){}});blocks.push(bigTitle('گزارش جراحی'));surgBlocks(sgS).forEach(b=>blocks.push(b))}
   const pages=[];let pg,y;const bottom=PH-M-36;
   const start=first=>{const cv=document.createElement('canvas');cv.width=PW;cv.height=PH;const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,PW,PH);pg={cv,cx};pages.push(pg);y=M;
     const hb=first?headerBlock(r,meta):miniHeader(r,meta);hb.draw(cx,y);y+=hb.h};
@@ -1341,7 +1383,7 @@ function sendToConsult(t){if(!(F.h.name||'').trim()){alertMsg('نام بیمار
   leaveForm(`طرح درمان ${name} برای مشاور فرستاده شد.`)}
 /* consultant: final approval → PDF downloads on this device now; Drive + email in the background */
 async function finalize(t){if(busy)return;if(!(F.h.name||'').trim()){alertMsg('نام بیمار را وارد کنید.');return}
-  if(F.brand==='ref'){alertMsg('برند ایمپلنت انتخاب نشده (ارجاع به مشاور). اول در «جمع کل درمان» برند بیمار را انتخاب کنید.');const bt=$('brandTotals');if(bt)bt.scrollIntoView({behavior:'smooth',block:'center'});return}
+  if(F.brand==='ref'&&needBrand(F)){alertMsg('برند ایمپلنت انتخاب نشده (ارجاع به مشاور). اول در «جمع کل درمان» برند بیمار را انتخاب کنید.');const bt=$('brandTotals');if(bt)bt.scrollIntoView({behavior:'smooth',block:'center'});return}
   busy=true;const old=t.textContent;t.disabled=true;t.textContent='در حال ساخت PDF…';
   try{const j=jalali(new Date()),fname=`${safeName(F.h.name)} - ${j.dash}.pdf`;
     const wasConfirmed=F.status==='confirmed'||F.status==='modified';
@@ -1352,7 +1394,7 @@ async function finalize(t){if(busy)return;if(!(F.h.name||'').trim()){alertMsg('�
     leaveForm(`PDF ${name} دانلود شد؛ ذخیره در پس‌زمینه انجام می‌شود.`)}
   catch(e){alertMsg('ساخت PDF ناموفق بود: '+(e&&e.message||e))}
   finally{busy=false;t.disabled=false;t.textContent=old}}
-async function doConfirm(){if(busy||!lastPDF)return;if(F.brand==='ref'){alertMsg('اول برند بیمار را انتخاب کنید.');return}busy=true;
+async function doConfirm(){if(busy||!lastPDF)return;if(F.brand==='ref'&&needBrand(F)){alertMsg('اول برند بیمار را انتخاب کنید.');return}busy=true;
   try{const wasConfirmed=F.status==='confirmed'||F.status==='modified';
     F.status='confirmed';F.jalali=lastPDF.jalali.slash;F.pdfName=lastPDF.name;if(wasConfirmed)F.edits=(F.edits||0)+1;
     const d=toDoc(F);d.updatedAt=new Date().toISOString();
@@ -1396,7 +1438,7 @@ function renderList(){const q=toEn($('q').value.trim()).toLowerCase();const el=$
     ${d.settle==='pending'&&ROLE==='consultant'?`<button class="btn sm" data-settle="${esc(d.id)}" type="button">تسویه اختلاف</button>`:''}</div></div>`).join('')}
 async function loadList(){try{const j=await api('list');ARCHIVE=j.items||[];listLoaded=true;renderList()}
   catch(e){$('list').innerHTML=`<div class="empty">بایگانی بارگذاری نشد: ${esc(e.message)}</div>`}}
-async function fetchRecord(id){const j=await api('get',{id});const r=fromDoc(id,j.data||{});
+async function fetchRecord(id){const j=await api('get',{id});const r=fromDoc(id,j.data||{});if(j.surg)r.surg=j.surg;
   ['status','jalali','emailStatus','emailError','pdfName','edits'].forEach(k=>{if(j[k]!==undefined&&j[k]!=='')r[k]=j[k]});return r}
 
 /* ---------- tariff settings ---------- */
@@ -1429,7 +1471,22 @@ async function pollQ(force){if(ROLE==='inventory')return;if(!ROLE||QBUSY)return;
   try{const j=await api('queue',{ver:force?'':QV},{prio:'poll'});setLive(true);applyQueue(j)}
   catch(e){if(e.message!=='aborted')setLive(false)}finally{QBUSY=false}}
 const NEWQ={doctor:'waiting',consultant:'consult',surgery:'surgery'};
-function applyQueue(j){if(!j||j.same||!j.items)return;QV=j.ver;try{localStorage.setItem('implantQ:'+ROLE,JSON.stringify({ver:j.ver,items:j.items}))}catch(e){}const prev=QSEEN;QITEMS=j.items;
+let TASKS=[],TASK_ALL={fu:false,uc:false};
+const TLBL={numb:['چک بی‌حسی (یک روز بعد از جراحی)','تماس بگیرید و بپرسید هنوز بی‌حس است یا نه.'],week:['چک عادی (یک هفته بعد)','تماس بگیرید و حال عمومی بیمار را بپرسید.'],suture:['نوبت کشیدن بخیه (دو هفته بعد)','برای کشیدن بخیه نوبت بدهید.'],uncover:['نوبت آنکاوری','برای آنکاوری ایمپلنت‌ها نوبت بدهید.']};
+const tDay=(d)=>{try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).format(d||new Date())}catch(e){return new Date().toISOString().slice(0,10)}};
+const dDiff=(a,b)=>Math.round((Date.parse(a+'T00:00:00Z')-Date.parse(b+'T00:00:00Z'))/864e5);
+function dueLbl(due){const n=dDiff(due,tDay());const j=jalali(new Date(due+'T12:00:00Z')).slash;return n===0?'امروز':n===1?'فردا':n<0?`${fa(-n)} روز گذشته (${j})`:`${j} (${fa(n)} روز دیگر)`}
+function renderTasks(){const today=tDay();const one=(t,uc)=>{const L=TLBL[t.kind]||[t.kind,''],n=dDiff(t.due,today),late=!t.done&&n<0;
+    return `<div class="item task${t.done?' done':''}${late?' late':''}"><div class="row1"><div><div class="nm">${esc(t.name||'')}</div><div class="meta">${esc(L[0])}${uc&&t.info?' — '+esc(t.info.split(',').map(k=>toothTxt([k])).join('، ')):''}</div><div class="meta">${t.done?'انجام شد':esc(L[1])}</div></div>
+      <span class="pill ${t.done?'done':late?'settle':n===0?'wait':''}">${dueLbl(t.due)}</span></div>
+      <div class="acts">${t.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(t.phone))}">تماس ${esc(faD(t.phone))}</a>`:''}${t.done?`<button class="btn sm ghost" data-tundo="${esc(t.id)}" type="button">برگرداندن</button>`:`<button class="btn sm" data-tdone="${esc(t.id)}" type="button">انجام شد</button>`}</div></div>`};
+  const list=(el,arr,horizon,key,uc)=>{const show=arr.filter(t=>t.done||TASK_ALL[key]||dDiff(t.due,today)<=horizon),more=arr.length-show.length;
+    $(el).innerHTML=(show.length?show.map(t=>one(t,uc)).join(''):'<div class="empty">فعلاً موردی نیست.</div>')+(more?`<button class="btn sm ghost" data-tall="${key}" type="button">نمایش ${fa(more)} مورد بعدی</button>`:'')};
+  list('fuList',TASKS.filter(t=>t.kind!=='uncover'),1,'fu',false);list('ucList',TASKS.filter(t=>t.kind==='uncover'),14,'uc',true)}
+document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.tall){TASK_ALL[t.dataset.tall]=true;renderTasks();return}
+  if(t.dataset.tdone||t.dataset.tundo){t.disabled=true;try{await api('taskDone',{id:t.dataset.tdone||t.dataset.tundo,undo:!!t.dataset.tundo,by:$('rc_asst').value||''});const x=TASKS.find(v=>v.id===(t.dataset.tdone||t.dataset.tundo));if(x)x.done=t.dataset.tdone?1:0;renderTasks();pollQ(true)}catch(err){alertMsg(err.message)}finally{t.disabled=false}}});
+function applyQueue(j){if(!j||j.same||!j.items)return;if(j.tasks){TASKS=j.tasks;try{renderTasks()}catch(e){}}QV=j.ver;try{localStorage.setItem('implantQ:'+ROLE,JSON.stringify({ver:j.ver,items:j.items}))}catch(e){}const prev=QSEEN;QITEMS=j.items;
   const fresh=prev?QITEMS.filter(x=>x.queue===NEWQ[ROLE]&&!prev.has(x.id)).map(x=>x.id):[];
   QSEEN=new Set(QITEMS.map(x=>x.id));
   if(NEWQ[ROLE]&&fresh.length){beep();fresh.forEach(id=>FRESH.add(id));setTimeout(()=>{fresh.forEach(id=>FRESH.delete(id));renderQ()},15000)}
@@ -1509,7 +1566,15 @@ function show(v){$('viewLogin').hidden=v!=='login';$('nav').hidden=v==='login';$
   $('tabQueue').setAttribute('aria-current',v==='queue');$('tabRecep').setAttribute('aria-current',v==='recep');
   $('tabList').setAttribute('aria-current',v==='list');$('tabNew').setAttribute('aria-current',v==='form'&&!F.id);
   if(v==='queue'||v==='recep')renderQ();window.scrollTo(0,0)}
-function openForm(r){F=r;CUR=1;dirty=false;renderForm();show('form')}
+function openForm(r){F=r;CUR=1;dirty=false;renderForm();show('form');loadPhoto()}
+/* consultant adds a patient photo (shown on the surgery-day page) */
+function loadPhoto(){const card=$('photoCard'),img=$('fPhoto');card.hidden=!(ROLE==='consultant'&&CF_ON&&F.id);img.hidden=true;img.removeAttribute('src');$('photoDel').hidden=true;$('photoMsg').textContent='';
+  if(card.hidden)return;const id=F.id;api('get',{id},{prio:'bg'}).then(j=>{if(F.id===id&&j.photo){img.src=j.photo;img.hidden=false;$('photoDel').hidden=false}}).catch(()=>{})}
+function shrinkPhoto(file){return new Promise((ok,no)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const m=640,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+  c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);let q=.82,d=c.toDataURL('image/jpeg',q);while(d.length>450000&&q>.4){q-=.1;d=c.toDataURL('image/jpeg',q)}ok(d)};im.onerror=()=>no(new Error('این فایل عکس نیست.'));im.src=u})}
+document.addEventListener('change',async e=>{if(e.target.id!=='photoIn')return;const f=e.target.files[0];e.target.value='';if(!f||!F.id)return;const m=$('photoMsg');m.className='msg';m.textContent='در حال ذخیره‌ی عکس…';
+  try{const d=await shrinkPhoto(f);await api('setPhoto',{id:F.id,photo:d},{timeout:20000});$('fPhoto').src=d;$('fPhoto').hidden=false;$('photoDel').hidden=false;m.className='msg ok';m.textContent='عکس ذخیره شد.'}catch(err){m.className='msg err';m.textContent=err.message}});
+document.addEventListener('click',async e=>{if(e.target.id!=='photoDel')return;const m=$('photoMsg');try{await api('setPhoto',{id:F.id,photo:''});$('fPhoto').hidden=true;$('photoDel').hidden=true;m.className='msg ok';m.textContent='عکس حذف شد.'}catch(err){m.className='msg err';m.textContent=err.message}});
 function logout(){API.pw='';API.t='';ROLE='';RQ.list.forEach(j=>{j.aborted=true;j.no(new Error('aborted'))});RQ.list=[];if(RQ.cur){RQ.cur.aborted=true;RQ.cur.ctrl&&RQ.cur.ctrl.abort()}QV='';QSEEN=null;QITEMS=[];stopPoll();saveApi();show('login');$('lg_pw').type='password';$('lgShow').checked=false;pwPrefill();$('lgUrlWrap').hidden=!!API_URL_DEFAULT||IN_GAS;$('lg_url').value=API.url||''}
 function applySettings(s){if(s)SET={...DEFAULT_SET,...s};SET.prices=SET.prices||{};try{fillRecep()}catch(e){}try{$('lgClinic').textContent=SET.clinic||'';if(ROLE)$('whoami').textContent=(ROLE_LBL[ROLE]||'')+(SET.clinic?' · '+SET.clinic:'')}catch(e){}try{localStorage.setItem('implantPlanSettings',JSON.stringify(SET))}catch(e){}
   if(F.status==='new'&&!dirty){F=blankForm();renderForm()}}
@@ -1582,7 +1647,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
     if(t.dataset.single){Object.keys(s.sel).forEach(o=>{if(!isTooth(o)&&o.split(':')[0]===t.dataset.g)s.sel[o]=false});document.querySelectorAll(`.chip[data-sid="${t.dataset.sid}"][data-g="${t.dataset.g}"]`).forEach(c=>c.setAttribute('aria-pressed','false'))}
     s.sel[k]=on;t.setAttribute('aria-pressed',on);touch();recalc();return}
   if(t.dataset.aot!==undefined){const sx=AS().aox;if(t.dataset.aot)sx.isel['t:long']=true;else delete sx.isel['t:long'];reSec('aox');touch();recalc();return}
-  if(t.dataset.cmode!==undefined){const sx=AS().cbct;if(t.dataset.cmode)sx.isel['m:ct']=true;else delete sx.isel['m:ct'];reSec('cbct');touch();recalc();return}
+  if(t.dataset.cmode!==undefined){const sx=AS().cbct;if(t.dataset.cmode){sx.isel['m:ct']=true;['q1','q2','q3','q4'].forEach(q=>sx.sel[q]=true)}else delete sx.isel['m:ct'];reSec('cbct');touch();recalc();return}
   if(t.hasAttribute('data-spadd')){const sx=AS().imp;sx.sp=sx.sp||[];sx.sp.push({k:'',b:'',d:'',l:''});reSec('imp');touch();const r=document.querySelectorAll('[data-sec="imp"] .sp-row');if(r.length)r[r.length-1].querySelector('select').focus();return}
   if(t.dataset.spdel){AS().imp.sp.splice(Number(t.dataset.spdel),1);reSec('imp');touch();return}
   if(t.dataset.isid){if(t.disabled)return;const x=SEC[t.dataset.isid],s=AS()[t.dataset.isid],k=t.dataset.ik,on=!s.isel[k];s.isel[k]=on;t.setAttribute('aria-pressed',on);
@@ -1709,7 +1774,9 @@ function openSurg(x){const d=x.data||{};const rec=fromDoc(x.id,d);if(!rec.h.name
   $('sgName').textContent='روز جراحی · '+(rec.h.name||'');
   $('sgMeta').textContent=[rec.h.nid?'کد ملی '+faD(rec.h.nid):'',rec.h.age?'سن '+faD(rec.h.age):'',rec.h.phone?faD(rec.h.phone):'',rec.brand&&rec.brand!=='ref'?'برند طرح: '+BRANDS.find(b=>b.k===rec.brand).n:'',rec.jalali?'تأیید طرح '+rec.jalali:''].filter(Boolean).join(' · ');
   const ms=medShort(rec.med);$('sgMed').hidden=!ms;$('sgMed').textContent=ms?'⚠ '+ms:'';
-  const L=secLines(rec.s);$('sgPlan').innerHTML=L.length?L.map(l=>`<li><b>${esc(l.t)}:</b> ${esc(l.d)}</li>`).join(''):'<li>—</li>';
+  $('sgPlan').innerHTML=planViewHTML(rec.s);
+  const ph=$('sgPhoto');ph.hidden=true;ph.removeAttribute('src');if(x.photo){ph.src=x.photo;ph.hidden=false}else if(CF_ON)api('get',{id:x.id},{prio:'bg'}).then(j=>{if(j.photo&&SURG&&SURG.id===x.id){ph.src=j.photo;ph.hidden=false}}).catch(()=>{});
+  document.querySelectorAll('[data-fu]').forEach(c=>c.checked=true);
   const pc=['U','L'].filter(j=>num(rec.s.imp.jc[j]));
   $('sgPrev').innerHTML=(pc.length?`<p class="note">ایمپلنت در طرح با «تعداد کل» آمده (${pc.map(j=>(j==='U'?'فک بالا ':'فک پایین ')+fa(num(rec.s.imp.jc[j]))).join('، ')})؛ امروز شماره‌ی دندان هر ایمپلنت را بزنید.</p>`:'')+
     (prev.length?`<h3 style="margin:10px 0 4px;font-size:.95rem">جلسه‌های قبلی</h3>`+prev.map(ss=>{const S=secFrom(ss.s||{});const ll=secLines(S);
@@ -1717,7 +1784,18 @@ function openSurg(x){const d=x.data||{};const rec=fromDoc(x.id,d);if(!rec.h.name
   $('sgTitle').textContent=`جلسه‌ی ${fa(prev.length+1)} جراحی · ${jalali(new Date()).slash}`;
   $('sg_note').value='';$('sg_fin').checked=false;$('sgMsg').textContent='';try{$('sg_by').value=localStorage.getItem('implantSurgBy')||''}catch(e){}
   $('sections').innerHTML='';renderSurg();show('surg');if(CF_ON)pollInv(true);SURG&&(SURG.open=true)}
-function renderSurg(){$('surgSecs').innerHTML=SECTIONS.filter(x=>x.price||x.kind!=='none').map(sectionHTML).join('');renderImps()}
+const SURG_SECS=()=>SECTIONS.filter(x=>(x.price||x.kind!=='none')&&x.id!=='cons');
+function renderSurg(){if(!SURG)return;SURG.openSecs=SURG.openSecs||new Set();renderPick();
+  $('surgSecs').innerHTML=SURG_SECS().filter(x=>SURG.openSecs.has(x.id)).map(sectionHTML).join('');renderImps()}
+/* small treatment picker: open only the tables you need */
+function renderPick(){if(!SURG)return;const P=SURG.plan,S=SURG.s,pv={brand:'ko',pay:{}};
+  $('sgPick').innerHTML='<span class="note">درمان‌ها (بزنید تا جدولش باز شود):</span>'+SURG_SECS().map(x=>{const inPlan=rowUsed(Object.assign({s:P},pv),x),on=rowUsed(Object.assign({s:S},pv),x);
+    return `<button type="button" class="chip sgc${inPlan?' inplan':''}${on?' marked':''}" data-sgsec="${x.id}" aria-pressed="${SURG.openSecs.has(x.id)}">${x.t}${on?' ✓':''}</button>`}).join('')}
+function planViewHTML(S){const pv={s:S,brand:'ko',pay:{}};const used=SECTIONS.filter(x=>rowUsed(pv,x));if(!used.length)return '<p class="note">طرحی ثبت نشده.</p>';
+  return used.map(x=>{const st=S[x.id];let mc='';
+    if(x.kind==='teeth'||x.n){const row=j=>{let r='';for(let i=x.n;i>=1;i--)r+=`<i class="${st.sel[j+'R'+i]?'on':''}">${i}</i>`;r+='<b></b>';for(let i=1;i<=x.n;i++)r+=`<i class="${st.sel[j+'L'+i]?'on':''}">${i}</i>`;return `<div class="mr">${r}</div>`};
+      if(Object.keys(st.sel).some(k=>st.sel[k]&&isTooth(k)))mc=`<div class="mc">${row('U')}${row('L')}</div>`}
+    return `<div class="pv-card" data-kind="${x.pros?'pros':'surg'}"><h3>${x.t}</h3>${mc}<p>${esc(secDesc(S,x)||'—')}</p></div>`}).join('')}
 function renderImps(){if(!SURG)return;const s=SURG.s.imp,keys=Object.keys(s.sel).filter(k=>s.sel[k]&&isTooth(k)).sort();
   $('sgImps').innerHTML=keys.length?keys.map(k=>{const m=SURG.imp[k];return `<button type="button" data-impedit="${k}">${esc(toothTxt([k]))} — ${m&&m.b&&m.d&&m.l?esc(impTxt(m)):'<span class="miss">برند و سایز ثبت نشده؛ بزنید</span>'}</button>`}).join(''):'<p class="note">ایمپلنتی برای این جلسه علامت نخورده. در بخش «پایه ایمپلنت» روی شماره‌ی دندان بزنید.</p>';
   document.querySelectorAll('#surgSecs .t[data-sid="imp"]').forEach(b=>{b.classList.toggle('hasimp',!!SURG.imp[b.dataset.k]);b.setAttribute('aria-pressed',!!s.sel[b.dataset.k])})}
@@ -1750,7 +1828,7 @@ async function surgSave(t){if(!SURG)return;const m=$('sgMsg');const sel=Object.k
   if(!used&&!t.dataset.armed){t.dataset.armed='1';m.className='msg err';m.textContent='هیچ کاری برای این جلسه علامت نخورده. اگر درست است دوباره «ثبت جلسه» را بزنید.';setTimeout(()=>delete t.dataset.armed,5000);return}delete t.dataset.armed;
   const by=$('sg_by').value.trim();try{localStorage.setItem('implantSurgBy',by)}catch(e){}
   const imp={};sel.forEach(k=>imp[k]=SURG.imp[k]);
-  const ses={n:SURG.prev.length+1,at:new Date().toISOString(),jalali:jalali(new Date()).slash,by,note:$('sg_note').value.trim(),s:secDoc(SURG.s),imp};
+  const ses={fu:[...document.querySelectorAll('[data-fu]')].filter(c=>c.checked).map(c=>c.dataset.fu),n:SURG.prev.length+1,at:new Date().toISOString(),jalali:jalali(new Date()).slash,by,note:$('sg_note').value.trim(),s:secDoc(SURG.s),imp};
   const fin=$('sg_fin').checked,all=SURG.prev.concat([ses]);
   const actual=surgActual(SURG.rec,all),planned=surgPlanned(SURG.rec);
   t.disabled=true;m.className='msg';m.textContent='در حال ثبت…';
@@ -1789,12 +1867,14 @@ function impTable(rows){const rh=44,cols=[['دندان',0.22],['برند و سی
     cols.forEach(([t,f])=>{T(cx,t,x-12,top+rh/2,{s:18,w:800});x-=W*f});
     rows.forEach((rw,i)=>{const yy=top+rh*(i+1);box(cx,C.L,yy,W,rh,i%2?FAINT:null,'#bbb',1);let xx=C.R;rw.forEach((v,ci)=>{const w=W*cols[ci][1];let fs=19;while(Wd(cx,v,{s:fs})>w-20&&fs>12)fs--;T(cx,v,xx-12,yy+rh/2,{s:fs});xx-=w})})}}}
 const impRows=im=>Object.keys(im||{}).sort().map(k=>{const m=im[k];return [toothTxt([k]),[m.b,m.sys].filter(Boolean).join(' '),(m.d?'Ø'+m.d:'')+(m.d&&m.l?' × ':'')+(m.l?m.l:''),m.ht?(m.ht==='heal'?'هیلینگ':'کاور')+(m.hs?' '+m.hs:''):'—']});
-async function surgReportPDF(r,sg){const blocks=[];
+function surgBlocks(sg){const blocks=[];
   (sg.sessions||[]).forEach(ss=>{blocks.push(bigTitle(`جلسه‌ی ${fa(ss.n||0)} جراحی — ${ss.jalali||''}`));
     const ll=secLines(secFrom(ss.s||{}));blocks.push(textBlock('کارهای انجام‌شده',ll.length?ll.map(l=>'• '+l.t+': '+l.d):['—']));
     const rows=impRows(ss.imp);if(rows.length){blocks.push(textBlock('ایمپلنت‌ها',[]));blocks.push(impTable(rows))}
     const o=[];if(ss.note)o.push('توضیحات: '+ss.note);if(ss.by)o.push('دستیار: '+ss.by);if(o.length)blocks.push(textBlock('',o))});
   if(sg.finished)blocks.push(textBlock('',['درمان جراحی به پایان رسید.']));
+  return blocks}
+async function surgReportPDF(r,sg){const blocks=surgBlocks(sg);
   blocks.push(signBlock());
   return docPDF(r,{title:'گزارش جراحی ایمپلنت',dateLine:'تاریخ آخرین جلسه: '+(((sg.sessions||[]).slice(-1)[0]||{}).jalali||'')},blocks,true)}
 async function implantCardPDF(r,sg){const rows=[];(sg.sessions||[]).forEach(ss=>impRows(ss.imp).forEach(rw=>rows.push(rw)));
@@ -1803,7 +1883,9 @@ async function implantCardPDF(r,sg){const rows=[];(sg.sessions||[]).forEach(ss=>
   return docPDF(r,{title:'کارت ایمپلنت بیمار',dateLine:'کلینیک: '+(SET.clinic||'')},blocks,false)}
 async function surgDownload(kind,r,sg){const b=kind==='card'?await implantCardPDF(r,sg):await surgReportPDF(r,sg);downloadBlob(b,safeName(r.h.name||'بیمار')+(kind==='card'?' - کارت ایمپلنت.pdf':' - گزارش جراحی.pdf'))}
 
+document.addEventListener('click',e=>{if(SURG&&e.target.closest&&e.target.closest('#surgSecs'))setTimeout(renderPick,0)});
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.sgsec){const id=t.dataset.sgsec;if(SURG.openSecs.has(id))SURG.openSecs.delete(id);else SURG.openSecs.add(id);renderSurg();if(SURG.openSecs.has(id)){const el=document.querySelector(`#surgSecs [data-sec="${id}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'})}return}
   if(t.dataset.impedit){openImp(t.dataset.impedit);return}
   if(t.dataset.ht){IMPH=IMPH===t.dataset.ht?'':t.dataset.ht;document.querySelectorAll('#impSheet [data-ht]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ht===IMPH));return}
   if(t.id==='impOk'){impSave();return}if(t.id==='impDel'){impDel();return}if(t.id==='impClose'){$('impSheet').hidden=true;return}
