@@ -482,6 +482,16 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
 .day.today{border-color:var(--accent)}.day[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}.day[aria-pressed="true"] small,.day[aria-pressed="true"] .n{color:inherit;opacity:.9}
 .day .cap{font-size:.66rem;font-weight:700;border-radius:99px;padding:0 6px;background:var(--lapis-soft);color:var(--lapis)}.day .cap.full{background:var(--bad-soft);color:var(--bad)}
 .day.fri{opacity:.75}
+.calmode{max-width:260px;margin:0 0 8px}
+.mgrid .wd{text-align:center;font-size:.72rem;color:var(--muted);font-weight:700}
+.day i{font-style:normal}.mgrid .day{min-height:62px;padding:6px 2px}.day.blank{visibility:hidden;pointer-events:none}
+.calsum{margin:-4px 2px 12px;font-size:.86rem}.calsum:empty{display:none}
+.ksum{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.kchip{font-size:.78rem;border-radius:99px;padding:3px 10px;background:var(--sunk);color:var(--ink);border:1px solid var(--line);white-space:nowrap}.kchip b{color:var(--accent);font-variant-numeric:tabular-nums}
+.agrp{display:flex;flex-direction:column;gap:inherit}.agh{font-size:.88rem;font-weight:800;margin:10px 2px 2px;display:flex;align-items:center;gap:6px;color:var(--accent)}
+.agh .cnt{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:99px;background:var(--sunk);color:var(--muted);font-size:.72rem;padding:0 6px}
+.dayh{font-weight:800;margin:8px 2px 0}.dayh+.ksum{margin-top:4px}
+@media (max-width:560px){.mgrid .day .n i,.mgrid .day .cap i{display:none}.mgrid .day{min-height:54px}}
 @media (max-width:560px){.days{gap:3px}.day{padding:6px 2px;min-height:68px}.day small{font-size:.62rem}.day b{font-size:.95rem}}
 .appt .tm{font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent);margin-inline-end:8px}
 .appt.st-done{opacity:.7}.appt.st-cancel,.appt.st-noshow{opacity:.55}.appt.st-cancel .nm{text-decoration:line-through}
@@ -531,6 +541,10 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
 .funnel .hbar .tr i{background:var(--lapis)}
 .dtable{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:8px}.dtable th,.dtable td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:right;font-variant-numeric:tabular-nums}
 .dtip{position:fixed;pointer-events:none;background:var(--ink);color:var(--surface);font-size:.78rem;padding:6px 10px;border-radius:8px;z-index:99;white-space:nowrap}
+/* long names/notes must wrap inside their box (patient file, cards, lists) */
+.nm,.meta,.note,.kv span,.pv-card p,.tl-i p,.tl-i b,.llog li,.lorder,.labcard,.prow,.banner,.qwarn{overflow-wrap:anywhere}
+.row1>*,.prow>*,.kv>*,.labmsg>input{min-width:0}
+.item .row1,.qitem .row1{flex-wrap:wrap}.row1>.pill{margin-inline-start:auto}
 
 </style>
 </head>
@@ -652,8 +666,10 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
   <section id="viewCal" class="wrap" style="padding:0" hidden>
     <div class="qhead"><h2>نوبت‌ها</h2><button class="btn" id="calNew" type="button">+ نوبت جدید</button></div>
     <div class="banner info" id="calRem" hidden></div>
+    <div class="seg calmode" id="calMode" role="group" aria-label="نمای تقویم"></div>
     <div class="calnav"><button class="btn ghost sm" id="calPrev" type="button">→ هفته‌ی قبل</button><b id="calRange"></b><button class="btn ghost sm" id="calToday" type="button">امروز</button><button class="btn ghost sm" id="calNext" type="button">هفته‌ی بعد ←</button></div>
     <div class="days" id="calDays"></div>
+    <div class="calsum" id="calSum"></div>
     <div class="qhead"><h2 id="calDayT" style="font-size:1rem"></h2></div>
     <div class="list" id="calList"><div class="empty">در حال بارگذاری…</div></div>
   </section>
@@ -1111,8 +1127,9 @@ function totals(r){const surg=bz();let pros=0;
   return {surg,pros}}
 const MIL=1e6,rnd=v=>v>=MIL?Math.round(v/MIL)*MIL:Math.round(v);
 function splitPay(T,pct,n){const c=Math.min(T,rnd(T*pct)),rest=T-c;n=Math.max(1,n||1);const per=rest>=MIL*n?Math.floor(rest/n/MIL)*MIL:Math.floor(rest/n);return {c,rest,n,per,last:rest-per*(n-1)}}
-const pctS=r=>{const v=num(r.pay.cs);return r.pay.cs!==undefined&&String(r.pay.cs).trim()!==''?Math.min(100,v):(r.pay.opt==='1'?30:50)};
-const pctP=r=>{const v=num(r.pay.cp);return r.pay.cp!==undefined&&String(r.pay.cp).trim()!==''?Math.min(100,v):30};
+const pctN=v=>{const x=parseFloat(toEn(String(v)).replace(/[٫\/,]/,'.').replace(/[^\d.]/g,''));return isFinite(x)?Math.max(0,Math.min(100,x)):0};
+const pctS=r=>r.pay.cs!==undefined&&String(r.pay.cs).trim()!==''?pctN(r.pay.cs):(r.pay.opt==='1'?30:50);
+const pctP=r=>r.pay.cp!==undefined&&String(r.pay.cp).trim()!==''?pctN(r.pay.cp):30;
 function cashFor(r,S,P){return splitPay(S,pctS(r)/100,1).c+splitPay(P,pctP(r)/100,1).c}
 function payText(r,brand){const T=totals(r),b=brand||effBrand(r),S=T.surg[b],p=r.pay,out={surg:'',pros:''},ps=pctS(r),pp=pctP(r);
   const chk=x=>x.n<2||x.per===x.last?`هر چک ${fa(x.per)}`:`${fa(x.n-1)} چک هر کدام ${fa(x.per)} و چک آخر ${fa(x.last)}`;
@@ -1826,9 +1843,13 @@ function renderQ(){try{renderKpi()}catch(e){}try{renderConx();renderSurgAppts();
       <div class="meta">${qMeta(x)}</div>${medShort(x.med)?`<div class="qwarn">⚠ ${esc(medShort(x.med))}</div>`:''}${x.note?`<div class="nt">${esc(x.note)}</div>`:''}</button>`).join(''):(ROLE==='consultant'?'<div class="empty">طرح درمانی منتظر مشاور نیست.</div>':ROLE==='surgery'?'<div class="empty">بیماری برای جراحی فرستاده نشده.</div>':'<div class="empty">بیماری در صف انتظار نیست.</div>');
     document.title=(w?`(${fa(w)}) `:'')+'کارتابل '+ROLE_LBL[ROLE]+' · طرح درمان ایمپلنت'}
   else{
-    $('rList').innerHTML=QITEMS.length?QITEMS.map((x,i)=>`<div class="item"><div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span>
+    /* group today's queue by what the patient came for: today's appointment kind, else surgery / first visit */
+    const td=tDay(),catOf=x=>{const a=QAPPT.find(a=>a.plan===x.id&&a.day===td&&a.st!=='cancel');return a?akOf(a):['surgery','surgdone'].includes(x.queue)?'surg':'visit'};
+    const row=(x,i)=>`<div class="item"><div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span>
       <div class="meta">${qMeta(x)}</div>${x.note?`<div class="meta">${esc(x.note)}</div>`:''}</div>${qPill(x)}</div>
-      ${x.queue==='waiting'?`<div class="acts"><button class="btn sm ghost" data-qedit="${esc(x.id)}" type="button">ویرایش</button><button class="btn sm ghost" data-qdel="${esc(x.id)}" type="button">حذف از صف</button></div>`:''}</div>`).join(''):'<div class="empty">امروز هنوز بیماری پذیرش نشده.</div>'}}
+      ${x.queue==='waiting'?`<div class="acts"><button class="btn sm ghost" data-qedit="${esc(x.id)}" type="button">ویرایش</button><button class="btn sm ghost" data-qdel="${esc(x.id)}" type="button">حذف از صف</button></div>`:''}</div>`;
+    const by={};QITEMS.forEach((x,i)=>(by[catOf(x)]=by[catOf(x)]||[]).push([x,i]));
+    $('rList').innerHTML=QITEMS.length?kindSum(QITEMS.map(x=>({kind:catOf(x)})))+AORD.filter(k=>by[k]).map(k=>`<div class="agrp"><h3 class="agh">${k==='visit'?'ویزیت اولیه':akHead(k)} <span class="cnt">${fa(by[k].length)}</span></h3>${by[k].map(([x,i])=>row(x,i)).join('')}</div>`).join(''):'<div class="empty">امروز هنوز بیماری پذیرش نشده.</div>'}}
 const RCF=['name','nid','date','phone','age','asst','city','ref','note'];
 function fillRecep(v){const el=$('rc_asst');if(!el)return;const L=(SET.recep||[]).filter(Boolean);const cur=v!==undefined?v:el.value;
   el.innerHTML=`<option value="">${L.length?'— انتخاب پذیرنده —':'— فهرست پذیرنده‌ها در تنظیمات وارد نشده —'}</option>`+L.map(n=>`<option${n===cur?' selected':''}>${esc(n)}</option>`).join('')+(cur&&!L.includes(cur)?`<option selected>${esc(cur)}</option>`:'');
@@ -2512,7 +2533,13 @@ document.addEventListener('input',e=>{if(['rc_nid','rc_phone','rc_name'].include
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const sh=[...document.querySelectorAll('.sheet:not([hidden])')].pop();if(sh&&sh.id!=='cSheet'&&!busy)sh.hidden=true});
 
 /* ======================= treatment flow: appointments, prosthesis & lab, payments, follow-ups, consent, patient link, dashboard ======================= */
-const AKL={postop:'پیگیری بعد از جراحی',surg:'جراحی',uncover:'آنکاوری',impr:'قالب‌گیری',tryin:'امتحان پروتز',deliv:'تحویل پروتز',suture:'کشیدن بخیه',check:'چکاپ دوره‌ای',other:'ویزیت'};
+/* appointment kinds, in treatment order (used for ordering groups and the kind picker) */
+const AKL={visit:'ویزیت اولیه',surg:'جراحی',postop:'ویزیت بعد جراحی',suture:'کشیدن بخیه',uncover:'آنکاوری',impr:'قالب‌گیری',tryin:'تست رزین',deliv:'تحویل روکش',check:'چکاپ دوره‌ای',other:'سایر'};
+const AORD=Object.keys(AKL),akOf=a=>AKL[a.kind]?a.kind:'other',akHead=k=>k==='other'?'سایر نوبت‌ها':'نوبت '+AKL[k];
+const nPat=L=>new Set(L.map(a=>a.plan||a.name||a.id)).size;
+function kindSum(L){const n={};L.forEach(a=>{const k=akOf(a);n[k]=(n[k]||0)+1});return L.length?`<div class="ksum">${AORD.filter(k=>n[k]).map(k=>`<span class="kchip"><b>${fa(n[k])}</b> ${AKL[k]}</span>`).join('')}</div>`:''}
+function apptGroups(L,o){const by={};L.forEach(a=>(by[akOf(a)]=by[akOf(a)]||[]).push(a));
+  return AORD.filter(k=>by[k]).map(k=>`<div class="agrp"><h3 class="agh">${akHead(k)} <span class="cnt">${fa(by[k].length)}</span></h3>${by[k].sort((a,b)=>(a.day+(a.time||'99')).localeCompare(b.day+(b.time||'99'))).map(a=>apptCard(a,o)).join('')}</div>`).join('')}
 const PST=[['heal','ترمیم و آنکاوری'],['impr','قالب‌گیری'],['lab','لابراتوار'],['tryin','امتحان پروتز'],['deliv','تحویل پروتز'],['done','تحویل شد']];
 const PSTN=Object.fromEntries(PST);
 const LST={new:'سفارش جدید',recv:'دریافت در لابراتوار',making:'در حال ساخت',ready:'آماده؛ ارسال شد',redo:'برگشت برای اصلاح',done:'تحویل بیمار شد',cancel:'لغو شد'};
@@ -2538,11 +2565,15 @@ const JMN=['فروردین','اردیبهشت','خرداد','تیر','مرداد
 const money=n=>fa(n)+' تومان';
 
 /* ---------- appointments: calendar ---------- */
-const CAL={start:'',sel:'',items:[],loaded:false};
+const CAL={start:'',sel:'',items:[],loaded:false,mode:(()=>{try{return localStorage.getItem('implantCalMode')==='month'?'month':'week'}catch(e){return 'week'}})()};
 const weekStart=d=>{const g=new Date(d+'T12:00:00Z').getUTCDay();return dAdd(d,-((g+1)%7))};
-async function loadCal(){if(!CAL.start){CAL.sel=tDay();CAL.start=weekStart(CAL.sel)}const td=tDay(),from=CAL.start<td?CAL.start:td,end=dAdd(CAL.start,6),to=end>dAdd(td,1)?end:dAdd(td,1);
+const jP=d=>toEn(jDay(d)).split('/').map(Number);
+const jMonth=d=>{const [y,m]=jP(d),s=parseJ(`${y}/${m}/1`),n=m<=6?31:m<12?30:(parseJ(`${y}/12/30`)?30:29);return {y,m,s,n,e:dAdd(s,n-1)}};
+/* displayed range: a Sat–Fri week, or a whole Jalali month */
+function calRange(){if(CAL.mode==='month'){const M=jMonth(CAL.sel);return {from:M.s,to:M.e,M}}return {from:CAL.start,to:dAdd(CAL.start,6)}}
+async function loadCal(){if(!CAL.start){CAL.sel=tDay();CAL.start=weekStart(CAL.sel)}const td=tDay(),R=calRange(),from=R.from<td?R.from:td,to=R.to>dAdd(td,1)?R.to:dAdd(td,1);
   try{const j=await api('apptList',{from,to});CAL.items=j.items||[];CAL.loaded=true;renderCal()}catch(e){if(e.message!=='aborted')$('calList').innerHTML=`<div class="empty">${esc(e.message)}</div>`}}
-function apptMsg(a){const c=SET.clinic||'کلینیک';return `${a.name?a.name+' عزیز':'بیمار عزیز'}، سلام. یادآوری نوبت ${AKL[a.kind]||'ویزیت'} شما در ${c}: ${wDay(a.day)} ${jDay(a.day)}${a.time?' ساعت '+faD(a.time):''}.${SET.phone?' هماهنگی: '+SET.phone:''}`}
+function apptMsg(a){const c=SET.clinic||'کلینیک';return `${a.name?a.name+' عزیز':'بیمار عزیز'}، سلام. یادآوری نوبت ${akOf(a)==='other'?'ویزیت':AKL[a.kind]} شما در ${c}: ${wDay(a.day)} ${jDay(a.day)}${a.time?' ساعت '+faD(a.time):''}.${SET.phone?' هماهنگی: '+SET.phone:''}`}
 function apptCard(a,o={}){const n=dDiff(a.day,tDay()),st=a.st||'set',can=canAppt();
   const stp=st==='done'?'<span class="pill done">انجام شد</span>':st==='cancel'?'<span class="pill">لغو شد</span>':st==='noshow'?'<span class="pill settle">نیامد</span>':a.sms?'<span class="pill done">یادآوری رفت</span>':'';
   const sms=a.phone&&smsLink(a.phone,apptMsg(a));
@@ -2555,14 +2586,22 @@ function apptCard(a,o={}){const n=dDiff(a.day,tDay()),st=a.st||'set',can=canAppt
       ${st==='set'&&can?`<button class="btn sm ghost" data-aedit="${esc(a.id)}" type="button">جابه‌جایی / ویرایش</button><button class="btn sm ghost" data-ast="cancel" data-aid="${esc(a.id)}" type="button">لغو</button>`:''}
       ${st!=='set'&&can?`<button class="btn sm ghost" data-ast="set" data-aid="${esc(a.id)}" type="button">برگرداندن</button>`:''}
       ${a.plan&&!o.nofile?`<button class="btn sm ghost" data-file="${esc(a.plan)}" data-fname="${esc(a.name)}" type="button">پرونده</button>`:''}</div></div>`}
-function renderCal(){const td=tDay(),cap=Number(SET.cap)||0,days=[...Array(7)].map((_,i)=>dAdd(CAL.start,i));
+function renderCal(){const td=tDay(),cap=Number(SET.cap)||0,R=calRange(),mon=CAL.mode==='month';CAL.rs=R.from;CAL.re=R.to;
+  const n=mon?R.M.n:7,days=[...Array(n)].map((_,i)=>dAdd(R.from,i));
   $('calNew').hidden=!canAppt();
-  const jS=d=>{const p=toEn(jDay(d)).split('/').map(Number);return faD(String(p[2]))+' '+JMN[p[1]-1]};$('calRange').textContent=`${jS(days[0])} تا ${jS(days[6])}`;
-  $('calDays').innerHTML=days.map(d=>{const its=CAL.items.filter(a=>a.day===d&&a.st!=='cancel'),sg=its.filter(a=>a.kind==='surg').length,p=d.split('-');
-    return `<button type="button" class="day${d===td?' today':''}${new Date(d+'T12:00:00Z').getUTCDay()===5?' fri':''}" data-cday="${d}" aria-pressed="${d===CAL.sel}"><small>${esc(wDayS(d))}</small><b>${faD(String(+toEn(jDay(d)).split('/')[2]))}</b><span class="n">${its.length?fa(its.length)+' نوبت':'—'}</span>${sg?`<span class="cap${cap&&sg>=cap?' full':''}">جراحی ${fa(sg)}${cap?'/'+fa(cap):''}</span>`:''}</button>`}).join('');
-  const list=CAL.items.filter(a=>a.day===CAL.sel).sort((a,b)=>a.time<b.time?-1:1);
-  $('calDayT').textContent=`${wDay(CAL.sel)} ${jDay(CAL.sel)}`+(CAL.sel===td?' (امروز)':CAL.sel===dAdd(td,1)?' (فردا)':'');
-  $('calList').innerHTML=list.length?list.map(a=>apptCard(a)).join(''):`<div class="empty">برای این روز نوبتی ثبت نشده.${canAppt()?' با «+ نوبت جدید» ثبت کنید.':''}</div>`;
+  $('calMode').innerHTML=[['week','هفتگی'],['month','ماهانه']].map(([k,l])=>`<button type="button" data-calmode="${k}" aria-pressed="${CAL.mode===k}">${l}</button>`).join('');
+  $('calPrev').textContent=mon?'→ ماه قبل':'→ هفته‌ی قبل';$('calNext').textContent=mon?'ماه بعد ←':'هفته‌ی بعد ←';
+  const jS=d=>{const p=jP(d);return faD(String(p[2]))+' '+JMN[p[1]-1]};$('calRange').textContent=mon?`${JMN[R.M.m-1]} ${faD(String(R.M.y))}`:`${jS(days[0])} تا ${jS(days[6])}`;
+  const cell=d=>{const its=CAL.items.filter(a=>a.day===d&&a.st!=='cancel'),sg=its.filter(a=>a.kind==='surg').length;
+    return `<button type="button" class="day${d===td?' today':''}${new Date(d+'T12:00:00Z').getUTCDay()===5?' fri':''}" data-cday="${d}" aria-pressed="${d===CAL.sel}">${mon?'':`<small>${esc(wDayS(d))}</small>`}<b>${faD(String(jP(d)[2]))}</b><span class="n">${its.length?fa(its.length)+'<i> نوبت</i>':'—'}</span>${sg?`<span class="cap${cap&&sg>=cap?' full':''}"><i>جراحی </i>${fa(sg)}${cap?'/'+fa(cap):''}</span>`:''}</button>`};
+  const lead=mon?(new Date(R.from+'T12:00:00Z').getUTCDay()+1)%7:0;
+  $('calDays').className='days'+(mon?' mgrid':'');
+  $('calDays').innerHTML=(mon?['ش','ی','د','س','چ','پ','ج'].map(w=>`<span class="wd">${w}</span>`).join('')+'<span class="day blank"></span>'.repeat(lead):'')+days.map(cell).join('');
+  const inR=CAL.items.filter(a=>a.day>=R.from&&a.day<=R.to&&a.st!=='cancel');
+  $('calSum').innerHTML=inR.length?`<b>${mon?'این ماه':'این هفته'}: ${fa(inR.length)} نوبت · ${fa(nPat(inR))} بیمار</b>${kindSum(inR)}`:'';
+  const list=CAL.items.filter(a=>a.day===CAL.sel),live=list.filter(a=>a.st!=='cancel');
+  $('calDayT').textContent=`${wDay(CAL.sel)} ${jDay(CAL.sel)}`+(CAL.sel===td?' (امروز)':CAL.sel===dAdd(td,1)?' (فردا)':'')+(live.length?` — ${fa(nPat(live))} بیمار`:'');
+  $('calList').innerHTML=list.length?kindSum(live)+apptGroups(list):`<div class="empty">برای این روز نوبتی ثبت نشده.${canAppt()?' با «+ نوبت جدید» ثبت کنید.':''}</div>`;
   const tm=CAL.items.filter(a=>a.day===dAdd(td,1)&&a.st==='set'),un=tm.filter(a=>!a.sms&&a.phone);const rb=$('calRem');
   rb.hidden=!(canAppt()&&tm.length);if(!rb.hidden)rb.innerHTML=`فردا ${fa(tm.length)} نوبت دارید${un.length?`؛ <b>${fa(un.length)} یادآوری هنوز فرستاده نشده</b>`:'؛ یادآوری همه فرستاده شده'}. <button class="btn sm ghost" type="button" data-cday="${dAdd(td,1)}">نمایش فردا</button>`}
 
@@ -2762,7 +2801,7 @@ const DEFAULT_CONSENT=`اینجانب {name} با آگاهی کامل و با ر
 ۵. هزینه‌ها و شرایط پرداخت که در این طرح درمان نوشته شده است را مطالعه کرده و می‌پذیرم. قیمت‌ها تقریبی است و تغییر طرح درمان می‌تواند هزینه را تغییر دهد.`;
 const consentText=r=>(SET.consent||DEFAULT_CONSENT).replace(/\{name\}/g,(r.h.name||'').trim()||'……………').replace(/\{clinic\}/g,SET.clinic||'کلینیک');
 const SG={drawn:false,btn:null};
-function openSign(t){if(!(F.h.name||'').trim()||(F.brand==='ref'&&needBrand(F))){finalize(t);return}SG.btn=t;SG.drawn=false;$('sgnTxt').textContent=consentText(F);$('sgnMsg').textContent='';
+function openSign(t){if(!(F.h.name||'').trim()||(F.brand==='ref'&&needBrand(F))){if(PK.undo){Object.assign(F,PK.undo);PK.undo=null;CUR=1;renderForm()}delete F._next;finalize(t);return}SG.btn=t;SG.drawn=false;$('sgnTxt').textContent=consentText(F);$('sgnMsg').textContent='';
   const c=$('sgnPad'),cx=c.getContext('2d');cx.clearRect(0,0,c.width,c.height);$('sgnSkip').textContent=F.sign?'ادامه با امضای قبلی':'ثبت نهایی بدون امضا';$('sgnSheet').hidden=false}
 (function(){const c=$('sgnPad');if(!c)return;const cx=c.getContext('2d');let on=false,last=null;
   const pt=e=>{const r=c.getBoundingClientRect();return [(e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height]};
@@ -2827,7 +2866,8 @@ function showExtra(v){['cal','pros','lab','dash'].forEach(k=>{const el=$('view'+
   if(v==='lab'){pollLab(true);VTIMER=setInterval(()=>pollLab(false),8000)}
   if(v==='dash')loadDash()}
 function renderRecepAppts(){const el=$('raList');if(!el||ROLE!=='staff')return;const td=tDay(),A=QAPPT.filter(a=>a.st!=='cancel').sort((a,b)=>(a.day+a.time).localeCompare(b.day+b.time));
-  el.innerHTML=A.length?A.map(a=>apptCard(Object.assign({},a),{date:a.day!==td})).join(''):'<div class="empty">برای امروز و فردا نوبتی ثبت نشده.</div>'}
+  el.innerHTML=A.length?[[td,'امروز'],[dAdd(td,1),'فردا']].map(([d,l])=>{const L=A.filter(a=>a.day===d);
+    return `<div class="dayh">${l} <span class="note">${esc(wDay(d)+' '+jDay(d))}</span> — ${L.length?`${fa(nPat(L))} بیمار، ${fa(L.length)} نوبت`:'نوبتی ندارد'}</div>`+kindSum(L)+apptGroups(L,{date:d!==td})}).join(''):'<div class="empty">برای امروز و فردا نوبتی ثبت نشده.</div>'}
 function renderSurgAppts(){const el=$('qAppt');if(!el)return;if(ROLE!=='surgery'||!QAPPT.length){el.innerHTML='';return}
   el.innerHTML=`<div class="qhead"><h2>نوبت‌های جراحی امروز</h2></div><div class="list">${QAPPT.slice().sort((a,b)=>a.time<b.time?-1:1).map(a=>{const x=QITEMS.find(v=>v.id===a.plan);
     return `<div class="item appt st-${a.st}"><div class="row1"><div><span class="tm">${faD(a.time)}</span><span class="nm">${esc(a.name)}</span><div class="meta">${a.doc?esc(a.doc):''}${a.note?' · '+esc(a.note):''}</div></div>${a.st==='done'?'<span class="pill done">انجام شد</span>':''}</div>
@@ -2841,8 +2881,9 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button,a')
   if(t.id==='tabDash'){show('dash');return}
   if(t.dataset.dper){DASH.per=t.dataset.dper;document.querySelectorAll('[data-dper]').forEach(b=>b.setAttribute('aria-pressed',b===t));renderDash();return}
   /* calendar */
-  if(t.dataset.cday){CAL.sel=t.dataset.cday;if(CAL.sel<CAL.start||CAL.sel>dAdd(CAL.start,6)){CAL.start=weekStart(CAL.sel);loadCal()}else renderCal();return}
-  if(t.id==='calPrev'||t.id==='calNext'){CAL.start=dAdd(CAL.start,t.id==='calPrev'?-7:7);CAL.sel=CAL.start;$('calList').innerHTML='<div class="empty">در حال بارگذاری…</div>';loadCal();return}
+  if(t.dataset.cday){CAL.sel=t.dataset.cday;if(!CAL.rs||CAL.sel<CAL.rs||CAL.sel>CAL.re){CAL.start=weekStart(CAL.sel);loadCal()}else renderCal();return}
+  if(t.dataset.calmode){CAL.mode=t.dataset.calmode==='month'?'month':'week';try{localStorage.setItem('implantCalMode',CAL.mode)}catch(e){}CAL.start=weekStart(CAL.sel);loadCal();return}
+  if(t.id==='calPrev'||t.id==='calNext'){const nx=t.id==='calNext';if(CAL.mode==='month'){const M=jMonth(CAL.sel),s=nx?dAdd(M.e,1):jMonth(dAdd(M.s,-1)).s,M2=jMonth(s),td=tDay();CAL.sel=td>=M2.s&&td<=M2.e?td:s;CAL.start=weekStart(CAL.sel)}else{CAL.start=dAdd(CAL.start,nx?7:-7);CAL.sel=CAL.start}$('calList').innerHTML='<div class="empty">در حال بارگذاری…</div>';loadCal();return}
   if(t.id==='calToday'){CAL.sel=tDay();CAL.start=weekStart(CAL.sel);loadCal();return}
   if(t.id==='calNew'){openAppt({day:CAL.sel>=tDay()?CAL.sel:''});return}
   if(t.dataset.aedit){const a=[...CAL.items,...QAPPT,...((PF&&PF.j&&PF.j.appts)||[])].find(x=>x.id===t.dataset.aedit);if(a)openAppt(Object.assign({},a,{aid:a.id}));return}
