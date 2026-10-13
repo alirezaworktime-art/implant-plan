@@ -483,7 +483,20 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
 .rtabs button{font:inherit;font-size:.86rem;font-weight:700;border:0;background:transparent;color:var(--muted);border-radius:10px;padding:9px 4px;cursor:pointer;min-height:42px;display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;line-height:1.3}
 .rtabs button[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:var(--sh)}
 .rtabs b,.rfab b{display:inline-block;min-width:20px;padding:0 6px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:.74rem;line-height:20px;text-align:center}.rtabs b[hidden],.rfab b[hidden]{display:none}
-.rsec{margin:0 0 16px}.rsh{font-size:.98rem;margin:4px 0 8px;padding-inline-start:10px;border-inline-start:4px solid var(--line)}.rsh.k-sg{border-color:var(--lapis)}.rsh.k-pr{border-color:var(--accent)}
+:root{--k-sg:var(--lapis);--k-pr:var(--ok);--k-ck:#7a8794;--k-fl:var(--warn);--k-ot:var(--accent)}
+.item.kg-sg{border-inline-start-color:var(--k-sg)!important}.item.kg-pr{border-inline-start-color:var(--k-pr)!important}.item.kg-ck{border-inline-start-color:var(--k-ck)!important}.item.kg-fl{border-inline-start-color:var(--k-fl)!important}.item.kg-ot{border-inline-start-color:var(--k-ot)!important}.item.task.late{border-inline-start-color:var(--bad)!important}
+.pill.kp-sg{color:var(--k-sg);background:var(--lapis-soft)}.pill.kp-pr{color:var(--k-pr);background:var(--ok-soft)}.pill.kp-ck{color:var(--k-ck);background:var(--sunk)}.pill.kp-ot{color:var(--k-ot);background:var(--accent-soft)}
+.kdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:4px;vertical-align:middle;background:var(--k-ot)}.kdot.k-sg{background:var(--k-sg)}.kdot.k-pr{background:var(--k-pr)}.kdot.k-ck{background:var(--k-ck)}.kdot.k-fl{background:var(--k-fl)}
+.dots{display:flex;gap:2px;justify-content:center;line-height:0}.dots .kdot{margin:0;width:6px;height:6px}
+.kleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.74rem;color:var(--muted);margin:2px 0 10px}
+.rfab .fb.ck{border-color:var(--k-ck)}
+.more{position:relative}.more>summary{list-style:none;cursor:pointer}.more>summary::-webkit-details-marker{display:none}
+.more .menu{position:absolute;z-index:9;inset-inline-end:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh);padding:6px;display:flex;flex-direction:column;gap:4px;min-width:180px}
+.more .menu .btn{width:100%;justify-content:flex-start}
+.rnow{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}.rnh{font-weight:800;font-size:.92rem;display:flex;align-items:center;gap:6px}.rnh b{background:var(--bad);color:#fff;border-radius:999px;padding:0 8px;font-size:.78rem}.rnh.ok{color:var(--ok);font-weight:700;font-size:.85rem}
+.rn{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:12px;background:var(--warn-soft);border:1px solid transparent;border-inline-start:4px solid var(--warn)}.rn.bad{background:var(--bad-soft);border-inline-start-color:var(--bad)}
+.rn .tx{flex:1 1 220px;min-width:0;font-size:.86rem;line-height:1.7}.rn .acts{flex:0 0 auto}
+.rsec{margin:0 0 16px}.rsh{font-size:.98rem;margin:4px 0 8px;padding-inline-start:10px;border-inline-start:4px solid var(--line)}.rsh.k-sg{border-color:var(--lapis)}.rsh.k-pr{border-color:var(--k-pr)}
 .rday{display:inline-flex;min-width:170px}
 .akg{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}.akg small{color:var(--muted);font-size:.74rem}
 .onlw{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px dashed var(--lapis);border-radius:12px;background:var(--lapis-soft);cursor:pointer}.onlw input{width:20px;height:20px;accent-color:var(--lapis)}
@@ -507,7 +520,7 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
 .mday.past{opacity:.6}.mday.fri{opacity:.7}
 .mday.today{border-color:var(--accent);border-width:2px}
 .mday[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);opacity:1}.mday[aria-pressed="true"] .n{color:inherit}
-@container (max-width:520px){.mday i{display:none}.mday{min-height:54px}.mday .n{font-weight:700;color:var(--ink)}}.calnav b{flex:1;text-align:center;font-size:.92rem}
+@container (max-width:520px){.mday .n i,.mday .cap i{display:none}.mday{min-height:54px}.mday .n{font-weight:700;color:var(--ink)}}.calnav b{flex:1;text-align:center;font-size:.92rem}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}
 .day{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:var(--r);padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-height:76px;box-shadow:var(--sh)}
 .day small{font-size:.7rem;color:var(--muted)}.day b{font-size:1.05rem;font-variant-numeric:tabular-nums}.day .n{font-size:.7rem;color:var(--muted)}
@@ -637,7 +650,7 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
   <section id="viewRecep" class="wrap" style="padding:0" hidden>
     <div class="kpis" id="kpiStripR" hidden></div>
     <div class="rsearch"><input id="rS" type="search" placeholder="جستجوی سریع بیمار: نام، موبایل یا کد ملی" autocomplete="off"><div class="qres" id="rSRes"></div></div>
-    <div class="banner info" id="rRem" hidden></div>
+    <div class="rnow" id="rNow" hidden></div>
     <div class="rtabs" id="rTabs">
       <button type="button" data-rtab="ex">معاینه‌ی امروز <b id="rtN_ex"></b></button>
       <button type="button" data-rtab="ap">نوبت‌های امروز <b id="rtN_ap"></b></button>
@@ -654,7 +667,7 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
       <div class="rsec"><h3 class="rsh k-sg">نوبت‌های جراحی</h3><div class="rqf" id="raSgF"></div><div class="list" id="raSg"></div></div>
       <div class="rsec"><h3 class="rsh k-pr">نوبت‌های پروتز</h3><div class="rqf" id="raPrF"></div><div class="list" id="raPr"></div></div>
       <div class="rsec" id="raOtW" hidden><h3 class="rsh">سایر نوبت‌ها</h3><div class="list" id="raOt"></div></div>
-      <p class="note">چکاپ‌های جراحی و پروتز را از دکمه‌های «چکاپ جراحی» و «چکاپ پروتز» ببینید.</p>
+      <p class="note">چکاپ‌های جراحی و پروتز را از دکمه‌های «چکاپ جراحی» و «چکاپ پروتز» ببینید.</p><div class="kleg"><span><i class="kdot k-sg"></i>جراحی</span><span><i class="kdot k-pr"></i>پروتز</span><span><i class="kdot k-ck"></i>چکاپ</span><span><i class="kdot k-fl"></i>پیگیری</span><span><i class="kdot k-ot"></i>سایر</span></div>
     </div>
     <div class="rpane" data-rpane="bk" hidden>
       <div class="rsec"><h3 class="rsh k-sg">صف نوبت‌دهی جراحی</h3><p class="note">بیمارانی که طرح را پذیرفته‌اند و باید برای جراحی نوبت بگیرند.</p><div class="list" id="bkList"><div class="empty">موردی نیست.</div></div></div>
@@ -668,8 +681,8 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
     <div class="rfab" id="rFab">
       <button type="button" class="fb main" data-rfab="rc"><i>＋</i><span>پذیرش بیمار</span></button>
       <button type="button" class="fb sg" data-rfab="book"><i>📅</i><span>اخذ نوبت جراحی</span></button>
-      <button type="button" class="fb" data-rfab="cs"><i>🩺</i><span>چکاپ جراحی</span><b id="rfN_cs"></b></button>
-      <button type="button" class="fb" data-rfab="cp"><i>🦷</i><span>چکاپ پروتز</span><b id="rfN_cp"></b></button>
+      <button type="button" class="fb ck" data-rfab="cs"><i>🩺</i><span>چکاپ جراحی</span><b id="rfN_cs"></b></button>
+      <button type="button" class="fb ck" data-rfab="cp"><i>🦷</i><span>چکاپ پروتز</span><b id="rfN_cp"></b></button>
     </div>
     <div class="sheet" id="rcSheet" hidden><div class="in">
     <section class="card" id="rcCard" style="box-shadow:none;border:0;padding:0;margin:0">
@@ -717,6 +730,7 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
     <div class="banner info" id="calRem" hidden></div>
     <div class="chips calmode"><button type="button" class="chip" data-cmode="week">هفتگی</button><button type="button" class="chip" data-cmode="month">ماهانه</button></div>
     <div class="calnav"><button class="btn ghost sm" id="calPrev" type="button">→ هفته‌ی قبل</button><b id="calRange"></b><button class="btn ghost sm" id="calToday" type="button">امروز</button><button class="btn ghost sm" id="calNext" type="button">هفته‌ی بعد ←</button></div>
+    <div class="kleg"><span><i class="kdot k-sg"></i>جراحی</span><span><i class="kdot k-pr"></i>پروتز</span><span><i class="kdot k-ck"></i>چکاپ</span><span><i class="kdot k-fl"></i>پیگیری</span><span><i class="kdot k-ot"></i>سایر</span></div>
     <div class="days" id="calDays"></div>
     <div class="mcal" id="calMonth" hidden></div>
     <div class="qhead"><h2 id="calDayT" style="font-size:1rem"></h2></div>
@@ -1869,9 +1883,9 @@ const tDay=(d)=>{try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tehr
 const dDiff=(a,b)=>Math.round((Date.parse(a+'T00:00:00Z')-Date.parse(b+'T00:00:00Z'))/864e5);
 function dueLbl(due){const n=dDiff(due,tDay());const j=jalali(new Date(due+'T12:00:00Z')).slash;return n===0?'امروز':n===1?'فردا':n<0?`${fa(-n)} روز گذشته (${j})`:`${j} (${fa(n)} روز دیگر)`}
 function renderTasks(){if(ROLE!=='staff')return;const today=tDay();const one=(t,uc)=>{const L=TLBL[t.kind]||[t.kind,''],n=dDiff(t.due,today),late=!t.done&&n<0;
-    return `<div class="item task${t.done?' done':''}${late?' late':''}"><div class="row1"><div><div class="nm">${esc(t.name||'')}</div><div class="meta">${esc(L[0])}${uc&&t.info&&t.kind==='uncover'?' — '+esc(t.info.split(',').map(k=>toothTxt([k])).join('، ')):''}</div><div class="meta">${t.done?'انجام شد':esc(L[1])}</div></div>
+    return `<div class="item task kg-${TGRP[t.kind]||'fl'}${t.done?' done':''}${late?' late':''}"><div class="row1"><div><div class="nm">${esc(t.name||'')}</div><div class="meta">${esc(L[0])}${uc&&t.info&&t.kind==='uncover'?' — '+esc(t.info.split(',').map(k=>toothTxt([k])).join('، ')):''}</div><div class="meta">${t.done?'انجام شد':esc(L[1])}</div></div>
       <span class="pill ${t.done?'done':late?'settle':n===0?'wait':''}">${dueLbl(t.due)}</span></div>
-      <div class="acts">${t.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(t.phone))}">تماس ${esc(faD(t.phone))}</a>${waLink(t.phone)?`<a class="btn sm ghost" target="_blank" rel="noopener" href="${waLink(t.phone,msgFor(t.kind,t.name))}">واتس‌اپ</a><a class="btn sm ghost" href="${smsLink(t.phone,msgFor(t.kind,t.name))}">پیامک</a>`:''}`:''}${!t.done&&(t.kind==='fol1'||t.kind==='fol4')?`<button class="btn sm" data-undto="back" data-uid="${esc(t.plan)}" type="button">پذیرفت؛ برگشت به مشاور</button><button class="btn sm ghost" data-undto="lost" data-uid="${esc(t.plan)}" type="button">انصراف قطعی</button>`:''}${!t.done&&['uncover','recall','labready','suture','book'].includes(t.kind)&&CF_ON?`<button class="btn sm" data-tbook="${esc(t.id)}" type="button">تعیین نوبت</button>`:''}<button class="btn sm ghost" data-file="${esc(t.plan)}" data-fname="${esc(t.name||'')}" type="button">پرونده</button>${t.done?`<button class="btn sm ghost" data-tundo="${esc(t.id)}" type="button">برگرداندن</button>`:`<button class="btn sm" data-tdone="${esc(t.id)}" type="button">انجام شد</button>`}</div></div>`};
+      <div class="acts">${t.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(t.phone))}">تماس ${esc(faD(t.phone))}</a>`:''}${!t.done&&(t.kind==='fol1'||t.kind==='fol4')?`<button class="btn sm" data-undto="back" data-uid="${esc(t.plan)}" type="button">پذیرفت؛ برگشت به مشاور</button><button class="btn sm ghost" data-undto="lost" data-uid="${esc(t.plan)}" type="button">انصراف قطعی</button>`:''}${!t.done&&['uncover','recall','labready','suture','book'].includes(t.kind)&&CF_ON?`<button class="btn sm" data-tbook="${esc(t.id)}" type="button">تعیین نوبت</button>`:''}${t.done?`<button class="btn sm ghost" data-tundo="${esc(t.id)}" type="button">برگرداندن</button>`:`<button class="btn sm" data-tdone="${esc(t.id)}" type="button">انجام شد</button>`}${moreMenu((t.phone&&waLink(t.phone)?`<a class="btn sm ghost" target="_blank" rel="noopener" href="${waLink(t.phone,msgFor(t.kind,t.name))}">واتس‌اپ</a><a class="btn sm ghost" href="${smsLink(t.phone,msgFor(t.kind,t.name))}">پیامک</a>`:'')+`<button class="btn sm ghost" data-file="${esc(t.plan)}" data-fname="${esc(t.name||'')}" type="button">پرونده</button>`)}</div></div>`};
   const list=(el,arr,horizon,key,uc)=>{const show=arr.filter(t=>t.done||TASK_ALL[key]||dDiff(t.due,today)<=horizon),more=arr.length-show.length;
     $(el).innerHTML=(show.length?show.map(t=>one(t,uc)).join(''):'<div class="empty">فعلاً موردی نیست.</div>')+(more?`<button class="btn sm ghost" data-tall="${key}" type="button">نمایش ${fa(more)} مورد بعدی</button>`:'')};
   const FOLK=['fol1','fol4','book'];const NBK=['suture','labready'];list('bkList',TASKS.filter(t=>t.kind==='book'),3650,'bk',false);list('nbList',TASKS.filter(t=>NBK.includes(t.kind)),1,'nb',false);list('flList',TASKS.filter(t=>t.kind==='fol1'||t.kind==='fol4'),7,'fl',false);list('fuList',TASKS.filter(t=>t.kind!=='uncover'&&t.kind!=='recall'&&!FOLK.includes(t.kind)&&!NBK.includes(t.kind)),1,'fu',false);list('ucList',TASKS.filter(t=>t.kind==='uncover'||t.kind==='recall'),14,'uc',true);try{renderRecepBar()}catch(e){}}
@@ -2606,6 +2620,9 @@ document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const sh=[...
 /* ======================= treatment flow: appointments, prosthesis & lab, payments, follow-ups, consent, patient link, dashboard ======================= */
 const AKL={surg:'جراحی ایمپلنت',uncover:'آنکاوری',tooth:'دندان نهفته',soft:'بافت نرم',impr:'قالب‌گیری',tryin:'امتحان پروتز',rscr:'رزین پیچ‌شونده',rabt:'رزین اباتمنت',deliv:'تحویل پروتز',chks:'چکاپ جراحی',postop:'پیگیری بعد از جراحی',suture:'کشیدن بخیه',chkp:'چکاپ پروتز',check:'چکاپ دوره‌ای',other:'ویزیت'};
 const AGRP={sg:['surg','uncover','tooth','soft'],pr:['impr','tryin','rscr','rabt','deliv'],cs:['chks','postop','suture'],cp:['chkp','check'],ot:['other']},AFL={surg:'ایمپلنت',deliv:'تحویل'};
+const kGrp=k=>AGRP.sg.includes(k)?'sg':AGRP.pr.includes(k)?'pr':AGRP.cs.includes(k)||AGRP.cp.includes(k)?'ck':'ot';
+const TGRP={book:'sg',uncover:'sg',suture:'sg',labready:'pr',recall:'ck',fol1:'fl',fol4:'fl',numb:'fl',week:'fl'};
+const kDots=its=>{const c={};its.forEach(a=>{const g=kGrp(a.kind);c[g]=(c[g]||0)+1});return ['sg','pr','ck','ot'].filter(g=>c[g]).map(g=>`<i class="kdot k-${g}"></i>`).join('')};
 const aDur=k=>k==='surg'?120:k==='tooth'||k==='soft'?60:AGRP.cs.includes(k)||AGRP.cp.includes(k)?20:45;
 const PST=[['heal','ترمیم و آنکاوری'],['impr','قالب‌گیری'],['lab','لابراتوار'],['tryin','امتحان پروتز'],['deliv','تحویل پروتز'],['done','تحویل شد']];
 const PSTN=Object.fromEntries(PST);
@@ -2643,15 +2660,17 @@ function apptMsg(a){const c=SET.clinic||'کلینیک';return `${a.name?a.name+'
 function apptCard(a,o={}){const n=dDiff(a.day,tDay()),st=a.st||'set',can=canAppt();
   const stp=st==='done'?'<span class="pill done">انجام شد</span>':st==='cancel'?'<span class="pill">لغو شد</span>':st==='noshow'?'<span class="pill settle">نیامد</span>':a.sms?'<span class="pill done">یادآوری رفت</span>':'';
   const sms=a.phone&&smsLink(a.phone,apptMsg(a));
-  return `<div class="item appt st-${st}">${a.note==='جراحی خارج نوبت'?'<div class="xnob">جراحی خارج نوبت</div>':''}<div class="row1"><div><span class="tm">${a.time?faD(a.time):'بدون ساعت'}</span><span class="nm">${esc(a.name)}</span>
+  return `<div class="item appt st-${st} kg-${kGrp(a.kind)}">${a.note==='جراحی خارج نوبت'?'<div class="xnob">جراحی خارج نوبت</div>':''}<div class="row1"><div><span class="tm">${a.time?faD(a.time):'بدون ساعت'}</span><span class="nm">${esc(a.name)}</span>
     <div class="meta">${!a.time&&a.st==='set'&&can?'<b class="late">ساعت را تعیین کنید</b> · ':''}${a.by==='خودکار'?'ثبت خودکار از روز جراحی · ':''}${o.date?esc(wDay(a.day)+' '+jDay(a.day))+' · ':''}${a.dur?fa(a.dur)+' دقیقه':''}${a.doc?' · '+esc(a.doc):''}${a.phone?' · '+esc(faD(a.phone)):''}</div>${a.note?`<div class="meta">${esc(a.note)}</div>`:''}</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="pill ${AGRP.sg.includes(a.kind)?'k-surg':'rev'}">${esc(AKL[a.kind]||a.kind)}</span>${a.onl==='1'?'<span class="pill done">طرح آنلاین دارد</span>':a.onl==='0'?'<span class="pill">بدون طرح آنلاین</span>':''}${stp}</div></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="pill kp-${kGrp(a.kind)}">${esc(AKL[a.kind]||a.kind)}</span>${a.onl==='1'?'<span class="pill done">طرح آنلاین دارد</span>':a.onl==='0'?'<span class="pill">بدون طرح آنلاین</span>':''}${stp}</div></div>
     <div class="acts">${st==='set'&&sms&&n>=0&&n<=2?`<a class="btn sm${a.sms?' ghost':''}" href="${sms}" data-asms="${esc(a.id)}">${a.sms?'پیامک دوباره':'پیامک یادآوری'}</a>`:''}${a.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(a.phone))}">تماس</a>`:''}
       ${st==='set'&&(can||ROLE==='surgery')&&n<=0?`<button class="btn sm" data-ast="done" data-aid="${esc(a.id)}" type="button">انجام شد</button>`:''}
-      ${st==='set'&&can&&n<=0?`<button class="btn sm ghost" data-ast="noshow" data-aid="${esc(a.id)}" type="button">نیامد</button>`:''}
-      ${st==='set'&&can?`<button class="btn sm ghost" data-aedit="${esc(a.id)}" type="button">جابه‌جایی / ویرایش</button><button class="btn sm ghost" data-ast="cancel" data-aid="${esc(a.id)}" type="button">لغو</button>`:''}
-      ${st!=='set'&&can?`<button class="btn sm ghost" data-ast="set" data-aid="${esc(a.id)}" type="button">برگرداندن</button>`:''}
-      ${a.plan&&!o.nofile?`<button class="btn sm ghost" data-file="${esc(a.plan)}" data-fname="${esc(a.name)}" type="button">پرونده</button>`:''}</div></div>`}
+      ${moreMenu((st==='set'&&can&&n<=0?`<button class="btn sm ghost" data-ast="noshow" data-aid="${esc(a.id)}" type="button">نیامد</button>`:'')
+      +(st==='set'&&can?`<button class="btn sm ghost" data-aedit="${esc(a.id)}" type="button">جابه‌جایی / ویرایش</button><button class="btn sm ghost danger" data-ast="cancel" data-aid="${esc(a.id)}" type="button">لغو نوبت</button>`:'')
+      +(st!=='set'&&can?`<button class="btn sm ghost" data-ast="set" data-aid="${esc(a.id)}" type="button">برگرداندن</button>`:'')
+      +(a.plan&&!o.nofile?`<button class="btn sm ghost" data-file="${esc(a.plan)}" data-fname="${esc(a.name)}" type="button">پرونده</button>`:''))}</div></div>`}
+function moreMenu(h){return h?`<details class="more"><summary class="btn sm ghost">⋯ بیشتر</summary><div class="menu">${h}</div></details>`:''}
+document.addEventListener('click',e=>{const d=e.target.closest&&e.target.closest('details.more');document.querySelectorAll('details.more[open]').forEach(x=>{if(x!==d)x.open=false});if(d&&e.target.closest('.menu'))setTimeout(()=>{d.open=false},0)});
 function renderCal(){const td=tDay(),cap=Number(SET.cap)||0,days=[...Array(7)].map((_,i)=>dAdd(CAL.start,i));
   $('calNew').hidden=!canAppt();
   const jS=d=>{const p=toEn(jDay(d)).split('/').map(Number);return faD(String(p[2]))+' '+JMN[p[1]-1]};$('calRange').textContent=`${jS(days[0])} تا ${jS(days[6])}`;
@@ -2660,10 +2679,10 @@ function renderCal(){const td=tDay(),cap=Number(SET.cap)||0,days=[...Array(7)].m
   if(MO){const [a,b]=jMonth(CAL.sel),jp=jParts(a),lead=dDiff(a,weekStart(a)),cells=[];$('calRange').textContent=`${JMN[jp[1]-1]} ${faD(String(jp[0]))}`;
     for(let i=0;i<lead;i++)cells.push('<span class="mc0"></span>');
     for(let d=a;d<=b;d=dAdd(d,1)){const its=CAL.items.filter(x=>x.day===d&&x.st!=='cancel'),sg=its.filter(x=>x.kind==='surg').length;
-      cells.push(`<button type="button" class="mday${d===td?' today':''}${new Date(d+'T12:00:00Z').getUTCDay()===5?' fri':''}${d<td?' past':''}${its.length?' has':''}" data-cday="${d}" aria-pressed="${d===CAL.sel}"><b>${faD(String(jParts(d)[2]))}</b>${its.length?`<span class="n">${fa(its.length)}<i> نوبت</i></span>`:''}${sg?`<span class="cap${cap&&sg>=cap?' full':''}"><i>جراحی </i>${fa(sg)}${cap?'/'+fa(cap):''}</span>`:''}</button>`)}
+      cells.push(`<button type="button" class="mday${d===td?' today':''}${new Date(d+'T12:00:00Z').getUTCDay()===5?' fri':''}${d<td?' past':''}${its.length?' has':''}" data-cday="${d}" aria-pressed="${d===CAL.sel}"><b>${faD(String(jParts(d)[2]))}</b>${its.length?`<span class="dots">${kDots(its)}</span><span class="n">${fa(its.length)}<i> نوبت</i></span>`:''}${sg?`<span class="cap${cap&&sg>=cap?' full':''}"><i>جراحی </i>${fa(sg)}${cap?'/'+fa(cap):''}</span>`:''}</button>`)}
     $('calMonth').innerHTML='<div class="mhd">'+['ش','ی','د','س','چ','پ','ج'].map(x=>`<span>${x}</span>`).join('')+'</div><div class="mgr">'+cells.join('')+'</div>'}
   $('calDays').innerHTML=days.map(d=>{const its=CAL.items.filter(a=>a.day===d&&a.st!=='cancel'),sg=its.filter(a=>a.kind==='surg').length,p=d.split('-');
-    return `<button type="button" class="day${d===td?' today':''}${new Date(d+'T12:00:00Z').getUTCDay()===5?' fri':''}" data-cday="${d}" aria-pressed="${d===CAL.sel}"><small>${esc(wDayS(d))}</small><b>${faD(String(+toEn(jDay(d)).split('/')[2]))}</b><span class="n">${its.length?fa(its.length)+' نوبت':'—'}</span>${sg?`<span class="cap${cap&&sg>=cap?' full':''}">جراحی ${fa(sg)}${cap?'/'+fa(cap):''}</span>`:''}</button>`}).join('');
+    return `<button type="button" class="day${d===td?' today':''}${new Date(d+'T12:00:00Z').getUTCDay()===5?' fri':''}" data-cday="${d}" aria-pressed="${d===CAL.sel}"><small>${esc(wDayS(d))}</small><b>${faD(String(+toEn(jDay(d)).split('/')[2]))}</b><span class="n">${its.length?fa(its.length)+' نوبت':'—'}</span>${its.length?`<span class="dots">${kDots(its)}</span>`:''}${sg?`<span class="cap${cap&&sg>=cap?' full':''}">جراحی ${fa(sg)}${cap?'/'+fa(cap):''}</span>`:''}</button>`}).join('');
   const list=CAL.items.filter(a=>a.day===CAL.sel).sort((a,b)=>a.time<b.time?-1:1);
   $('calDayT').textContent=`${wDay(CAL.sel)} ${jDay(CAL.sel)}`+(CAL.sel===td?' (امروز)':CAL.sel===dAdd(td,1)?' (فردا)':'');
   $('calList').innerHTML=list.length?list.map(a=>apptCard(a)).join(''):`<div class="empty">برای این روز نوبتی ثبت نشده.${canAppt()?' با «+ نوبت جدید» ثبت کنید.':''}</div>`;
@@ -2990,8 +3009,26 @@ function renderRecepBar(){if(ROLE!=='staff'||!$('rTabs'))return;const td=tDay(),
   ['cs','cp'].forEach(g=>{const n=T.filter(a=>AGRP[g].includes(a.kind)).length,b=$('rfN_'+g);b.textContent=n?fa(n):'';b.hidden=!n});
   if(!document.querySelector('[data-rpane="'+RTAB+'"]'))RTAB='ex';
   document.querySelectorAll('[data-rtab]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.rtab===RTAB));document.querySelectorAll('[data-rpane]').forEach(p=>p.hidden=p.dataset.rpane!==RTAB);
-  const tm=QAPPT.filter(a=>a.day===dAdd(td,1)&&a.st==='set'),un=tm.filter(a=>!a.sms&&a.phone),rb=$('rRem');rb.hidden=!un.length;
-  if(un.length)rb.innerHTML=`فردا ${fa(tm.length)} نوبت دارید؛ <b>${fa(un.length)} پیامک یادآوری هنوز فرستاده نشده.</b> <button class="btn sm" type="button" data-remgo>فرستادن یادآوری‌ها</button>`}
+  renderNow()}
+let NOW_ALL=false;
+function tehNow(){try{const p={};new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Tehran',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).forEach(x=>p[x.type]=x.value);return (+p.hour)*60+(+p.minute)}catch(e){const d=new Date();return d.getHours()*60+d.getMinutes()}}
+function renderNow(){const el=$('rNow');if(!el)return;const td=tDay(),now=tehNow(),R=[],mins=iso=>Math.round((Date.now()-Date.parse(iso))/60000);
+  QITEMS.forEach(x=>{if((x.queue==='waiting'||x.queue==='consult')&&x.queuedAt){const m=mins(x.queuedAt);if(m>=20)R.push({w:m>=40?2:1,o:-m,t:`<b>${esc(x.name)}</b> — ${fa(m)} دقیقه ${x.queue==='waiting'?'منتظر پزشک':'منتظر مشاور'}`,a:`<button class="btn sm ghost" type="button" data-rtab="ex">دیدن صف</button>`})}});
+  const here=new Set(QITEMS.map(x=>x.id));
+  QAPPT.filter(a=>a.day===td&&a.st==='set').forEach(a=>{const g=kGrp(a.kind);
+    if(!a.time){R.push({w:1,o:0,t:`ساعت نوبت <b>${esc(a.name)}</b> (${esc(AKL[a.kind]||'')}) تعیین نشده`,a:`<button class="btn sm" type="button" data-aedit="${esc(a.id)}">تعیین ساعت</button>`});return}
+    const late=now-(+a.time.slice(0,2)*60+ +a.time.slice(3));if(late>=15&&!(a.plan&&here.has(a.plan)))R.push({w:late>=40?2:1,o:-late,t:`<span class="kdot k-${g}"></span>نوبت ${esc(faD(a.time))} <b>${esc(a.name)}</b> (${esc(AKL[a.kind]||'')}) — ${fa(late)} دقیقه گذشته، هنوز نیامده`,a:`${a.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(a.phone))}">تماس</a>`:''}<button class="btn sm ghost" type="button" data-ast="done" data-aid="${esc(a.id)}">آمد / انجام شد</button><button class="btn sm ghost" type="button" data-ast="noshow" data-aid="${esc(a.id)}">نیامد</button>`})});
+  const od=k=>TASKS.filter(t=>!t.done&&k.includes(t.kind)&&dDiff(t.due,td)<0).length,o1=od(['fol1','fol4','numb','week']),o2=od(['book','suture','labready','uncover','recall']);
+  if(o1)R.push({w:2,o:1,t:`<b>${fa(o1)}</b> پیگیری عقب‌افتاده`,a:`<button class="btn sm" type="button" data-rtab="fl">رفتن به پیگیری‌ها</button>`});
+  if(o2)R.push({w:1,o:2,t:`<b>${fa(o2)}</b> نوبت‌دهی عقب‌افتاده`,a:`<button class="btn sm" type="button" data-rtab="bk">رفتن به نوبت‌دهی</button>`});
+  const tm=QAPPT.filter(a=>a.day===dAdd(td,1)&&a.st==='set'),un=tm.filter(a=>!a.sms&&a.phone);
+  if(un.length)R.push({w:1,o:3,t:`فردا ${fa(tm.length)} نوبت؛ <b>${fa(un.length)} پیامک یادآوری</b> فرستاده نشده`,a:`<button class="btn sm" type="button" data-remgo>فرستادن یادآوری‌ها</button>`});
+  R.sort((a,b)=>b.w-a.w||a.o-b.o);el.hidden=false;
+  if(!R.length){el.innerHTML='<div class="rnh ok">✓ کار فوری ندارید</div>';return}
+  const V=NOW_ALL?R:R.slice(0,4);
+  el.innerHTML=`<div class="rnh">کارهای الان <b>${fa(R.length)}</b></div>${V.map(r=>`<div class="rn${r.w>1?' bad':''}"><div class="tx">${r.t}</div><div class="acts">${r.a}</div></div>`).join('')}${R.length>4?`<button class="btn sm ghost" type="button" data-nowall>${NOW_ALL?'کمتر':'نمایش '+fa(R.length-4)+' مورد دیگر'}</button>`:''}`}
+setInterval(()=>{try{if(ROLE==='staff'&&!$('viewRecep').hidden&&!document.hidden)renderNow()}catch(e){}},60000);
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-nowall]');if(t){NOW_ALL=!NOW_ALL;renderNow()}});
 function renderCk(){const g=CKM,day=raDayISO(CKD),A=QAPPT.filter(a=>a.st!=='cancel'&&a.day===day&&AGRP[g].includes(a.kind)).sort(apSort);
   $('ckTitle').textContent=(g==='cs'?'چکاپ جراحی':'چکاپ پروتز')+' — '+(CKD==='t'?'امروز':'فردا');document.querySelectorAll('[data-ckd]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ckd===CKD));
   apFilterSec(A,AGRP[g],CKF,'ckF','ckList',(CKD==='t'?'امروز':'فردا')+' چکاپی ثبت نشده.');$('ckNew').textContent='＋ ثبت نوبت '+(g==='cs'?'چکاپ جراحی':'چکاپ پروتز')}
