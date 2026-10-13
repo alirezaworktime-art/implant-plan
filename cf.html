@@ -496,7 +496,19 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
 .rnow{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}.rnh{font-weight:800;font-size:.92rem;display:flex;align-items:center;gap:6px}.rnh b{background:var(--bad);color:#fff;border-radius:999px;padding:0 8px;font-size:.78rem}.rnh.ok{color:var(--ok);font-weight:700;font-size:.85rem}
 .rn{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:12px;background:var(--warn-soft);border:1px solid transparent;border-inline-start:4px solid var(--warn)}.rn.bad{background:var(--bad-soft);border-inline-start-color:var(--bad)}
 .rn .tx{flex:1 1 220px;min-width:0;font-size:.86rem;line-height:1.7}.rn .acts{flex:0 0 auto}
-.rsec{margin:0 0 16px}.rsh{font-size:.98rem;margin:4px 0 8px;padding-inline-start:10px;border-inline-start:4px solid var(--line)}.rsh.k-sg{border-color:var(--lapis)}.rsh.k-pr{border-color:var(--k-pr)}
+.rsec{margin:0 0 16px}.rsec>.rsh[data-sec]{cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none}.rsec>.rsh[data-sec]::after{content:'▾';margin-inline-start:auto;color:var(--muted);transition:transform .15s}
+.rsec.col>.rsh::after{transform:rotate(90deg)}.rsec.col>:not(.rsh){display:none!important}.rsc{font-size:.74rem;background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted)}
+.qpw{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.wt{font-size:.74rem;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--sunk);color:var(--muted);white-space:nowrap}.wt.w1{background:var(--warn-soft);color:var(--warn)}.wt.w2{background:var(--bad-soft);color:var(--bad)}
+.instc{border:1px dashed var(--lapis);border-radius:14px;padding:10px 12px;margin-top:10px;display:block}.instc>summary{cursor:pointer;font-weight:800;color:var(--lapis)}.instc[open]>summary{margin-bottom:10px}.instc .seg{margin:8px 0}
+.ictab{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:8px 0}.ictab>div{display:grid;grid-template-columns:36px 1fr auto;gap:8px;padding:7px 10px;font-size:.86rem;border-bottom:1px solid var(--line)}.ictab>div:nth-child(even){background:var(--sunk)}.ictab .tot{font-weight:800;border-bottom:0}
+.prtop{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px}.prtop .seg{min-width:220px}
+.board{display:grid;grid-template-columns:repeat(5,minmax(160px,1fr));gap:10px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.bcol{background:var(--sunk);border:1px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0;scroll-snap-align:start;border-top:4px solid var(--k-pr)}.bc-heal{border-top-color:var(--k-sg)}.bc-lab{border-top-color:var(--warn)}
+.bh{display:flex;justify-content:space-between;align-items:center;font-size:.88rem}.bh span{background:var(--surface);border-radius:999px;padding:0 8px;font-weight:800}
+.bl{display:flex;flex-direction:column;gap:6px}.bempty{text-align:center;color:var(--muted);padding:10px 0}
+.bcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--sh);border-inline-start:4px solid var(--line2)}.bcard.d1{border-inline-start-color:var(--warn)}.bcard.d2{border-inline-start-color:var(--bad)}
+.bcard .bnm{font:inherit;font-weight:800;text-align:right;background:none;border:0;color:var(--ink);padding:0;cursor:pointer}.bcard .meta{font-size:.76rem;color:var(--muted)}.bcard .btn{align-self:flex-start}
+@media (max-width:720px){.board{grid-template-columns:repeat(5,minmax(230px,82vw))}}.rsh{font-size:.98rem;margin:4px 0 8px;padding-inline-start:10px;border-inline-start:4px solid var(--line)}.rsh.k-sg{border-color:var(--lapis)}.rsh.k-pr{border-color:var(--k-pr)}
 .rday{display:inline-flex;min-width:170px}
 .akg{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}.akg small{color:var(--muted);font-size:.74rem}
 .onlw{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px dashed var(--lapis);border-radius:12px;background:var(--lapis-soft);cursor:pointer}.onlw input{width:20px;height:20px;accent-color:var(--lapis)}
@@ -666,7 +678,7 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
       <div class="qhead"><div class="seg rday" id="raDay"><button type="button" data-rad="t">امروز</button><button type="button" data-rad="f">فردا</button></div><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm ghost" type="button" data-gocal data-cmode="week">تقویم هفتگی</button><button class="btn sm ghost" type="button" data-gocal data-cmode="month">تقویم ماهانه</button></span></div>
       <div class="rsec"><h3 class="rsh k-sg">نوبت‌های جراحی</h3><div class="rqf" id="raSgF"></div><div class="list" id="raSg"></div></div>
       <div class="rsec"><h3 class="rsh k-pr">نوبت‌های پروتز</h3><div class="rqf" id="raPrF"></div><div class="list" id="raPr"></div></div>
-      <div class="rsec" id="raOtW" hidden><h3 class="rsh">سایر نوبت‌ها</h3><div class="list" id="raOt"></div></div>
+      <div class="rsec" id="raOtW"><h3 class="rsh">سایر نوبت‌ها</h3><div class="list" id="raOt"></div></div>
       <p class="note">چکاپ‌های جراحی و پروتز را از دکمه‌های «چکاپ جراحی» و «چکاپ پروتز» ببینید.</p><div class="kleg"><span><i class="kdot k-sg"></i>جراحی</span><span><i class="kdot k-pr"></i>پروتز</span><span><i class="kdot k-ck"></i>چکاپ</span><span><i class="kdot k-fl"></i>پیگیری</span><span><i class="kdot k-ot"></i>سایر</span></div>
     </div>
     <div class="rpane" data-rpane="bk" hidden>
@@ -741,8 +753,9 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
   <section id="viewPros" class="wrap" style="padding:0" hidden>
     <div class="qhead"><h2>پروتز و لابراتوار</h2><span class="live" id="prLive">زنده</span></div>
     <p class="note">بیمارانی که جراحی‌شان تمام شده تا تحویل پروتز اینجا می‌مانند. روی هر بیمار بزنید تا مرحله را جلو ببرید یا سفارش لابراتوار ثبت کنید.</p>
+    <div class="prtop"><div class="seg" id="prMode"><button type="button" data-prm="b">تابلوی مراحل</button><button type="button" data-prm="l">فهرست</button></div><div class="search" style="flex:1;margin:0"><input id="prQ" placeholder="جستجوی بیمار"></div></div>
     <div class="chips" id="prFilt"></div>
-    <div class="search"><input id="prQ" placeholder="جستجوی بیمار"></div>
+    <div class="board" id="prBoard" hidden></div>
     <div class="list" id="prList"><div class="empty">در حال بارگذاری…</div></div>
   </section>
 
@@ -1888,7 +1901,7 @@ function renderTasks(){if(ROLE!=='staff')return;const today=tDay();const one=(t,
       <div class="acts">${t.phone?`<a class="btn sm ghost" href="tel:${esc(toEn(t.phone))}">تماس ${esc(faD(t.phone))}</a>`:''}${!t.done&&(t.kind==='fol1'||t.kind==='fol4')?`<button class="btn sm" data-undto="back" data-uid="${esc(t.plan)}" type="button">پذیرفت؛ برگشت به مشاور</button><button class="btn sm ghost" data-undto="lost" data-uid="${esc(t.plan)}" type="button">انصراف قطعی</button>`:''}${!t.done&&['uncover','recall','labready','suture','book'].includes(t.kind)&&CF_ON?`<button class="btn sm" data-tbook="${esc(t.id)}" type="button">تعیین نوبت</button>`:''}${t.done?`<button class="btn sm ghost" data-tundo="${esc(t.id)}" type="button">برگرداندن</button>`:`<button class="btn sm" data-tdone="${esc(t.id)}" type="button">انجام شد</button>`}${moreMenu((t.phone&&waLink(t.phone)?`<a class="btn sm ghost" target="_blank" rel="noopener" href="${waLink(t.phone,msgFor(t.kind,t.name))}">واتس‌اپ</a><a class="btn sm ghost" href="${smsLink(t.phone,msgFor(t.kind,t.name))}">پیامک</a>`:'')+`<button class="btn sm ghost" data-file="${esc(t.plan)}" data-fname="${esc(t.name||'')}" type="button">پرونده</button>`)}</div></div>`};
   const list=(el,arr,horizon,key,uc)=>{const show=arr.filter(t=>t.done||TASK_ALL[key]||dDiff(t.due,today)<=horizon),more=arr.length-show.length;
     $(el).innerHTML=(show.length?show.map(t=>one(t,uc)).join(''):'<div class="empty">فعلاً موردی نیست.</div>')+(more?`<button class="btn sm ghost" data-tall="${key}" type="button">نمایش ${fa(more)} مورد بعدی</button>`:'')};
-  const FOLK=['fol1','fol4','book'];const NBK=['suture','labready'];list('bkList',TASKS.filter(t=>t.kind==='book'),3650,'bk',false);list('nbList',TASKS.filter(t=>NBK.includes(t.kind)),1,'nb',false);list('flList',TASKS.filter(t=>t.kind==='fol1'||t.kind==='fol4'),7,'fl',false);list('fuList',TASKS.filter(t=>t.kind!=='uncover'&&t.kind!=='recall'&&!FOLK.includes(t.kind)&&!NBK.includes(t.kind)),1,'fu',false);list('ucList',TASKS.filter(t=>t.kind==='uncover'||t.kind==='recall'),14,'uc',true);try{renderRecepBar()}catch(e){}}
+  const FOLK=['fol1','fol4','book'];const NBK=['suture','labready'];list('bkList',TASKS.filter(t=>t.kind==='book'),3650,'bk',false);list('nbList',TASKS.filter(t=>NBK.includes(t.kind)),1,'nb',false);list('flList',TASKS.filter(t=>t.kind==='fol1'||t.kind==='fol4'),7,'fl',false);list('fuList',TASKS.filter(t=>t.kind!=='uncover'&&t.kind!=='recall'&&!FOLK.includes(t.kind)&&!NBK.includes(t.kind)),1,'fu',false);list('ucList',TASKS.filter(t=>t.kind==='uncover'||t.kind==='recall'),14,'uc',true);try{renderRecepBar();tidySecs()}catch(e){}}
 document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
   if(t.dataset.tall){TASK_ALL[t.dataset.tall]=true;renderTasks();return}
   if(t.dataset.tdone||t.dataset.tundo){t.disabled=true;try{await api('taskDone',{id:t.dataset.tdone||t.dataset.tundo,undo:!!t.dataset.tundo,by:$('rc_asst').value||''});const x=TASKS.find(v=>v.id===(t.dataset.tdone||t.dataset.tundo));if(x)x.done=t.dataset.tdone?1:0;renderTasks();pollQ(true)}catch(err){alertMsg(err.message)}finally{t.disabled=false}}});
@@ -1901,6 +1914,8 @@ const FRESH=new Set();
 function setLive(ok){['qLive','rLive'].forEach(id=>{const el=$(id);el.classList.toggle('off',!ok);el.textContent=ok?'زنده':'اتصال قطع است؛ دوباره تلاش می‌شود…'})}
 const qTime=iso=>{try{return new Date(iso).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})}catch(e){return ''}};
 const QLBL={waiting:['wait','منتظر پزشک'],reviewing:['rev','نزد پزشک'],consult:['wait','منتظر مشاور'],consulting:['rev','نزد مشاور'],done:['done','ثبت شد'],surgery:['surg','در جراحی'],surgdone:['done','جراحی انجام شد'],undecided:['wait','تصمیم نگرفته'],lost:['fail','انصراف داد']};
+function waitPill(x){const q=x.queue;if(!((q==='waiting'&&ROLE!=='consultant')||(q==='consult'&&ROLE==='consultant')))return '';const at=q==='consult'?(x.consultAt||x.queuedAt):x.queuedAt;if(!at)return '';const m=Math.max(0,Math.round((Date.now()-Date.parse(at))/60000));return `<span class="wt${m>=40?' w2':m>=20?' w1':''}">⏱ ${m<1?'همین الان':fa(m)+' دقیقه'}</span>`}
+setInterval(()=>{try{if((ROLE==='doctor'||ROLE==='consultant')&&!$('viewQueue').hidden&&!document.hidden)renderQ()}catch(e){}},60000);
 function qPill(x){if(ROLE==='consultant'&&x.settle==='pending'){const d=x.surg&&x.surg.diff||0;return `<span class="pill settle">تسویه اختلاف ${d>0?'+':'−'}${fa(Math.abs(d))}</span>`}
   const l=QLBL[x.queue]||['draft',x.queue];return `<span class="pill ${l[0]}">${l[1]}</span>`}
 function qMeta(x){return [x.age?'سن '+faD(x.age):'',x.city?x.city:'',x.phone?faD(x.phone):'',x.nid?'کد ملی '+faD(x.nid):'',ROLE==='surgery'?'در جراحی از ساعت '+qTime(x.surgAt):'پذیرش '+qTime(x.queuedAt),ROLE==='surgery'&&x.surgN?fa(x.surgN)+' جلسه ثبت شده':'',x.asst&&ROLE!=='surgery'?'توسط '+x.asst:''].filter(Boolean).map(esc).join(' · ')}
@@ -1919,7 +1934,7 @@ function renderQ(){try{renderKpi()}catch(e){}try{renderConx();renderSurgAppts();
   const b=$('qBadge');const w=QITEMS.filter(x=>x.queue===NEWQ[ROLE]&&!SENDING.has(x.id)).length;b.hidden=!w;b.textContent=fa(w);
   if(ROLE!=='staff'){
     $('qList').innerHTML=active.length?active.map((x,i)=>`<button type="button" class="qitem${FRESH.has(x.id)?' fresh':''}" data-qopen="${esc(x.id)}">
-      <div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span></div>${qPill(x)}</div>
+      <div class="row1"><div><span class="qn">${fa(i+1)}</span><span class="nm">${esc(x.name)}</span></div><span class="qpw">${waitPill(x)}${qPill(x)}</span></div>
       <div class="meta">${qMeta(x)}</div>${medShort(x.med)?`<div class="qwarn">⚠ ${esc(medShort(x.med))}</div>`:''}${x.note?`<div class="nt">${esc(x.note)}</div>`:''}</button>`).join(''):(ROLE==='consultant'?'<div class="empty">طرح درمانی منتظر مشاور نیست.</div>':ROLE==='surgery'?'<div class="empty">بیماری برای جراحی فرستاده نشده.</div>':'<div class="empty">بیماری در صف انتظار نیست.</div>');
     document.title=(w?`(${fa(w)}) `:'')+'کارتابل '+ROLE_LBL[ROLE]+' · طرح درمان ایمپلنت'}
   else{
@@ -2730,7 +2745,12 @@ async function apSave(t){const m=$('apMsg');if(AP.free){AP.name=($('ap_name').va
   catch(e){m.className='msg err';m.textContent=e.message}finally{t.disabled=false}}
 
 /* ---------- prosthesis board ---------- */
-const PR={items:[],f:'all',loaded:false,t:0};
+const PR={items:[],f:'all',loaded:false,t:0,m:(()=>{try{return localStorage.getItem('implantPrMode')||'b'}catch(e){return 'b'}})()};
+function prBoardCard(x){const td=tDay(),days=x.at?Math.max(0,dDiff(td,x.at.slice(0,10))):0,l=x.lab,late=l&&l.due&&l.due<td&&l.st!=='ready',rd=x.stage==='heal'&&x.ready&&x.ready<=td;
+  return `<div class="bcard${days>=30?' d2':days>=14?' d1':''}"><button type="button" class="bnm" data-file="${esc(x.id)}" data-fname="${esc(x.name)}" data-ftab="pros">${esc(x.name)}</button>
+    <div class="meta"><span class="bd">${days?fa(days)+' روز':'امروز'}</span>${x.doc?' · '+esc(x.doc):''}</div>
+    ${rd?'<div class="meta"><b class="late">زمان آنکاوری رسیده</b></div>':x.stage==='heal'&&x.ready?`<div class="meta">آنکاوری از ${esc(jDay(x.ready))}</div>`:''}${l?`<div class="meta">${esc(LST[l.st]||l.st)} · <span class="${late?'late':''}">${l.due?esc(jDay(l.due)):'—'}</span></div>`:''}
+    ${canPros()&&NEXT_ST[x.stage]?`<button class="btn sm ghost" type="button" data-pnext="${esc(x.id)}" data-pst="${NEXT_ST[x.stage]}">← ${esc(PSTN[NEXT_ST[x.stage]])}</button>`:''}${canLab()&&x.stage==='impr'?`<button class="btn sm ghost" type="button" data-file="${esc(x.id)}" data-fname="${esc(x.name)}" data-ftab="pros" data-flab="1">سفارش لابراتوار</button>`:''}</div>`}
 async function loadPros(){try{const j=await api('prosList');PR.items=j.items||[];PR.loaded=true;$('prLive').classList.remove('off');renderPros()}catch(e){$('prLive').classList.add('off');if(!PR.loaded)$('prList').innerHTML=`<div class="empty">${esc(e.message)}</div>`}}
 const NEXT_ST={heal:'impr',tryin:'deliv',deliv:'done'};
 const NEXT_LBL={heal:'آنکاوری انجام شد؛ آماده‌ی قالب‌گیری',tryin:'امتحان انجام شد؛ آماده‌ی تحویل',deliv:'پروتز تحویل بیمار شد'};
@@ -2741,8 +2761,12 @@ function prosCard(x){const td=tDay(),days=x.at?Math.max(0,dDiff(td,x.at.slice(0,
 function renderPros(){const n={all:0};PR.items.forEach(x=>{n[x.stage]=(n[x.stage]||0)+1;if(x.stage!=='done')n.all++});
   $('prFilt').innerHTML=[['all','همه‌ی در جریان'],...PST].filter(([k])=>k==='all'||n[k]).map(([k,l])=>`<button type="button" class="chip" data-prf="${k}" aria-pressed="${PR.f===k}">${l} <span class="cnt">${fa(n[k]||0)}</span></button>`).join('');
   const q=toEn($('prQ').value.trim()).toLowerCase(),order=Object.fromEntries(PST.map((s,i)=>[s[0],i]));
+  const B=PR.m==='b';$('prBoard').hidden=!B;$('prList').hidden=B;$('prFilt').hidden=B;document.querySelectorAll('[data-prm]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.prm===PR.m));
+  if(B){const its=PR.items.filter(x=>!q||String(x.name||'').toLowerCase().includes(q));$('prBoard').innerHTML=PST.filter(([k])=>k!=='done').map(([k,l])=>{const C=its.filter(x=>x.stage===k).sort((a,b)=>String(a.at).localeCompare(String(b.at)));
+      return `<div class="bcol bc-${k}"><div class="bh"><b>${esc(l)}</b><span>${fa(C.length)}</span></div><div class="bl">${C.map(prBoardCard).join('')||'<div class="bempty">—</div>'}</div></div>`}).join('');return}
   const rows=PR.items.filter(x=>(PR.f==='all'?x.stage!=='done':x.stage===PR.f)&&(!q||String(x.name||'').toLowerCase().includes(q))).sort((a,b)=>(order[a.stage]-order[b.stage])||String(a.at).localeCompare(String(b.at)));
   $('prList').innerHTML=rows.length?rows.map(prosCard).join(''):'<div class="empty">'+(PR.items.length?'بیماری در این مرحله نیست.':'هنوز بیماری وارد مرحله‌ی پروتز نشده. بعد از ثبت «آخرین جلسه‌ی جراحی» بیمار خودکار اینجا می‌آید.')+'</div>'}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-prm]');if(!t)return;PR.m=t.dataset.prm;try{localStorage.setItem('implantPrMode',PR.m)}catch(x){}renderPros()});
 async function prosSet(id,stage,note,btn){if(btn)btn.disabled=true;try{await api('prosSet',{id,stage,note:note||'',by:($('rc_asst')||{}).value||ROLE_LBL[ROLE]});toast('مرحله ثبت شد: '+(PSTN[stage]||stage));if(!$('viewPros').hidden)loadPros();if(PF&&!$('pfSheet').hidden)refreshFile();pollQ(true)}catch(e){alertMsg(e.message)}finally{if(btn)btn.disabled=false}}
 
 /* ---------- dental lab ---------- */
@@ -2796,8 +2820,35 @@ function pfPays(j,r){const N=payNums(j),P=j.pays||[],ed=ROLE==='consultant',td=t
       <div class="fields"><label class="f">مبلغ (تومان)<input id="py_amount" class="price" inputmode="numeric" value="${esc(PYF.amount||'')}"></label><label class="f">توضیح<input id="py_note" value="${esc(PYF.note||'')}"></label></div>
       <div id="pyChq" ${PYF.kind==='chq'?'':'hidden'}><div class="fields"><label class="f">تاریخ سررسید (شمسی)<input id="py_due" inputmode="numeric" placeholder="۱۴۰۵/۰۹/۱۵" value="${esc(PYF.due||'')}"><small class="dhint" id="py_dueH"></small></label><label class="f">شماره چک<input id="py_no" inputmode="numeric" value="${esc(PYF.no||'')}"></label><label class="f">بانک<input id="py_bank" value="${esc(PYF.bank||'')}"></label></div>
         <div class="chips">${[1,2,3,4,5,6].map(n=>`<button type="button" class="chip" data-pydq="${mAdd(td,n)}">${fa(n)} ماه بعد</button>`).join('')}</div></div>
-      <div class="msg" id="pyMsg"></div><div class="btns"><button class="btn" type="button" id="pyAdd">ثبت پرداخت</button></div></div>`}
+      <div class="msg" id="pyMsg"></div><div class="btns"><button class="btn" type="button" id="pyAdd">ثبت پرداخت</button></div></div>`;
+    h+=icHTML(Math.max(0,N.rest-N.wait))}
   return h}
+let IC={open:false,total:'',pre:'',n:'6',gap:1,first:'',bank:'',part:'s'};
+function jmAdd(iso,n){const p=jParts(iso);let y=p[0],m=p[1]+n;while(m>12){m-=12;y++}while(m<1){m+=12;y--}const key=(a,b,c)=>a*600+b*40+c;let d=dAdd(iso,Math.round(n*30.44));
+  for(let i=0;i<40;i++){const q=jParts(d);if(q[0]===y&&q[1]===m&&(q[2]===p[2]||(q[2]<p[2]&&jParts(dAdd(d,1))[1]!==m)))return d;d=dAdd(d,key(q[0],q[1],q[2])<key(y,m,p[2])?1:-1)}return d}
+function icPlan(){const tot=num(IC.total),pre=num(IC.pre),n=Math.max(1,Math.min(36,parseInt(toEn(IC.n),10)||1)),rest=tot-pre,first=parseJ(IC.first||'');if(!tot||rest<=0||!first)return {rows:[],rest,n};
+  const unit=100000,base=Math.floor(rest/n/unit)*unit||Math.floor(rest/n),rows=[];for(let i=0;i<n;i++)rows.push({due:jmAdd(first,i*IC.gap),amount:i===0?rest-base*(n-1):base});return {rows,rest,n}}
+function icHTML(rest){if(!IC.total&&rest)IC.total=rest.toLocaleString('en-US');if(!IC.first)IC.first=jDay(jmAdd(tDay(),1));const P=icPlan();
+  return `<details class="instc"${IC.open?' open':''}><summary>🧮 ماشین‌حساب اقساط — چند چک با یک کلیک</summary>
+    <div class="fields"><label class="f">مبلغ کل (تومان)<input id="ic_total" class="price" inputmode="numeric" value="${esc(IC.total)}"></label><label class="f">پیش‌پرداخت (تومان)<input id="ic_pre" class="price" inputmode="numeric" value="${esc(IC.pre)}"></label>
+    <label class="f">تعداد چک<input id="ic_n" inputmode="numeric" value="${esc(IC.n)}"></label><label class="f">سررسید اولین چک (شمسی)<input id="ic_first" inputmode="numeric" value="${esc(IC.first)}"></label><label class="f">بانک<input id="ic_bank" value="${esc(IC.bank)}"></label></div>
+    <div class="seg"><button type="button" data-icg="1" aria-pressed="${IC.gap===1}">هر ماه</button><button type="button" data-icg="2" aria-pressed="${IC.gap===2}">هر دو ماه</button><button type="button" data-icg="3" aria-pressed="${IC.gap===3}">هر سه ماه</button></div>
+    <div class="seg"><button type="button" data-icp="s" aria-pressed="${IC.part==='s'}">پارت جراحی</button><button type="button" data-icp="p" aria-pressed="${IC.part==='p'}">پارت پروتز</button><button type="button" data-icp="" aria-pressed="${IC.part===''}">سایر</button></div>
+    <div id="icPrev">${icPrev(P)}</div>
+    <p class="note">پیش‌پرداخت را جداگانه با «ثبت پرداخت تازه» ثبت کنید. شماره‌ی هر چک را بعداً می‌توانید در توضیح بنویسید.</p>
+    <div class="msg" id="icMsg"></div><div class="btns"><button class="btn" type="button" id="icGo"${P.rows.length?'':' disabled'}>ثبت ${fa(P.rows.length||0)} چک</button></div></details>`}
+function icPrev(P){if(!P.rows.length)return `<div class="empty">${P.rest<=0&&num(IC.total)?'پیش‌پرداخت از مبلغ کل بیشتر است.':'مبلغ و تاریخ را وارد کنید.'}</div>`;
+  return `<div class="ictab">${P.rows.map((r,i)=>`<div><span>${fa(i+1)}</span><span>${esc(wDay(r.due))} ${esc(jDay(r.due))}</span><b>${fa(r.amount)}</b></div>`).join('')}<div class="tot"><span></span><span>جمع ${fa(P.rows.length)} چک</span><b>${fa(P.rest)}</b></div></div>`}
+function icRead(){[['total','ic_total'],['pre','ic_pre'],['n','ic_n'],['first','ic_first'],['bank','ic_bank']].forEach(([k,id])=>{const e=$(id);if(e)IC[k]=e.value})}
+function icRefresh(){icRead();const P=icPlan();$('icPrev').innerHTML=icPrev(P);const b=$('icGo');b.disabled=!P.rows.length;b.textContent=`ثبت ${fa(P.rows.length||0)} چک`}
+async function icGo(t){icRead();const P=icPlan(),m=$('icMsg');if(!P.rows.length)return;t.disabled=true;let ok=0;
+  try{for(const r of P.rows){m.className='msg';m.textContent=`در حال ثبت چک ${fa(ok+1)} از ${fa(P.rows.length)}…`;await api('payAdd',{id:PF.id,pay:{kind:'chq',part:IC.part,amount:r.amount,due:r.due,no:'',bank:IC.bank||'',note:`قسط ${fa(ok+1)} از ${fa(P.rows.length)}`},sendId:uuid()});ok++}
+    toast(`${fa(ok)} چک ثبت شد.`);IC={open:false,total:'',pre:'',n:'6',gap:1,first:'',bank:'',part:IC.part};refreshFile();pollQ(true)}
+  catch(e){m.className='msg err';m.textContent=(ok?`${fa(ok)} چک ثبت شد؛ `:'')+e.message;t.disabled=false;if(ok)refreshFile()}}
+document.addEventListener('input',e=>{const i=e.target;if(!i.id||!i.id.startsWith('ic_'))return;if(i.id==='ic_total'||i.id==='ic_pre')i.value=fmtInput(i.value);icRefresh()});
+document.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('instc'))IC.open=e.target.open},true);
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('button');if(!t)return;if(t.dataset.icg){IC.gap=+t.dataset.icg;t.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===t));icRefresh();return}
+  if(t.dataset.icp!==undefined){IC.part=t.dataset.icp;t.parentNode.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===t));return}if(t.id==='icGo'){icGo(t)}});
 /* cheque printing */
 function numWords(n){n=Math.floor(Math.abs(+n||0));if(!n)return 'صفر';const O=['','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه'],T=['ده','یازده','دوازده','سیزده','چهارده','پانزده','شانزده','هفده','هجده','نوزده'],D=['','','بیست','سی','چهل','پنجاه','شصت','هفتاد','هشتاد','نود'],H=['','یکصد','دویست','سیصد','چهارصد','پانصد','ششصد','هفتصد','هشتصد','نهصد'],S=['','هزار','میلیون','میلیارد','هزار میلیارد'];
   const three=x=>{const h=Math.floor(x/100),r=x%100,p=[];if(h)p.push(H[h]);if(r>=10&&r<20)p.push(T[r-10]);else{const d=Math.floor(r/10),o=r%10;if(d)p.push(D[d]);if(o)p.push(O[o])}return p.join(' و ')};
@@ -2996,13 +3047,18 @@ const raDayISO=x=>x==='f'?dAdd(tDay(),1):tDay();
 const apSort=(a,b)=>(a.time||'99').localeCompare(b.time||'99');
 function apFilterSec(A,keys,fsel,fEl,lEl,emp){const cnt={};A.forEach(a=>cnt[a.kind]=(cnt[a.kind]||0)+1);
   $(fEl).innerHTML=[['all','همه',A.length],...keys.filter(k=>k!=='tryin'&&k!=='postop'&&k!=='check'||cnt[k]).map(k=>[k,AFL[k]||AKL[k],cnt[k]||0])].map(([k,l,n])=>`<button type="button" class="chip" data-raf="${fEl}:${k}" aria-pressed="${fsel===k}">${esc(l)} <b>${fa(n)}</b></button>`).join('');
-  const V=fsel==='all'?A:A.filter(a=>a.kind===fsel);$(lEl).innerHTML=V.length?V.map(a=>apptCard(Object.assign({},a))).join(''):`<div class="empty">${emp}</div>`}
+  const V=fsel==='all'?A:A.filter(a=>a.kind===fsel);$(lEl).dataset.n=A.length;$(lEl).innerHTML=V.length?V.map(a=>apptCard(Object.assign({},a))).join(''):`<div class="empty">${emp}</div>`}
+let SECC=(()=>{try{return JSON.parse(localStorage.getItem('implantSecC')||'{}')}catch(e){return {}}})();
+function tidySecs(){if(ROLE!=='staff')return;document.querySelectorAll('#viewRecep .rpane').forEach(pn=>{let vis=0;pn.querySelectorAll('.rsec').forEach(sec=>{const L=sec.querySelector('.list');if(!L)return;const k=L.id,n=L.dataset.n!==undefined?+L.dataset.n:L.querySelectorAll(':scope>.item').length;
+    const has=n||!!L.querySelector('[data-tall]');sec.hidden=!has;if(has)vis++;sec.classList.toggle('col',!!SECC[k]);const h=sec.querySelector('.rsh');if(h){h.dataset.sec=k;let b=h.querySelector('.rsc');if(!b){b=document.createElement('b');b.className='rsc';h.appendChild(b)}b.textContent=fa(n)}});
+    let em=pn.querySelector('.rpEmpty');if(!em){em=document.createElement('div');em.className='empty rpEmpty';em.textContent='در این بخش فعلاً کاری نیست.';pn.appendChild(em)}em.hidden=!!vis||pn.dataset.rpane==='ex'})}
+document.addEventListener('click',e=>{const h=e.target.closest&&e.target.closest('.rsec>.rsh[data-sec]');if(!h||e.target.closest('button,a'))return;const k=h.dataset.sec;SECC[k]=!SECC[k];if(!SECC[k])delete SECC[k];try{localStorage.setItem('implantSecC',JSON.stringify(SECC))}catch(x){}h.parentNode.classList.toggle('col',!!SECC[k])});
 function renderRecepAppts(){if(ROLE!=='staff'||!$('raSg'))return;const day=raDayISO(RAD),dl=RAD==='t'?'امروز':'فردا',A=QAPPT.filter(a=>a.st!=='cancel'&&a.day===day).sort(apSort);
   document.querySelectorAll('[data-rad]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.rad===RAD));
   apFilterSec(A.filter(a=>AGRP.sg.includes(a.kind)),AGRP.sg,RAF.sg,'raSgF','raSg',dl+' نوبت جراحی ثبت نشده.');
   apFilterSec(A.filter(a=>AGRP.pr.includes(a.kind)),AGRP.pr,RAF.pr,'raPrF','raPr',dl+' نوبت پروتز ثبت نشده.');
-  const O=A.filter(a=>!AGRP.sg.includes(a.kind)&&!AGRP.pr.includes(a.kind)&&!AGRP.cs.includes(a.kind)&&!AGRP.cp.includes(a.kind));$('raOtW').hidden=!O.length;$('raOt').innerHTML=O.map(a=>apptCard(Object.assign({},a))).join('');
-  renderRecepBar();if(!$('ckSheet').hidden)renderCk()}
+  const O=A.filter(a=>!AGRP.sg.includes(a.kind)&&!AGRP.pr.includes(a.kind)&&!AGRP.cs.includes(a.kind)&&!AGRP.cp.includes(a.kind));$('raOt').innerHTML=O.map(a=>apptCard(Object.assign({},a))).join('');
+  $('raOt').dataset.n=O.length;renderRecepBar();tidySecs();if(!$('ckSheet').hidden)renderCk()}
 function renderRecepBar(){if(ROLE!=='staff'||!$('rTabs'))return;const td=tDay(),T=QAPPT.filter(a=>a.st!=='cancel'&&a.day===td),open=(ks,h)=>TASKS.filter(t=>!t.done&&ks.includes(t.kind)&&dDiff(t.due,td)<=h).length;
   const N={ex:QITEMS.length,ap:T.filter(a=>!AGRP.cs.includes(a.kind)&&!AGRP.cp.includes(a.kind)).length,bk:open(['book'],3650)+open(['suture','labready'],1)+open(['uncover','recall'],0),fl:open(['fol1','fol4'],0)+open(['numb','week'],0)};
   Object.keys(N).forEach(k=>{const b=$('rtN_'+k);if(b){b.textContent=N[k]?fa(N[k]):'';b.hidden=!N[k]}});
