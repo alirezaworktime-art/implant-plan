@@ -476,7 +476,21 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
 
 /* ---- treatment flow: calendar, prosthesis, lab, payments, dashboard ---- */
 @media (min-width:721px) and (max-width:1180px){nav.tabs{overflow-x:auto;scrollbar-width:none;max-width:72vw}.tab{padding:6px 8px;font-size:.78rem;gap:4px}}
-.calnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 10px}.calnav b{flex:1;text-align:center;font-size:.92rem}
+.calnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 10px}
+.calmode{margin:0 0 8px}
+.mcal{margin-bottom:12px;container-type:inline-size}
+.mhd,.mgr{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.mhd span{text-align:center;font-size:.72rem;color:var(--muted);padding:2px 0}
+.mday{font:inherit;min-width:0;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:5px 2px;min-height:62px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;overflow:hidden}
+.mday b{font-size:.95rem;font-variant-numeric:tabular-nums}
+.mday .n{font-size:.68rem;color:var(--muted);white-space:nowrap}
+.mday .cap{font-size:.62rem;font-weight:700;border-radius:99px;padding:0 5px;background:var(--lapis-soft);color:var(--lapis);white-space:nowrap}
+.mday .cap.full{background:var(--bad-soft);color:var(--bad)}
+.mday i{font-style:normal}.mday.has{border-color:var(--lapis);box-shadow:inset 0 -3px 0 var(--lapis-soft)}
+.mday.past{opacity:.6}.mday.fri{opacity:.7}
+.mday.today{border-color:var(--accent);border-width:2px}
+.mday[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);opacity:1}.mday[aria-pressed="true"] .n{color:inherit}
+@container (max-width:520px){.mday i{display:none}.mday{min-height:54px}.mday .n{font-weight:700;color:var(--ink)}}.calnav b{flex:1;text-align:center;font-size:.92rem}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}
 .day{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:var(--r);padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-height:76px;box-shadow:var(--sh)}
 .day small{font-size:.7rem;color:var(--muted)}.day b{font-size:1.05rem;font-variant-numeric:tabular-nums}.day .n{font-size:.7rem;color:var(--muted)}
@@ -629,7 +643,7 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
     <div class="qhead"><h2>صف امروز</h2><span class="live" id="rLive">زنده</span></div>
     <div class="rqf" id="rChips"></div>
     <div class="list" id="rList"><div class="empty">در حال بارگذاری…</div></div>
-<div class="qhead"><h2>نوبت‌های امروز و فردا</h2><button class="btn sm ghost" type="button" data-gocal>تقویم نوبت‌ها</button></div>
+<div class="qhead"><h2>نوبت‌های امروز و فردا</h2><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm ghost" type="button" data-gocal data-cmode="week">تقویم هفتگی</button><button class="btn sm ghost" type="button" data-gocal data-cmode="month">تقویم ماهانه</button></span></div>
     <div class="list" id="raList"><div class="empty">نوبتی ثبت نشده.</div></div>
     <div class="qhead"><h2>صف نوبت‌دهی جراحی</h2></div>
     <div class="list" id="bkList"><div class="empty">موردی نیست.</div></div>
@@ -654,8 +668,10 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
   <section id="viewCal" class="wrap" style="padding:0" hidden>
     <div class="qhead"><h2>نوبت‌ها</h2><button class="btn" id="calNew" type="button">+ نوبت جدید</button></div>
     <div class="banner info" id="calRem" hidden></div>
+    <div class="chips calmode"><button type="button" class="chip" data-cmode="week">هفتگی</button><button type="button" class="chip" data-cmode="month">ماهانه</button></div>
     <div class="calnav"><button class="btn ghost sm" id="calPrev" type="button">→ هفته‌ی قبل</button><b id="calRange"></b><button class="btn ghost sm" id="calToday" type="button">امروز</button><button class="btn ghost sm" id="calNext" type="button">هفته‌ی بعد ←</button></div>
     <div class="days" id="calDays"></div>
+    <div class="mcal" id="calMonth" hidden></div>
     <div class="qhead"><h2 id="calDayT" style="font-size:1rem"></h2></div>
     <div class="list" id="calList"><div class="empty">در حال بارگذاری…</div></div>
   </section>
@@ -2549,9 +2565,12 @@ const JMN=['فروردین','اردیبهشت','خرداد','تیر','مرداد
 const money=n=>fa(n)+' تومان';
 
 /* ---------- appointments: calendar ---------- */
-const CAL={start:'',sel:'',items:[],loaded:false};
+const CAL={start:'',sel:'',items:[],loaded:false,mode:(()=>{try{return localStorage.getItem('implantCalMode')==='month'?'month':'week'}catch(e){return 'week'}})()};
+const jParts=d=>toEn(jDay(d)).split('/').map(Number);
+function jMonth(d){const m=jParts(d)[1];let a=d,b=d;for(let i=0;i<32&&jParts(dAdd(a,-1))[1]===m;i++)a=dAdd(a,-1);for(let i=0;i<32&&jParts(dAdd(b,1))[1]===m;i++)b=dAdd(b,1);return [a,b]}
+function calSetMode(m){CAL.mode=m==='month'?'month':'week';try{localStorage.setItem('implantCalMode',CAL.mode)}catch(e){}if(!CAL.sel)CAL.sel=tDay();CAL.start=weekStart(CAL.sel)}
 const weekStart=d=>{const g=new Date(d+'T12:00:00Z').getUTCDay();return dAdd(d,-((g+1)%7))};
-async function loadCal(){if(!CAL.start){CAL.sel=tDay();CAL.start=weekStart(CAL.sel)}const td=tDay(),from=CAL.start<td?CAL.start:td,end=dAdd(CAL.start,6),to=end>dAdd(td,1)?end:dAdd(td,1);
+async function loadCal(){if(!CAL.start){CAL.sel=tDay();CAL.start=weekStart(CAL.sel)}const td=tDay(),R0=CAL.mode==='month'?jMonth(CAL.sel):[CAL.start,dAdd(CAL.start,6)],from=R0[0]<td?R0[0]:td,end=R0[1],to=end>dAdd(td,1)?end:dAdd(td,1);
   try{const j=await api('apptList',{from,to});CAL.items=j.items||[];CAL.loaded=true;renderCal()}catch(e){if(e.message!=='aborted')$('calList').innerHTML=`<div class="empty">${esc(e.message)}</div>`}}
 function apptMsg(a){const c=SET.clinic||'کلینیک';return `${a.name?a.name+' عزیز':'بیمار عزیز'}، سلام. یادآوری نوبت ${AKL[a.kind]||'ویزیت'} شما در ${c}: ${wDay(a.day)} ${jDay(a.day)}${a.time?' ساعت '+faD(a.time):''}.${SET.phone?' هماهنگی: '+SET.phone:''}`}
 function apptCard(a,o={}){const n=dDiff(a.day,tDay()),st=a.st||'set',can=canAppt();
@@ -2569,6 +2588,13 @@ function apptCard(a,o={}){const n=dDiff(a.day,tDay()),st=a.st||'set',can=canAppt
 function renderCal(){const td=tDay(),cap=Number(SET.cap)||0,days=[...Array(7)].map((_,i)=>dAdd(CAL.start,i));
   $('calNew').hidden=!canAppt();
   const jS=d=>{const p=toEn(jDay(d)).split('/').map(Number);return faD(String(p[2]))+' '+JMN[p[1]-1]};$('calRange').textContent=`${jS(days[0])} تا ${jS(days[6])}`;
+  const MO=CAL.mode==='month';document.querySelectorAll('.calmode [data-cmode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cmode===CAL.mode));
+  $('calPrev').textContent=MO?'→ ماه قبل':'→ هفته‌ی قبل';$('calNext').textContent=MO?'ماه بعد ←':'هفته‌ی بعد ←';$('calDays').hidden=MO;$('calMonth').hidden=!MO;
+  if(MO){const [a,b]=jMonth(CAL.sel),jp=jParts(a),lead=dDiff(a,weekStart(a)),cells=[];$('calRange').textContent=`${JMN[jp[1]-1]} ${faD(String(jp[0]))}`;
+    for(let i=0;i<lead;i++)cells.push('<span class="mc0"></span>');
+    for(let d=a;d<=b;d=dAdd(d,1)){const its=CAL.items.filter(x=>x.day===d&&x.st!=='cancel'),sg=its.filter(x=>x.kind==='surg').length;
+      cells.push(`<button type="button" class="mday${d===td?' today':''}${new Date(d+'T12:00:00Z').getUTCDay()===5?' fri':''}${d<td?' past':''}${its.length?' has':''}" data-cday="${d}" aria-pressed="${d===CAL.sel}"><b>${faD(String(jParts(d)[2]))}</b>${its.length?`<span class="n">${fa(its.length)}<i> نوبت</i></span>`:''}${sg?`<span class="cap${cap&&sg>=cap?' full':''}"><i>جراحی </i>${fa(sg)}${cap?'/'+fa(cap):''}</span>`:''}</button>`)}
+    $('calMonth').innerHTML='<div class="mhd">'+['ش','ی','د','س','چ','پ','ج'].map(x=>`<span>${x}</span>`).join('')+'</div><div class="mgr">'+cells.join('')+'</div>'}
   $('calDays').innerHTML=days.map(d=>{const its=CAL.items.filter(a=>a.day===d&&a.st!=='cancel'),sg=its.filter(a=>a.kind==='surg').length,p=d.split('-');
     return `<button type="button" class="day${d===td?' today':''}${new Date(d+'T12:00:00Z').getUTCDay()===5?' fri':''}" data-cday="${d}" aria-pressed="${d===CAL.sel}"><small>${esc(wDayS(d))}</small><b>${faD(String(+toEn(jDay(d)).split('/')[2]))}</b><span class="n">${its.length?fa(its.length)+' نوبت':'—'}</span>${sg?`<span class="cap${cap&&sg>=cap?' full':''}">جراحی ${fa(sg)}${cap?'/'+fa(cap):''}</span>`:''}</button>`}).join('');
   const list=CAL.items.filter(a=>a.day===CAL.sel).sort((a,b)=>a.time<b.time?-1:1);
@@ -2846,13 +2872,15 @@ function renderSurgAppts(){const el=$('qAppt');if(!el)return;if(ROLE!=='surgery'
 
 /* ---------- events ---------- */
 document.addEventListener('click',async e=>{const t=e.target.closest('button,a');if(!t)return;
-  if(t.id==='tabCal'||t.hasAttribute('data-gocal')){if(dirty&&!$('viewForm').hidden&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}delete t.dataset.armed;dirty=false;show('cal');return}
+  if(t.id==='tabCal'||t.hasAttribute('data-gocal')){if(t.dataset.cmode)calSetMode(t.dataset.cmode);if(dirty&&!$('viewForm').hidden&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}delete t.dataset.armed;dirty=false;show('cal');return}
   if(t.id==='tabPros'){if(dirty&&!$('viewForm').hidden&&!t.dataset.armed){t.dataset.armed='1';alertMsg('تغییرات این فرم ذخیره نشده. برای رفتن دوباره بزنید.');setTimeout(()=>delete t.dataset.armed,4000);return}delete t.dataset.armed;dirty=false;show('pros');return}
   if(t.id==='tabLab'){show('lab');return}
   if(t.id==='tabDash'){show('dash');return}
   if(t.dataset.dper){DASH.per=t.dataset.dper;document.querySelectorAll('[data-dper]').forEach(b=>b.setAttribute('aria-pressed',b===t));renderDash();return}
   /* calendar */
-  if(t.dataset.cday){CAL.sel=t.dataset.cday;if(CAL.sel<CAL.start||CAL.sel>dAdd(CAL.start,6)){CAL.start=weekStart(CAL.sel);loadCal()}else renderCal();return}
+  if(t.dataset.cday){const old=CAL.mode==='month'?jMonth(CAL.sel):[CAL.start,dAdd(CAL.start,6)];CAL.sel=t.dataset.cday;CAL.start=weekStart(CAL.sel);if(CAL.sel<old[0]||CAL.sel>old[1])loadCal();else renderCal();return}
+  if(t.dataset.cmode&&!t.hasAttribute('data-gocal')){calSetMode(t.dataset.cmode);$('calList').innerHTML='<div class="empty">در حال بارگذاری…</div>';loadCal();return}
+  if((t.id==='calPrev'||t.id==='calNext')&&CAL.mode==='month'){const [a,b]=jMonth(CAL.sel);CAL.sel=t.id==='calPrev'?jMonth(dAdd(a,-1))[0]:dAdd(b,1);const td=tDay();if(CAL.sel<=td&&jMonth(CAL.sel)[1]>=td)CAL.sel=td;CAL.start=weekStart(CAL.sel);$('calList').innerHTML='<div class="empty">در حال بارگذاری…</div>';loadCal();return}
   if(t.id==='calPrev'||t.id==='calNext'){CAL.start=dAdd(CAL.start,t.id==='calPrev'?-7:7);CAL.sel=CAL.start;$('calList').innerHTML='<div class="empty">در حال بارگذاری…</div>';loadCal();return}
   if(t.id==='calToday'){CAL.sel=tDay();CAL.start=weekStart(CAL.sel);loadCal();return}
   if(t.id==='calNew'){openAppt({day:CAL.sel>=tDay()?CAL.sel:''});return}
