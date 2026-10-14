@@ -496,6 +496,13 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
 .rnow{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}.rnh{font-weight:800;font-size:.92rem;display:flex;align-items:center;gap:6px}.rnh b{background:var(--bad);color:#fff;border-radius:999px;padding:0 8px;font-size:.78rem}.rnh.ok{color:var(--ok);font-weight:700;font-size:.85rem}
 .rn{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:12px;background:var(--warn-soft);border:1px solid transparent;border-inline-start:4px solid var(--warn)}.rn.bad{background:var(--bad-soft);border-inline-start-color:var(--bad)}
 .rn .tx{flex:1 1 220px;min-width:0;font-size:.86rem;line-height:1.7}.rn .acts{flex:0 0 auto}
+.lockn{font-size:.82rem;color:var(--warn);background:var(--warn-soft);border-radius:10px;padding:6px 10px;margin:0 0 8px}
+.hdoc .seg{margin-bottom:6px}.hdoc .seg button{font-size:.8rem}
+.msub.hba{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.chip.tick{font-weight:700}
+.qprice{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px}
+.mixw{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:8px 0}.mixw .note{grid-column:1/-1;margin:0}
+.mix{border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--sunk);display:flex;flex-direction:column;gap:4px}
+.mixr{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.88rem}.mxc{display:flex;align-items:center;gap:6px}.mxv{min-width:22px;text-align:center;font-weight:800}.mxc .btn{min-width:34px;padding:4px 0}
 .rsec{margin:0 0 16px}.rsec>.rsh[data-sec]{cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none}.rsec>.rsh[data-sec]::after{content:'▾';margin-inline-start:auto;color:var(--muted);transition:transform .15s}
 .rsec.col>.rsh::after{transform:rotate(90deg)}.rsec.col>:not(.rsh){display:none!important}.rsc{font-size:.74rem;background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted)}
 .qpw{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.wt{font-size:.74rem;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--sunk);color:var(--muted);white-space:nowrap}.wt.w1{background:var(--warn-soft);color:var(--warn)}.wt.w2{background:var(--bad-soft);color:var(--bad)}
@@ -812,7 +819,7 @@ body[data-role="doctor"] #viewForm [data-sec="surg"] .calc{display:block!importa
         <label class="f">تاریخ مراجعه<input id="h_date" data-h="date"></label>
         <label class="f">شماره موبایل<input id="h_phone" data-h="phone" class="ltr" inputmode="tel"></label>
         <label class="f">سن<input id="h_age" data-h="age" inputmode="numeric"></label>
-        <label class="f">نام پزشک<input id="h_doc" data-h="doc"></label>
+        <div class="f hdoc"><span>نام پزشک</span><div class="seg" id="hDocSeg"><button type="button" data-hdoc="m">دکتر سید مجتبی علویکیا</button><button type="button" data-hdoc="o">پزشک دیگر</button></div><input id="h_doc" data-h="doc" placeholder="نام پزشک را بنویسید" hidden></div>
         <label class="f">پذیرنده<input id="h_asst" data-h="asst"></label>
         <label class="f">شهر<input id="h_city" data-h="city" list="dlCity"></label>
         <label class="f">معرف<input id="h_ref" data-h="ref" list="dlRef"></label>
@@ -1134,7 +1141,7 @@ const SECTIONS=[
  {id:'imp',t:'پایه ایمپلنت',kind:'teeth',n:7,price:'brandUnit',cnt:'jaws',jmax:14,text:'توضیحات'},
  {id:'sub',t:'ایمپلنت ساب‌پریوستئال',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
  {id:'aox',t:'All on X',sgt:7,kind:'chips',groups:[{l:'فک بالا',o:['4','5','6','7','8'],single:true},{l:'فک پایین',o:['4','5','6','7','8'],single:true}],price:'aox',prosJaw:true,def:'19000000',
-   xp:[{k:'cb',pk:'aox_cb',l:'All on X کلاسیک · هر پایه (ایتالیایی)'}]},
+   xp:[{k:'cb',pk:'aox_cb',l:'All on X · هر پایه پلاس (ایتالیایی)'},{k:'mz',pk:'aox_z',l:'All on X · هر پایه زایگوما'},{k:'mt',pk:'aox_t',l:'All on X · هر پایه تریگوئید'},{k:'mn',pk:'aox_n',l:'All on X · هر پایه نازال'}]},
  {id:'pon',t:'پایه پونتیک',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14,pros:true},
  {id:'gbr',t:'جراحی GBR',kind:'teeth',n:7,price:'unit',cnt:'jaws',jmax:14},
  {id:'vip',t:'جراحی VIP / GBR',kind:'items',price:'items',two:true,items:[{k:'cgf',l:'CGF',type:'quad',qn:8,pk:'vip_cgf',ul:'هر عدد'},{k:'mem',l:'ممبران و تگ',type:'quad',qn:8,pk:'vip_mem',ul:'هر عدد'}]},
@@ -1173,11 +1180,11 @@ const blankMed=()=>({y:{},t:{},other:''});
 function medNorm(m){m=m||{};return {y:{...(m.y||{})},t:{...(m.t||{})},other:m.other||''}}
 function medList(m){m=medNorm(m);const L=[];MED_Q.forEach(([k,l])=>{if(m.y[k])L.push(l.replace(/^آیا /,'').replace(/؟$/,'')+((m.t[k]||'').trim()?': '+m.t[k].trim():''))});
   const d=medDis(m);if(d.length)L.push('مبتلا: '+d.join('، '));if(m.other.trim())L.push('توضیحات: '+m.other.trim());return L}
-const medDis=m=>MED_D.filter(([k])=>m.y[k]).map(([k,l,o])=>l+(o&&m.t[k]?' ('+m.t[k]+')':'')).concat(MED_OLD.filter(([k])=>m.y[k]&&!MED_D.some(x=>x[0]===k)).map(([,l])=>l));
+const medDis=m=>MED_D.filter(([k])=>m.y[k]).map(([k,l,o])=>l+(o&&m.t[k]?' ('+m.t[k]+')':'')+(k==='diab'&&m.y.hba?' · قند سه ماهه (HbA1c)'+(m.t.hba?' '+m.t.hba:''):'')).concat(MED_OLD.filter(([k])=>m.y[k]&&!MED_D.some(x=>x[0]===k)).map(([,l])=>l));
 function medShort(m){m=medNorm(m);const a=medDis(m);if(m.y.alg)a.push('حساسیت'+(m.t.alg?' ('+m.t.alg+')':''));MED_Q.forEach(([k,l])=>{if(k!=='alg'&&m.y[k])a.push(l.replace(/^آیا /,'').replace(/؟$/,''))});if(m.other.trim())a.push(m.other.trim());return a.join('، ')}
 function medHTML(m){m=medNorm(m);const yn=(k)=>`<span class="yn"><button type="button" data-mk="${k}" data-mv="0" aria-pressed="${!m.y[k]}">خیر</button><button type="button" data-mk="${k}" data-mv="1" aria-pressed="${!!m.y[k]}">بله</button></span>`;
   return `<h3>وضعیت عمومی بیمار</h3><div class="medq">`+MED_Q.map(([k,l])=>`<div class="mrow"><span>${l}</span>${yn(k)}${m.y[k]?`<input data-mt="${k}" value="${esc(m.t[k]||'')}" placeholder="${k==='hosp'?'به چه علت؟':'توضیح'}">`:''}</div>`).join('')+'</div>'+
-    `<h3>آیا به هیچ‌کدام از حالات و بیماری‌های زیر مبتلا بوده یا هستید؟</h3><div class="mgrid">`+MED_D.map(([k,l,o])=>`<div class="mrow"><span>${l}</span>${yn(k)}${o&&m.y[k]?`<span class="msub">${o.map(v=>`<button type="button" class="chip" data-ms="${k}" data-msv="${esc(v)}" aria-pressed="${m.t[k]===v}">${v}</button>`).join('')}</span>`:''}</div>`).join('')+`</div>`+
+    `<h3>آیا به هیچ‌کدام از حالات و بیماری‌های زیر مبتلا بوده یا هستید؟</h3><div class="mgrid">`+MED_D.map(([k,l,o])=>`<div class="mrow"><span>${l}</span>${yn(k)}${o&&m.y[k]?`<span class="msub">${o.map(v=>`<button type="button" class="chip" data-ms="${k}" data-msv="${esc(v)}" aria-pressed="${m.t[k]===v}">${v}</button>`).join('')}</span>`:''}${k==='diab'&&m.y[k]?`<span class="msub hba"><button type="button" class="chip tick" data-mhb aria-pressed="${!!m.y.hba}">${m.y.hba?'☑':'☐'} قند سه ماهه (HbA1c)</button>${m.y.hba?['زیر ۷٫۵','بالای ۷٫۵'].map(v=>`<button type="button" class="chip" data-ms="hba" data-msv="${v}" aria-pressed="${m.t.hba===v}">${v}</button>`).join(''):''}</span>`:''}</div>`).join('')+`</div>`+
     (MED_OLD.some(([k])=>m.y[k]&&!MED_D.some(x=>x[0]===k))?`<p class="note">ثبت‌شده در فرم قبلی: ${MED_OLD.filter(([k])=>m.y[k]&&!MED_D.some(x=>x[0]===k)).map(([,l])=>l).join('، ')}</p>`:'')+
     `<label class="f full" style="margin-top:8px">توضیحات<textarea data-mo rows="2" placeholder="بیماری یا نکته‌ای که در لیست نیست">${esc(m.other)}</textarea></label>`}
 let RC_MED=blankMed();
@@ -1204,6 +1211,11 @@ function qty(s,x){
   if(x.price==='implantBrand'||x.price==='aox')return Object.keys(s.sel).filter(k=>s.sel[k]).reduce((a,k)=>a+num(k.split(':')[1]),0);
   return chipSel(s)}
 function tnTeeth(s,it,q){return Object.keys(s.isel).filter(z=>s.isel[z]&&z.startsWith(it.k+'n:'+q)).map(z=>z.split(':')[1]).sort()}
+const RQD=['UR','UL','LR','LL'];
+function itemQ(s,it,q){if(!s.isel[it.k+':'+q])return 0;return it.tn?(tnTeeth(s,it,q).length||1):it.qn?(num(s.icnt[it.k+':'+q])||1):1}
+const regP=(x,it)=>x.id==='surg'&&it.type==='quad';
+const qPrice=(s,it,q)=>{const v=s.ip[it.k+'@'+q];return num(v!==undefined&&v!==''?v:s.ip[it.k])};
+function itemCost(x,s,it){return regP(x,it)?RQD.reduce((a,q)=>a+itemQ(s,it,q)*qPrice(s,it,q),0):itemQty(s,it)*num(s.ip[it.k])}
 function itemQty(s,it){if(it.type==='count')return num(s.icnt[it.k]);const on=Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':'));if(it.tn)return on.reduce((a,k)=>a+(tnTeeth(s,it,k.split(':')[1]).length||1),0);return it.qn?on.reduce((a,k)=>a+(num(s.icnt[k])||1),0):on.length}
 function rowTotals(r,x){const s=r.s[x.id],q=qty(s,x),o={flat:0,brand:bz()};
   if(x.price==='unit')o.flat=q*num(s.price);
@@ -1211,9 +1223,9 @@ function rowTotals(r,x){const s=r.s[x.id],q=qty(s,x),o={flat:0,brand:bz()};
   else if(x.price==='brandUnit')BRANDS.forEach(b=>o.brand[b.k]=q*num(s.bp[b.k]));
   if(x.id==='imp'&&r.s.crw)o.pros=q*num(r.s.crw.price);
   else if(x.price==='implantBrand')BRANDS.forEach(b=>o.brand[b.k]=q*num(r.s.imp.bp[b.k]));
-  if(x.price==='aox'){if(s.isel['t:long']){const on=q||chipSel(s);o.flat=on?num(s.ip.lt):0;o.pros=on?num(s.ip.lq):0;return o}o.flat=q*num(s.ip.cb);o.pros=chipSel(s)*num(s.price);return o}
+  if(x.price==='aox'){if(s.isel['t:long']){const on=q||chipSel(s);o.flat=on?num(s.ip.lt):0;o.pros=on?num(s.ip.lq):0;return o}o.flat=aoxCost(s);o.pros=chipSel(s)*num(s.price);return o}
   if(x.prosJaw)o.pros=chipSel(s)*num(s.price);
-  else if(x.price==='items')o.flat=x.items.reduce((a,it)=>a+itemQty(s,it)*num(s.ip[it.k]),0)+(x.base?teethQty(s,x)*num(s.price):0);
+  else if(x.price==='items')o.flat=x.items.reduce((a,it)=>a+itemCost(x,s,it),0)+(x.base?teethQty(s,x)*num(s.price):0);
   if(x.items&&x.price&&x.price!=='items')o.flat+=x.items.reduce((a,it)=>a+itemQty(s,it)*num(s.ip[it.k]),0);
   return o}
 function totals(r){const surg=bz();let pros=0;
@@ -1242,16 +1254,24 @@ function jawUseOne(S,id,j){const s=S&&S[id];if(!s)return false;if(id==='imp')ret
   return Object.keys(s.sel||{}).some(k=>s.sel[k]&&(isTooth(k)?k[0]===j:k.split(':')[0]===gi))}
 const jawChip=(s,j)=>Object.keys(s.sel).some(k=>s.sel[k]&&!isTooth(k)&&k.split(':')[0]===(j==='U'?'0':'1'));
 /* name of the other treatment that already holds this jaw (plan and surgery day), or '' */
-function jawBlocked(id,j){if(!EXG.includes(id))return '';const Ss=SURG?[SURG.s,SURG.plan]:[AS()];if(Ss.some(S=>jawUseOne(S,id,j)))return '';for(const o of EXG){if(o!==id&&Ss.some(S=>jawUseOne(S,o,j)))return SEC[o].t}return ''}
-function exRefresh(sid){if(EXG.includes(sid))EXG.forEach(o=>{if(o!==sid)reSec(o)})}
+function xBlock(id,j){if(SURG)return '';const S=AS();if(!S)return '';
+  if(id==='crw'){if(S.aox&&jawChip(S.aox,j))return 'All on X';if(S.imp&&teethSel(S.imp,j)+num(S.imp.jc[j])>6)return 'پایه ایمپلنت (فول)';if(S.ext&&num(S.ext.jc[j]))return 'Full EXT'}
+  if(id==='aox'&&S.sub&&(teethSel(S.sub,j)||num(S.sub.jc[j])))return SEC.sub.t;
+  if(id==='sub'&&S.aox&&jawChip(S.aox,j))return 'All on X';return ''}
+function enforceLocks(){if(SURG)return;const c=AS().crw;if(!c)return;let ch=[];['U','L'].forEach(j=>{if(!xBlock('crw',j))return;let x=false;Object.keys(c.sel).forEach(k=>{if(isTooth(k)&&k[0]===j&&c.sel[k]){delete c.sel[k];x=true}});if(num(c.jc[j])){c.jc[j]='';x=true}if(x)ch.push(j==='U'?'بالا':'پایین')});
+  if(ch.length)toast('«فقط روکش» فک '+ch.join(' و ')+' پاک شد؛ این فک درمان کامل دارد.')}
+function jawBlocked(id,j){const xb=xBlock(id,j);if(xb)return xb;if(!EXG.includes(id))return '';const Ss=SURG?[SURG.s,SURG.plan]:[AS()];if(Ss.some(S=>jawUseOne(S,id,j)))return '';for(const o of EXG){if(o!==id&&Ss.some(S=>jawUseOne(S,o,j)))return SEC[o].t}return ''}
+function exRefresh(sid){if(!SURG&&SEC[sid]&&(SEC[sid].cnt||sid==='aox'))reSec(sid);if(EXG.includes(sid))EXG.forEach(o=>{if(o!==sid)reSec(o)});if(SURG)return;const D={imp:['crw'],aox:['crw','sub'],ext:['crw'],sub:['aox']}[sid];if(D){enforceLocks();D.forEach(o=>{if(SEC[o])reSec(o)})}}
 function toothBtn(sid,key,label){const bl=jawBlocked(sid,key[0]),nc=SURG&&(sid==='aox'||sid==='ovd')&&!jawChip(AS()[sid],key[0]);if(bl||nc)return `<button type="button" class="t" data-sid="${sid}" data-k="${key}" aria-pressed="false" disabled title="${bl?'در این فک '+esc(bl)+' انتخاب شده':'اول تعداد پایه‌ی این فک را بزنید'}">${label}</button>`;const lk=jawLocked(SEC[sid]||{},key[0]);const pl=SURG&&SURG.plan[sid]&&SURG.plan[sid].sel[key],hi=SURG&&sid==='imp'&&SURG.imp[key];return `<button type="button" class="t${pl?' pl':''}${hi?' hasimp':''}" data-sid="${sid}" data-k="${key}" aria-pressed="${!lk&&!!AS()[sid].sel[key]}"${lk?' disabled title="تعداد کل این فک انتخاب شده"':''}>${label}</button>`}
 function jawCntHTML(x,j){if(x.cnt!=='jaw'&&x.cnt!=='jaws')return '';if(SURG)return '';const s=AS()[x.id];
   if(jawBlocked(x.id,j))return `<div class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small><span class="pick" style="opacity:.35;cursor:not-allowed">—</span></div>`;
+  if(teethSel(s,j))return `<div class="jcnt" title="شماره‌ی دندان انتخاب شده؛ تعداد کل خاموش است"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small><span class="pick off" style="opacity:.35;cursor:not-allowed">✕</span></div>`;
   const L=(x.cnt==='jaw'?'Full EXT':'تعداد کل')+' فک '+(j==='U'?'بالا':'پایین');return `<div class="jcnt"><small>${x.cnt==='jaw'?'Full EXT':'تعداد کل'}</small>${pickHTML(`data-jc="${x.id}" data-j="${j}" aria-label="${L}"`,x.jmax,s.jc[j],x.t+'، '+L)}</div>`}
 function chartHTML(x){const hc=(x.cnt==='jaw'||x.cnt==='jaws')&&!SURG;let h=`<div class="chart"><div class="chart-in${hc?' hascnt':''}" style="--n:${x.n}">`;
   [['U','بالا'],['L','پایین']].forEach(([j,l])=>{let r='',lf='';for(let i=x.n;i>=1;i--)r+=toothBtn(x.id,j+'R'+i,i);for(let i=1;i<=x.n;i++)lf+=toothBtn(x.id,j+'L'+i,i);
     h+=`<div class="jaw"><span class="jlabel">${l}</span><div class="half">${r}</div><span class="mid"></span><div class="half">${lf}</div>${jawCntHTML(x,j)}</div>`});
   return h+'<div class="sides"><span>راست بیمار</span><span>چپ بیمار</span></div></div></div>'}
+function lockNote(x){if(SURG||!['crw','sub','aox'].includes(x.id))return '';const L=['U','L'].map(j=>[j,xBlock(x.id,j)]).filter(a=>a[1]);return L.length?`<p class="lockn">🔒 ${L.map(([j,r])=>`فک ${j==='U'?'بالا':'پایین'}: به خاطر «${esc(r)}» قفل است`).join(' · ')}</p>`:''}
 function cntHTML(x){const s=AS()[x.id];if(SURG&&x.id==='imp')return '<p class="note">روی شماره‌ی دندان بزنید و برند و سایز فیکسچر را انتخاب کنید.</p>';
   if(x.cnt==='one')return `<div class="fields"><div class="f"><span>تعداد کل (به جای انتخاب تک‌تک دندان‌ها)</span>${pickHTML(`data-cnt="${x.id}"`,x.max,s.cnt,x.t+'، تعداد کل')}</div></div>`;
   return ''}
@@ -1277,13 +1297,21 @@ function itemsHTML(x){const s=AS()[x.id];
       (it.tn&&['UR','UL','LR','LL'].some(q=>s.isel[it.k+':'+q])?`<div class="qtn"><small>شماره‌ی دندان را بزنید</small>${['UR','UL','LR','LL'].filter(q=>s.isel[it.k+':'+q]).map(q=>{const nn=Array.from({length:it.tn},(_,i)=>i+1);if(q[1]==='R')nn.reverse();return `<div class="qtr" data-q="${q}"><b>${q}</b>${nn.map(i=>`<button type="button" class="tq" data-isid="${x.id}" data-ik="${it.k}n:${q}${i}" aria-pressed="${!!s.isel[it.k+'n:'+q+i]}">${i}</button>`).join('')}</div>`}).join('')}</div>`:'')
       :it.type==='chips'?`<div class="chips">${it.o.map(o=>`<button type="button" class="chip" data-isid="${x.id}" data-ik="${esc(it.k+':'+o)}" aria-pressed="${!!s.isel[it.k+':'+o]}"${x.excl&&s.isel[x.excl[it.k+':'+o]]?' disabled':''}>${o}</button>`).join('')}</div>`
       :`<div class="f"><span>تعداد</span>${pickHTML(`data-icnt="${x.id}" data-ik="${it.k}"`,it.max,s.icnt[it.k],x.t+'، '+it.l)}</div>`}
-    ${SURG?'':`<label class="f pz">قیمت ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}${x.id==='surg'?'<small class="dr-only"> (میلیون تومان)</small>':''}<input class="price" inputmode="decimal" data-ip="${x.id}" data-ik="${it.k}" value="${esc(s.ip[it.k])}"></label>`}
+    ${SURG?'':regP(x,it)&&RQD.some(q=>s.isel[it.k+':'+q])?`<div class="qprice">${RQD.filter(q=>s.isel[it.k+':'+q]).map(q=>{const v=s.ip[it.k+'@'+q];return `<label class="f pz">قیمت هر دندان ${q}<small class="dr-only"> (میلیون تومان)</small><input class="price" inputmode="decimal" data-ip="${x.id}" data-ik="${it.k}@${q}" value="${esc(v!==undefined&&v!==''?v:s.ip[it.k])}"></label>`}).join('')}</div>`:`<label class="f pz">قیمت ${it.ul||(it.type==='chips'?'هر طرف':'هر واحد')}${x.id==='surg'?'<small class="dr-only"> (میلیون تومان)</small>':''}<input class="price" inputmode="decimal" data-ip="${x.id}" data-ik="${it.k}" value="${esc(s.ip[it.k])}"></label>`}
     <div class="calc" id="icalc_${x.id}_${it.k}"></div></div>`).join('')}</div>`}
 function aoxTypeHTML(x){const s=AS()[x.id],L=!!s.isel['t:long'];return `<div class="grp aot"><span>نوع All on X</span><div class="chips"><button type="button" class="chip" data-aot="" aria-pressed="${!L}">کلاسیک</button><button type="button" class="chip" data-aot="long" aria-pressed="${L}">لانگ</button></div></div>`}
+const MXT=[['z','زایگوما','mz'],['t','تریگوئید','mt'],['n','نازال','mn']];
+const jawN=(s,j)=>Object.keys(s.sel).filter(k=>s.sel[k]&&!isTooth(k)&&k.split(':')[0]===(j==='U'?'0':'1')).reduce((a,k)=>a+num(k.split(':')[1]),0);
+function aoxMix(s,j){const N=jawN(s,j),o={N,z:0,t:0,n:0};let left=N;MXT.forEach(([k])=>{const v=Math.min(left,num(s.icnt['mx:'+j+':'+k]));o[k]=v;left-=v});o.p=left;return o}
+function aoxCost(s){return ['U','L'].reduce((a,j)=>{const m=aoxMix(s,j);return a+m.p*num(s.ip.cb)+MXT.reduce((b,[k,,pk])=>b+m[k]*num(s.ip[pk]),0)},0)}
+function aoxMixTxt(s,j){const m=aoxMix(s,j);if(!m.N)return '';return [m.p?fa(m.p)+' پلاس':''].concat(MXT.map(([k,l])=>m[k]?fa(m[k])+' '+l:'')).filter(Boolean).join('، ')}
+function aoxMixHTML(x){const s=AS()[x.id];const J=['U','L'].filter(j=>jawN(s,j));if(!J.length)return '';
+  return `<div class="mixw">${J.map(j=>{const m=aoxMix(s,j);return `<div class="mix"><b>فک ${j==='U'?'بالا':'پایین'} · ${fa(m.N)} پایه</b><div class="mixr"><span>پلاس</span><span class="mxv">${fa(m.p)}</span></div>${MXT.map(([k,l])=>`<div class="mixr"><span>${l}</span><span class="mxc"><button type="button" class="btn sm ghost" data-mx="${j}:${k}:-1"${m[k]?'':' disabled'} aria-label="کم کردن ${l}">−</button><span class="mxv">${fa(m[k])}</span><button type="button" class="btn sm ghost" data-mx="${j}:${k}:1"${m.p?'':' disabled'} aria-label="افزودن ${l}">+</button></span></div>`).join('')}</div>`}).join('')}<p class="note">هر پایه‌ای که زایگوما، تریگوئید یا نازال نباشد «پلاس» حساب می‌شود.</p></div>`}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-mx]');if(!t||t.disabled)return;const [j,k,d]=t.dataset.mx.split(':'),s=AS().aox,m=aoxMix(s,j),v=m[k]+Number(d);if(v<0||(Number(d)>0&&!m.p))return;s.icnt['mx:'+j+':'+k]=String(v);reSec('aox');touch();recalc()});
 function aoxHTML(x){const s=AS()[x.id],L=!!s.isel['t:long'];
   if(L)return aoxTypeHTML(x)+`<div class="fields dr"><label class="f full">توضیحات All on X لانگ<input data-aoxn value="${esc(s.ip.ln||'')}" placeholder="مثلاً نوع پایه‌ها، ناحیه، …"></label>
       ${SURG?'':`<label class="f">قیمت پایه‌ها (کل<span class="dr-only">، میلیون تومان</span>)<input class="price mil" inputmode="decimal" data-ip="aox" data-ik="lt" value="${esc(s.ip.lt)}"></label><label class="f">قیمت پروتز روی پایه‌ها (کل<span class="dr-only">، میلیون تومان</span>)<input class="price mil" inputmode="decimal" data-ip="aox" data-ik="lq" value="${esc(s.ip.lq)}"></label>`}</div><div class="calc dr" id="pcalc_aox"></div>`;
-  return aoxTypeHTML(x)+(SURG?'':`<div class="fields pz"><label class="f">قیمت هر پایه (کلاسیک)<input class="price" inputmode="numeric" data-ip="aox" data-ik="cb" value="${esc(s.ip.cb)}"></label>
+  return aoxTypeHTML(x)+(SURG?'':aoxMixHTML(x)+`<div class="fields pz"><label class="f">قیمت هر پایه پلاس<input class="price" inputmode="numeric" data-ip="aox" data-ik="cb" value="${esc(s.ip.cb)}"></label>${MXT.map(([k,l,pk])=>`<label class="f">قیمت هر پایه ${l}<input class="price" inputmode="numeric" data-ip="aox" data-ik="${pk}" value="${esc(s.ip[pk]||'')}"></label>`).join('')}
       <label class="f">پروتز هر فک (کلاسیک)<input id="pr_aox" class="price" inputmode="numeric" data-pr="aox" value="${esc(s.price)}"></label></div><div class="calc" id="pcalc_aox"></div>`)}
 const CTTXT='سی‌تی اسکن صورت و سینوس دو جهت بدون کنتراست';
 function cbctHTML(x){const s=AS()[x.id],ct=!!s.isel['m:ct'],sp=!!(s.isel['zx:1']||s.isel['z:1']||s.isel['zs:1']);
@@ -1312,7 +1340,7 @@ function asstSel(x){if(!SURG)return '';if(SOLO.includes(x.id))return `<span clas
 function renderAsst(){$('sgAsst').innerHTML=ASSTS().map(n=>`<button type="button" class="chip" data-sgas="${esc(n)}" aria-pressed="${SURG&&SURG.asst===n}">${esc(n)}</button>`).join('')}
 function sectionHTML(x){const s=AS()[x.id];
   const tag=x.pros?'<span class="tag p">پروتز</span>':(x.price?'<span class="tag">جراحی</span>':'');const wide=x.kind==='teeth'||(x.kind==='items'&&x.n);
-  return `<section class="card" data-sec="${x.id}" data-kind="${x.pros?'pros':x.price?'surg':'info'}"${wide?' data-wide':''}><h2><span class="h2t">${x.t}</span>${SURG?asstSel(x):tag}</h2>${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x)+needHTML(x):x.kind==='chips'?(x.price==='aox'?'<p class="note">فقط برند ایتالیایی.</p>':'')+chipsHTML(x)+(x.price==='aox'?aoxHTML(x):'')+(SURG&&x.sgt?sgChartHTML(x):''):x.kind==='items'?(x.n?chartHTML(x)+cntHTML(x):'')+(x.base&&!SURG?`<label class="f">قیمت جراحی هر واحد<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="bcalc_${x.id}"></div>`:'')+itemsHTML(x):x.kind==='quad'?quadHTML(x)+(x.id==='cbct'?cbctHTML(x):''):''}${x.id==='imp'?spHTML(x):''}
+  return `<section class="card" data-sec="${x.id}" data-kind="${x.pros?'pros':x.price?'surg':'info'}"${wide?' data-wide':''}><h2><span class="h2t">${x.t}</span>${SURG?asstSel(x):tag}</h2>${lockNote(x)}${x.kind==='teeth'?chartHTML(x)+(x.groups?chipsHTML(x):'')+cntHTML(x)+needHTML(x):x.kind==='chips'?(x.price==='aox'?'<p class="note">فقط برند ایتالیایی.</p>':'')+chipsHTML(x)+(x.price==='aox'?aoxHTML(x):'')+(SURG&&x.sgt?sgChartHTML(x):''):x.kind==='items'?(x.n?chartHTML(x)+cntHTML(x):'')+(x.base&&!SURG?`<label class="f">قیمت جراحی هر واحد<input id="pr_${x.id}" class="price" inputmode="numeric" data-pr="${x.id}" value="${esc(s.price)}"></label><div class="calc" id="bcalc_${x.id}"></div>`:'')+itemsHTML(x):x.kind==='quad'?quadHTML(x)+(x.id==='cbct'?cbctHTML(x):''):''}${x.id==='imp'?spHTML(x):''}
     ${x.text?`<label class="f">${x.text}<input id="tx_${x.id}" data-tx="${x.id}" value="${esc(s.text)}"></label>`:''}
     ${priceHTML(x)}<div class="calc" id="calc_${x.id}"></div></section>`}
 function renderForm(){
@@ -1323,7 +1351,8 @@ function renderForm(){
         :'<p class="note">این طرح از روی طرح اول ساخته شده؛ هر چیزی را که فرق دارد تغییر دهید. در PDF بعد از طرح اول می‌آید.</p>'}</section>`:'';
   document.getElementById('sections').innerHTML=head+(textOnly?'':SECTIONS.map(sectionHTML).join(''));
   document.getElementById('totalsCard').hidden=textOnly;
-  document.querySelectorAll('[data-h]').forEach(i=>i.value=F.h[i.dataset.h]||'');
+  if(!F.h.doc)F.h.doc=MAIN_DOC;HDOC_O=F.h.doc!==MAIN_DOC;
+  document.querySelectorAll('[data-h]').forEach(i=>i.value=F.h[i.dataset.h]||'');hdocSync();
   ['n1','m2','n3','cs','cp'].forEach(k=>document.getElementById('p_'+k).value=F.pay[k]||'');
   const en=document.getElementById('editNote');
   if(F.status==='confirmed'||F.status==='modified'){en.hidden=false;en.textContent=`این فرم در ${F.jalali||''} ثبت شده است. اگر چیزی را عوض کنید و دوباره «ثبت نهایی» بزنید، PDF تازه ساخته و دوباره ایمیل می‌شود.`}else en.hidden=true;
@@ -1342,10 +1371,10 @@ function recalc(){if(SURG)setTimeout(needUpd,0);const pv={s:AS(),brand:F.brand,p
     else if(x.kind==='teeth')el.textContent=q?`${fa(q)} واحد`:'';else el.textContent='';
     if(x.price==='aox'){const t=rowTotals(pv,x),L=!!s.isel['t:long'],e3=document.getElementById('pcalc_'+x.id),j=chipSel(s);
       if(L){el.innerHTML='';if(e3)e3.innerHTML=(t.flat||t.pros)?`پایه‌ها <b>${fa(t.flat)}</b> · پروتز <b>${fa(t.pros||0)}</b>`:(q||j?'قیمت لانگ را بنویسید.':'')}
-      else{el.innerHTML=q?`${fa(q)} پایه × ${fa(num(s.ip.cb))} = <b>${fa(t.flat)}</b>`:'';if(e3)e3.innerHTML=j?`پروتز: ${fa(j)} فک × ${fa(num(s.price))} = <b>${fa(t.pros)}</b>`:''}}
+      else{el.innerHTML=q?['U','L'].map(j=>aoxMixTxt(s,j)).filter(Boolean).join(' | ')+` = <b>${fa(t.flat)}</b>`:'';if(e3)e3.innerHTML=j?`پروتز: ${fa(j)} فک × ${fa(num(s.price))} = <b>${fa(t.pros)}</b>`:''}}
     else if(x.prosJaw){const e3=document.getElementById('pcalc_'+x.id),j=chipSel(s);if(e3)e3.innerHTML=j?`پروتز: ${fa(j)} فک × ${fa(num(s.price))} = <b>${fa(j*num(s.price))}</b>`:''}
     if(x.base){const e4=document.getElementById('bcalc_'+x.id),bq=teethQty(s,x);if(e4)e4.innerHTML=bq?`${fa(bq)} واحد × ${fa(num(s.price))} = <b>${fa(bq*num(s.price))}</b>`:''}
-    (x.items||[]).forEach(it=>{const e2=document.getElementById(`icalc_${x.id}_${it.k}`);if(!e2)return;const iq=itemQty(s,it),u=num(s.ip[it.k]);e2.innerHTML=iq?`${fa(iq)} × ${fa(u)} = <b>${fa(iq*u)}</b>`:''})});
+    (x.items||[]).forEach(it=>{const e2=document.getElementById(`icalc_${x.id}_${it.k}`);if(!e2)return;if(regP(x,it)){const P=RQD.filter(q=>itemQ(s,it,q));e2.innerHTML=P.length?P.map(q=>`${q}: ${fa(itemQ(s,it,q))} × ${fa(qPrice(s,it,q))}`).join(' · ')+` = <b>${fa(itemCost(x,s,it))}</b>`:'';return}const iq=itemQty(s,it),u=num(s.ip[it.k]);e2.innerHTML=iq?`${fa(iq)} × ${fa(u)} = <b>${fa(iq*u)}</b>`:''})});
   if(!(CUR===2&&F.alt.mode==='text')){
     const T=totals(pv),b=F.brand,REF=b==='ref',bn=REF?'ارجاع به مشاور':BRANDS.find(x=>x.k===b).n,mn=Math.min(...BRANDS.map(x=>T.surg[x.k])),mx=Math.max(...BRANDS.map(x=>T.surg[x.k])),rng=(a,c)=>a===c?fa(a):fa(a)+' تا '+fa(c);
     document.getElementById('totTitle').textContent=CUR===2?'جمع کل طرح دوم':'جمع کل درمان';
@@ -1361,6 +1390,9 @@ function recalc(){if(SURG)setTimeout(needUpd,0);const pv={s:AS(),brand:F.brand,p
   const p=F.pay;document.querySelectorAll('#payOpt .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.opt===p.opt));$('p_cs').placeholder=fa(p.opt==='1'?30:50);
   document.getElementById('lblN1').hidden=p.opt!=='1';document.getElementById('lblM2').hidden=p.opt!=='2';
   try{localStorage.setItem('implantPlanDraft',JSON.stringify(F))}catch(e){}}
+const MAIN_DOC='دکتر سید مجتبی علویکیا';let HDOC_O=false;
+function hdocSync(){const i=$('h_doc');if(!i)return;i.hidden=!HDOC_O;document.querySelectorAll('[data-hdoc]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.hdoc==='o')===HDOC_O))}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-hdoc]');if(!b)return;HDOC_O=b.dataset.hdoc==='o';F.h.doc=HDOC_O?'':MAIN_DOC;$('h_doc').value=F.h.doc;hdocSync();touch();if(HDOC_O)$('h_doc').focus()});
 const touch=()=>{dirty=true;if(F.status==='confirmed')F.status='modified'};
 
 /* ---------- serialization (db stores selections as arrays) ---------- */
@@ -1434,8 +1466,8 @@ function drawChipLines(draws,lines,mh){lines.forEach((ln,li)=>{const yy=mh+li*36
 function priceLines(r,x){const s=r.s[x.id],q=qty(s,x),L=[];if(!x.price)return L;
   if(x.price==='unit'){const u=num(s.price);if(q&&u){L.push({t:`${fa(q)} ${x.kind==='quad'?'Q':'واحد'} × ${fa(u)}`,c:'#444',s:18});L.push({t:fa(q*u),b:1})}}
   else if(x.price==='flat'){const v=rowTotals(r,x).flat;if(v)L.push({t:fa(v),b:1})}
-  else if(x.price==='aox'){const t=rowTotals(r,x),Lg=!!s.isel['t:long'];if(Lg){if(t.flat)L.push({t:`پایه‌ها: ${fa(t.flat)}`,c:'#444',s:17});if(t.pros)L.push({t:`پروتز: ${fa(t.pros)}`,c:'#444',s:17})}else{if(q)L.push({t:`${fa(q)} پایه × ${fa(num(s.ip.cb))}`,c:'#444',s:17});if(t.pros)L.push({t:`پروتز: ${fa(chipSel(s))} فک × ${fa(num(s.price))}`,c:'#444',s:17})}if(t.flat+(t.pros||0))L.push({t:fa(t.flat+(t.pros||0)),b:1})}
-  else if(x.price==='items'){let sum=0;if(x.base){const bq=teethQty(s,x),u=num(s.price);if(bq&&u){sum+=bq*u;L.push({t:`جراحی: ${fa(bq)}×${fa(u)}`,c:'#444',s:17})}}x.items.forEach(it=>{const iq=itemQty(s,it),u=num(s.ip[it.k]);if(iq&&u){sum+=iq*u;L.push({t:`${it.l}: ${fa(iq)}×${fa(u)}`,c:'#444',s:17})}});if(sum)L.push({t:fa(sum),b:1})}
+  else if(x.price==='aox'){const t=rowTotals(r,x),Lg=!!s.isel['t:long'];if(Lg){if(t.flat)L.push({t:`پایه‌ها: ${fa(t.flat)}`,c:'#444',s:17});if(t.pros)L.push({t:`پروتز: ${fa(t.pros)}`,c:'#444',s:17})}else{if(q){const m=['U','L'].map(j=>aoxMix(s,j));const tot=k=>m.reduce((a,x)=>a+x[k],0);if(tot('p'))L.push({t:`${fa(tot('p'))} پلاس × ${fa(num(s.ip.cb))}`,c:'#444',s:17});MXT.forEach(([k,l,pk])=>{if(tot(k))L.push({t:`${fa(tot(k))} ${l} × ${fa(num(s.ip[pk]))}`,c:'#444',s:17})})}if(t.pros)L.push({t:`پروتز: ${fa(chipSel(s))} فک × ${fa(num(s.price))}`,c:'#444',s:17})}if(t.flat+(t.pros||0))L.push({t:fa(t.flat+(t.pros||0)),b:1})}
+  else if(x.price==='items'){let sum=0;if(x.base){const bq=teethQty(s,x),u=num(s.price);if(bq&&u){sum+=bq*u;L.push({t:`جراحی: ${fa(bq)}×${fa(u)}`,c:'#444',s:17})}}x.items.forEach(it=>{if(regP(x,it)){RQD.forEach(q=>{const iq=itemQ(s,it,q),u=qPrice(s,it,q);if(iq&&u){sum+=iq*u;L.push({t:`${it.l} ${q}: ${fa(iq)}×${fa(u)}`,c:'#444',s:17})}});return}const iq=itemQty(s,it),u=num(s.ip[it.k]);if(iq&&u){sum+=iq*u;L.push({t:`${it.l}: ${fa(iq)}×${fa(u)}`,c:'#444',s:17})}});if(sum)L.push({t:fa(sum),b:1})}
   else{const rt0=rowTotals(r,x),t=rt0.brand;if(x.id==='imp'&&rt0.pros){L.push({t:`روکش: ${fa(q)}×${fa(num(r.s.crw.price))}`,c:'#444',s:16});L.push({t:`= ${fa(rt0.pros)}`,c:'#444',s:16})}if(x.prosJaw&&chipSel(s)&&num(s.price))L.push({t:`پروتز: ${fa(chipSel(s))} فک × ${fa(num(s.price))}`,c:'#444',s:17});if(q)L.push({t:`${fa(q)} ${x.price==='implantBrand'?'پایه':'واحد'}`,c:'#444',s:17});BRANDS.forEach(b=>{if(t[b.k])L.push({t:`${b.n}: ${fa(t[b.k])}`,b:b.k===r.brand,s:b.k===r.brand?19:17,c:b.k===r.brand?INK:'#555'})})}
   return L}
 
@@ -2094,6 +2126,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest('button');i
     const ti=(x.items||[]).find(it=>it.tn&&k.startsWith(it.k+':'));if(ti){if(!on){const q=k.split(':')[1];Object.keys(s.isel).forEach(z=>{if(z.startsWith(ti.k+'n:'+q))delete s.isel[z]})}reSec(x.id);touch();return}
     const tq=(x.items||[]).find(it=>it.tn&&k.startsWith(it.k+'n:'));if(tq){const q=k.split(':')[1].slice(0,2);if(on&&!s.isel[tq.k+':'+q])s.isel[tq.k+':'+q]=true;touch();recalc();return}
     const qi=(x.items||[]).find(it=>it.qn&&k.startsWith(it.k+':'));if(qi){if(on&&!num(s.icnt[k]))s.icnt[k]='1';if(!on)delete s.icnt[k];reSec(x.id);touch();return}
+    if((x.items||[]).some(it=>regP(x,it)&&k.startsWith(it.k+':'))){reSec(x.id);touch();return}
     if(x.excl&&x.excl[k]){const o=x.excl[k];if(on)s.isel[o]=false;const ob=document.querySelector(`[data-isid="${x.id}"][data-ik="${o}"]`);if(ob){ob.disabled=on;if(on)ob.setAttribute('aria-pressed','false')}}touch();recalc();return}
   if(t.dataset.plan){CUR=Number(t.dataset.plan);renderForm();window.scrollTo(0,0);return}
   if(t.id==='altAdd'){$('aSheet').hidden=false;return}
@@ -2112,10 +2145,11 @@ pwPrefill();
 renderMed('rc');
 $('lgShow').addEventListener('change',e=>{$('lg_pw').type=e.target.checked?'text':'password'});
 /* medical-history yes/no, details, other */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-mhb]');if(!b)return;const bx=b.closest('[data-medbox]');if(!bx)return;const box=bx.dataset.medbox,m=medOf(box);if(m.y.hba){delete m.y.hba;delete m.t.hba}else m.y.hba=1;if(box==='f')dirty=true;renderMed(box)});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-ms]');if(!b)return;const bx=b.closest('[data-medbox]');if(!bx)return;const box=bx.dataset.medbox,m=medOf(box),k=b.dataset.ms,v=b.dataset.msv;
   m.t[k]=m.t[k]===v?'':v;if(box==='f')dirty=true;bx.querySelectorAll(`[data-ms="${k}"]`).forEach(c=>c.setAttribute('aria-pressed',m.t[k]===c.dataset.msv))});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-mk]');if(!b)return;const box=b.closest('[data-medbox]').dataset.medbox,m=medOf(box),k=b.dataset.mk;
-  const on=b.dataset.mv==='1';if(!!m.y[k]===on)return;if(on)m.y[k]=1;else{delete m.y[k];delete m.t[k]}if(box==='f')dirty=true;renderMed(box);if(on&&box&&MED_Q.some(q=>q[0]===k)){const i=document.querySelector(`#${box==='rc'?'rcMed':'fMed'} [data-mt="${k}"]`);if(i)i.focus()}});
+  const on=b.dataset.mv==='1';if(!!m.y[k]===on)return;if(on)m.y[k]=1;else{delete m.y[k];delete m.t[k];if(k==='diab'){delete m.y.hba;delete m.t.hba}}if(box==='f')dirty=true;renderMed(box);if(on&&box&&MED_Q.some(q=>q[0]===k)){const i=document.querySelector(`#${box==='rc'?'rcMed':'fMed'} [data-mt="${k}"]`);if(i)i.focus()}});
 document.addEventListener('input',e=>{const t=e.target,bx=t.closest&&t.closest('[data-medbox]');if(!bx)return;const m=medOf(bx.dataset.medbox);
   if(t.dataset.mt)m.t[t.dataset.mt]=t.value;else if(t.hasAttribute('data-mo'))m.other=t.value;else return;if(bx.dataset.medbox==='f')dirty=true;e.stopPropagation()},true);
 document.addEventListener('input',e=>{const i=e.target;if(i.dataset.tp){i.value=fmtInput(i.value);return}if(i.closest('#sSheet')||i.closest('#viewLogin')||i.closest('#viewRecep')||i.closest('#viewInv')||i.closest('#invSheet')||i.closest('#invMvSheet')||i.id==='q')return;
@@ -2181,7 +2215,7 @@ function secDesc(S,x){const s=S[x.id];if(!s)return '';const p=[];const on=Object
   const th=on.filter(isTooth);if(th.length)p.push(toothTxt(th));
   if(x.cnt)[['U','فک بالا'],['L','فک پایین']].forEach(([j,l])=>{if(num(s.jc[j]))p.push(`${x.cnt==='jaw'?'Full EXT':'تعداد کل'} ${l}: ${fa(num(s.jc[j]))}`)});
   const ch=on.filter(k=>!isTooth(k));if(ch.length)p.push(ch.map(k=>QDN[k]||(x.groups&&x.groups[k.split(':')[0]]&&x.groups[k.split(':')[0]].l?x.groups[k.split(':')[0]].l+' '+k.split(':')[1]:k.split(':').slice(1).join(':')||k)).join('، '));
-  if(x.price==='aox'&&p.length){p.push(s.isel['t:long']?'لانگ':'کلاسیک');if(s.isel['t:long']&&(s.ip.ln||'').trim())p.push('توضیحات: '+s.ip.ln.trim())}
+  if(x.price==='aox'&&p.length){p.push(s.isel['t:long']?'لانگ':'کلاسیک');if(!s.isel['t:long'])['U','L'].forEach(j=>{const m=aoxMix(s,j);if(m.N&&m.p!==m.N)p.push(`فک ${j==='U'?'بالا':'پایین'}: ${aoxMixTxt(s,j)}`)});if(s.isel['t:long']&&(s.ip.ln||'').trim())p.push('توضیحات: '+s.ip.ln.trim())}
   (s.sp||[]).forEach(r=>{if(r.k||r.b)p.push('مورد خاص '+(r.k?(isTooth(r.k)?toothTxt([r.k]):QNAME[r.k]||r.k):'')+' '+[r.b,r.d?'Ø'+r.d:'',r.l?'L'+r.l:''].filter(Boolean).join(' '))});
   (x.items||[]).forEach(it=>{const q=itemQty(s,it);if(!q)return;if(it.type==='toggle'){p.push(it.l);return}if(it.tn){p.push(`${it.l}: `+Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':')).map(k=>{const q=k.split(':')[1],tt=tnTeeth(s,it,q);return tt.length?toothTxt(tt):q}).join('، '));return}if(it.qn){p.push(`${it.l}: `+Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':')).map(k=>k.split(':')[1]+' ('+fa(num(s.icnt[k])||1)+' عدد)').join('، '));return}if(it.type==='count')p.push(`${it.l}: ${fa(q)}`);else p.push(`${it.l}: ${Object.keys(s.isel).filter(k=>s.isel[k]&&k.startsWith(it.k+':')).map(k=>k.split(':')[1]).join('، ')}`)});
   if((s.text||'').trim()&&x.text)p.push(`${x.text}: ${s.text.trim()}`);
